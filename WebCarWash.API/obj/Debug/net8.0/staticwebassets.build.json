@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "cf1mm2Apn0EFzj09Qzl5WBQZpQjQ8WqQ8x9mttMJsYA=",
+  "Source": "WebCarWash.API",
+  "BasePath": "_content/WebCarWash.API",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}
