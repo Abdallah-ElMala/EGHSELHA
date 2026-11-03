@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("WebCarWash")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c8ad8cc209ff09a5e772decc9579602c2410b550")]
 [assembly: System.Reflection.AssemblyProductAttribute("WebCarWash")]
 [assembly: System.Reflection.AssemblyTitleAttribute("WebCarWash")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -1,0 +1,206 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Rawan\u0027s Data\\R5 DEPI\\WebCarWash\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{41CF1B22-1262-4A57-9DA8-548CB63D15E2}|WebCarWash.API\\WebCarWash.API.csproj|c:\\rawan\u0027s data\\r5 depi\\webcarwash\\webcarwash.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{41CF1B22-1262-4A57-9DA8-548CB63D15E2}|WebCarWash.API\\WebCarWash.API.csproj|solutionrelative:webcarwash.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{41CF1B22-1262-4A57-9DA8-548CB63D15E2}|WebCarWash.API\\WebCarWash.API.csproj|c:\\rawan\u0027s data\\r5 depi\\webcarwash\\webcarwash.api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{41CF1B22-1262-4A57-9DA8-548CB63D15E2}|WebCarWash.API\\WebCarWash.API.csproj|solutionrelative:webcarwash.api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A7D9A46C-401A-4CEF-9A9F-45E9020B42C0}|WebCarWash\\WebCarWash.csproj|c:\\rawan\u0027s data\\r5 depi\\webcarwash\\webcarwash\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{A7D9A46C-401A-4CEF-9A9F-45E9020B42C0}|WebCarWash\\WebCarWash.csproj|solutionrelative:webcarwash\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4E4400CF-1C7C-4940-8D3C-BDA1644164AF}|WebCarWash.Infrastructure\\WebCarWash.Infrastructure.csproj|c:\\rawan\u0027s data\\r5 depi\\webcarwash\\webcarwash.infrastructure\\configurationclass\\jsonvalueconverter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4E4400CF-1C7C-4940-8D3C-BDA1644164AF}|WebCarWash.Infrastructure\\WebCarWash.Infrastructure.csproj|solutionrelative:webcarwash.infrastructure\\configurationclass\\jsonvalueconverter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4E4400CF-1C7C-4940-8D3C-BDA1644164AF}|WebCarWash.Infrastructure\\WebCarWash.Infrastructure.csproj|c:\\rawan\u0027s data\\r5 depi\\webcarwash\\webcarwash.infrastructure\\configurationclass\\servicezoneconfiguration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4E4400CF-1C7C-4940-8D3C-BDA1644164AF}|WebCarWash.Infrastructure\\WebCarWash.Infrastructure.csproj|solutionrelative:webcarwash.infrastructure\\configurationclass\\servicezoneconfiguration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BF061B78-688C-4F31-BAB2-59B9DCA86558}|WebCarWash.Domain\\WebCarWash.Domain.csproj|c:\\rawan\u0027s data\\r5 depi\\webcarwash\\webcarwash.domain\\entities\\point.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BF061B78-688C-4F31-BAB2-59B9DCA86558}|WebCarWash.Domain\\WebCarWash.Domain.csproj|solutionrelative:webcarwash.domain\\entities\\point.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4E4400CF-1C7C-4940-8D3C-BDA1644164AF}|WebCarWash.Infrastructure\\WebCarWash.Infrastructure.csproj|c:\\rawan\u0027s data\\r5 depi\\webcarwash\\webcarwash.infrastructure\\data\\eghselhadbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4E4400CF-1C7C-4940-8D3C-BDA1644164AF}|WebCarWash.Infrastructure\\WebCarWash.Infrastructure.csproj|solutionrelative:webcarwash.infrastructure\\data\\eghselhadbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4E4400CF-1C7C-4940-8D3C-BDA1644164AF}|WebCarWash.Infrastructure\\WebCarWash.Infrastructure.csproj|c:\\rawan\u0027s data\\r5 depi\\webcarwash\\webcarwash.infrastructure\\data\\carwashdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4E4400CF-1C7C-4940-8D3C-BDA1644164AF}|WebCarWash.Infrastructure\\WebCarWash.Infrastructure.csproj|solutionrelative:webcarwash.infrastructure\\data\\carwashdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BF061B78-688C-4F31-BAB2-59B9DCA86558}|WebCarWash.Domain\\WebCarWash.Domain.csproj|c:\\rawan\u0027s data\\r5 depi\\webcarwash\\webcarwash.domain\\enums\\jobofferstatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BF061B78-688C-4F31-BAB2-59B9DCA86558}|WebCarWash.Domain\\WebCarWash.Domain.csproj|solutionrelative:webcarwash.domain\\enums\\jobofferstatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BF061B78-688C-4F31-BAB2-59B9DCA86558}|WebCarWash.Domain\\WebCarWash.Domain.csproj|c:\\rawan\u0027s data\\r5 depi\\webcarwash\\webcarwash.domain\\entities\\servicezone.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BF061B78-688C-4F31-BAB2-59B9DCA86558}|WebCarWash.Domain\\WebCarWash.Domain.csproj|solutionrelative:webcarwash.domain\\entities\\servicezone.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 9,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Rawan\u0027s Data\\R5 DEPI\\WebCarWash\\WebCarWash.API\\appsettings.json",
+              "RelativeDocumentMoniker": "WebCarWash.API\\appsettings.json",
+              "ToolTip": "C:\\Rawan\u0027s Data\\R5 DEPI\\WebCarWash\\WebCarWash.API\\appsettings.json",
+              "RelativeToolTip": "WebCarWash.API\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-10-22T21:21:00.985Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Rawan\u0027s Data\\R5 DEPI\\WebCarWash\\WebCarWash\\appsettings.json",
+              "RelativeDocumentMoniker": "WebCarWash\\appsettings.json",
+              "ToolTip": "C:\\Rawan\u0027s Data\\R5 DEPI\\WebCarWash\\WebCarWash\\appsettings.json",
+              "RelativeToolTip": "WebCarWash\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-10-22T21:17:52.099Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "JsonValueConverter.cs",
+              "DocumentMoniker": "C:\\Rawan\u0027s Data\\R5 DEPI\\WebCarWash\\WebCarWash.Infrastructure\\ConfigurationClass\\JsonValueConverter.cs",
+              "RelativeDocumentMoniker": "WebCarWash.Infrastructure\\ConfigurationClass\\JsonValueConverter.cs",
+              "ToolTip": "C:\\Rawan\u0027s Data\\R5 DEPI\\WebCarWash\\WebCarWash.Infrastructure\\ConfigurationClass\\JsonValueConverter.cs",
+              "RelativeToolTip": "WebCarWash.Infrastructure\\ConfigurationClass\\JsonValueConverter.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-22T21:08:38.76Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "ServiceZoneConfiguration.cs",
+              "DocumentMoniker": "C:\\Rawan\u0027s Data\\R5 DEPI\\WebCarWash\\WebCarWash.Infrastructure\\ConfigurationClass\\ServiceZoneConfiguration.cs",
+              "RelativeDocumentMoniker": "WebCarWash.Infrastructure\\ConfigurationClass\\ServiceZoneConfiguration.cs",
+              "ToolTip": "C:\\Rawan\u0027s Data\\R5 DEPI\\WebCarWash\\WebCarWash.Infrastructure\\ConfigurationClass\\ServiceZoneConfiguration.cs",
+              "RelativeToolTip": "WebCarWash.Infrastructure\\ConfigurationClass\\ServiceZoneConfiguration.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-22T21:04:51.772Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Point.cs",
+              "DocumentMoniker": "C:\\Rawan\u0027s Data\\R5 DEPI\\WebCarWash\\WebCarWash.Domain\\Entities\\Point.cs",
+              "RelativeDocumentMoniker": "WebCarWash.Domain\\Entities\\Point.cs",
+              "ToolTip": "C:\\Rawan\u0027s Data\\R5 DEPI\\WebCarWash\\WebCarWash.Domain\\Entities\\Point.cs",
+              "RelativeToolTip": "WebCarWash.Domain\\Entities\\Point.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-22T21:03:59.306Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "EGHSELHADbContext.cs",
+              "DocumentMoniker": "C:\\Rawan\u0027s Data\\R5 DEPI\\WebCarWash\\WebCarWash.Infrastructure\\Data\\EGHSELHADbContext.cs",
+              "RelativeDocumentMoniker": "WebCarWash.Infrastructure\\Data\\EGHSELHADbContext.cs",
+              "ToolTip": "C:\\Rawan\u0027s Data\\R5 DEPI\\WebCarWash\\WebCarWash.Infrastructure\\Data\\EGHSELHADbContext.cs",
+              "RelativeToolTip": "WebCarWash.Infrastructure\\Data\\EGHSELHADbContext.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-22T21:00:43.897Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "JobOfferStatus.cs",
+              "DocumentMoniker": "C:\\Rawan\u0027s Data\\R5 DEPI\\WebCarWash\\WebCarWash.Domain\\Enums\\JobOfferStatus.cs",
+              "RelativeDocumentMoniker": "WebCarWash.Domain\\Enums\\JobOfferStatus.cs",
+              "ToolTip": "C:\\Rawan\u0027s Data\\R5 DEPI\\WebCarWash\\WebCarWash.Domain\\Enums\\JobOfferStatus.cs",
+              "RelativeToolTip": "WebCarWash.Domain\\Enums\\JobOfferStatus.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-22T20:58:46.739Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "ServiceZone.cs",
+              "DocumentMoniker": "C:\\Rawan\u0027s Data\\R5 DEPI\\WebCarWash\\WebCarWash.Domain\\Entities\\ServiceZone.cs",
+              "RelativeDocumentMoniker": "WebCarWash.Domain\\Entities\\ServiceZone.cs",
+              "ToolTip": "C:\\Rawan\u0027s Data\\R5 DEPI\\WebCarWash\\WebCarWash.Domain\\Entities\\ServiceZone.cs",
+              "RelativeToolTip": "WebCarWash.Domain\\Entities\\ServiceZone.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-22T20:41:21.321Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "CarWashDBContext.cs",
+              "DocumentMoniker": "C:\\Rawan\u0027s Data\\R5 DEPI\\WebCarWash\\WebCarWash.Infrastructure\\Data\\CarWashDBContext.cs",
+              "RelativeDocumentMoniker": "WebCarWash.Infrastructure\\Data\\CarWashDBContext.cs",
+              "ToolTip": "C:\\Rawan\u0027s Data\\R5 DEPI\\WebCarWash\\WebCarWash.Infrastructure\\Data\\CarWashDBContext.cs",
+              "RelativeToolTip": "WebCarWash.Infrastructure\\Data\\CarWashDBContext.cs",
+              "ViewState": "AgIAAB4AAAAAAAAAAAAiwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-22T20:37:25.352Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Rawan\u0027s Data\\R5 DEPI\\WebCarWash\\WebCarWash.API\\Program.cs",
+              "RelativeDocumentMoniker": "WebCarWash.API\\Program.cs",
+              "ToolTip": "C:\\Rawan\u0027s Data\\R5 DEPI\\WebCarWash\\WebCarWash.API\\Program.cs",
+              "RelativeToolTip": "WebCarWash.API\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-22T20:25:14.208Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{fbcae063-e2c0-4ab1-a516-996ea3dafb72}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

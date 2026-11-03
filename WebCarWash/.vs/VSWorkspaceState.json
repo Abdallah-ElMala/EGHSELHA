@@ -1,0 +1,13 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\WebCarWash.API",
+    "\\WebCarWash.API\\Controllers",
+    "\\WebCarWash.Application",
+    "\\WebCarWash.Domain",
+    "\\WebCarWash.Infrastructure",
+    "\\WebCarWash.Infrastructure\\Data"
+  ],
+  "SelectedNode": "\\WebCarWash.API",
+  "PreviewInSolutionExplorer": false
+}
