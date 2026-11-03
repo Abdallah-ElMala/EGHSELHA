@@ -1,0 +1,23 @@
+C:\Rawan's Data\R5 DEPI\WebCarWash\WebCarWash.Domain\bin\Debug\net8.0\WebCarWash.Domain.deps.json
+C:\Rawan's Data\R5 DEPI\WebCarWash\WebCarWash.Domain\bin\Debug\net8.0\WebCarWash.Domain.dll
+C:\Rawan's Data\R5 DEPI\WebCarWash\WebCarWash.Domain\bin\Debug\net8.0\WebCarWash.Domain.pdb
+C:\Rawan's Data\R5 DEPI\WebCarWash\WebCarWash.Domain\obj\Debug\net8.0\WebCarWash.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Rawan's Data\R5 DEPI\WebCarWash\WebCarWash.Domain\obj\Debug\net8.0\WebCarWash.Domain.AssemblyInfoInputs.cache
+C:\Rawan's Data\R5 DEPI\WebCarWash\WebCarWash.Domain\obj\Debug\net8.0\WebCarWash.Domain.AssemblyInfo.cs
+C:\Rawan's Data\R5 DEPI\WebCarWash\WebCarWash.Domain\obj\Debug\net8.0\WebCarWash.Domain.csproj.CoreCompileInputs.cache
+C:\Rawan's Data\R5 DEPI\WebCarWash\WebCarWash.Domain\obj\Debug\net8.0\WebCarWash.Domain.dll
+C:\Rawan's Data\R5 DEPI\WebCarWash\WebCarWash.Domain\obj\Debug\net8.0\refint\WebCarWash.Domain.dll
+C:\Rawan's Data\R5 DEPI\WebCarWash\WebCarWash.Domain\obj\Debug\net8.0\WebCarWash.Domain.pdb
+C:\Rawan's Data\R5 DEPI\WebCarWash\WebCarWash.Domain\obj\Debug\net8.0\ref\WebCarWash.Domain.dll
+C:\Rawan's Data\R5 DEPI\WebCarWash\WebCarWash.Domain\obj\Debug\net8.0\WebCarWa.4CBF13F9.Up2Date
+G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Domain\bin\Debug\net8.0\WebCarWash.Domain.deps.json
+G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Domain\bin\Debug\net8.0\WebCarWash.Domain.dll
+G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Domain\bin\Debug\net8.0\WebCarWash.Domain.pdb
+G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Domain\obj\Debug\net8.0\WebCarWash.Domain.GeneratedMSBuildEditorConfig.editorconfig
+G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Domain\obj\Debug\net8.0\WebCarWash.Domain.AssemblyInfoInputs.cache
+G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Domain\obj\Debug\net8.0\WebCarWash.Domain.AssemblyInfo.cs
+G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Domain\obj\Debug\net8.0\WebCarWash.Domain.csproj.CoreCompileInputs.cache
+G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Domain\obj\Debug\net8.0\WebCarWash.Domain.dll
+G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Domain\obj\Debug\net8.0\refint\WebCarWash.Domain.dll
+G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Domain\obj\Debug\net8.0\WebCarWash.Domain.pdb
+G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Domain\obj\Debug\net8.0\ref\WebCarWash.Domain.dll

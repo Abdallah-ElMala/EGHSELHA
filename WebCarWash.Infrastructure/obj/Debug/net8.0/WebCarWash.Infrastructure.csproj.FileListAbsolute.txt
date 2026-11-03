@@ -1,0 +1,38 @@
+C:\Rawan's Data\R5 DEPI\WebCarWash\WebCarWash.Infrastructure\bin\Debug\net8.0\WebCarWash.Infrastructure.deps.json
+C:\Rawan's Data\R5 DEPI\WebCarWash\WebCarWash.Infrastructure\bin\Debug\net8.0\WebCarWash.Infrastructure.dll
+C:\Rawan's Data\R5 DEPI\WebCarWash\WebCarWash.Infrastructure\bin\Debug\net8.0\WebCarWash.Infrastructure.pdb
+C:\Rawan's Data\R5 DEPI\WebCarWash\WebCarWash.Infrastructure\bin\Debug\net8.0\WebCarWash.Application.dll
+C:\Rawan's Data\R5 DEPI\WebCarWash\WebCarWash.Infrastructure\bin\Debug\net8.0\WebCarWash.Domain.dll
+C:\Rawan's Data\R5 DEPI\WebCarWash\WebCarWash.Infrastructure\bin\Debug\net8.0\WebCarWash.Application.pdb
+C:\Rawan's Data\R5 DEPI\WebCarWash\WebCarWash.Infrastructure\bin\Debug\net8.0\WebCarWash.Domain.pdb
+C:\Rawan's Data\R5 DEPI\WebCarWash\WebCarWash.Infrastructure\obj\Debug\net8.0\WebCarWash.Infrastructure.csproj.AssemblyReference.cache
+C:\Rawan's Data\R5 DEPI\WebCarWash\WebCarWash.Infrastructure\obj\Debug\net8.0\WebCarWash.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+C:\Rawan's Data\R5 DEPI\WebCarWash\WebCarWash.Infrastructure\obj\Debug\net8.0\WebCarWash.Infrastructure.AssemblyInfoInputs.cache
+C:\Rawan's Data\R5 DEPI\WebCarWash\WebCarWash.Infrastructure\obj\Debug\net8.0\WebCarWash.Infrastructure.AssemblyInfo.cs
+C:\Rawan's Data\R5 DEPI\WebCarWash\WebCarWash.Infrastructure\obj\Debug\net8.0\WebCarWash.Infrastructure.csproj.CoreCompileInputs.cache
+C:\Rawan's Data\R5 DEPI\WebCarWash\WebCarWash.Infrastructure\obj\Debug\net8.0\WebCarWa.A447BBAF.Up2Date
+C:\Rawan's Data\R5 DEPI\WebCarWash\WebCarWash.Infrastructure\obj\Debug\net8.0\WebCarWash.Infrastructure.dll
+C:\Rawan's Data\R5 DEPI\WebCarWash\WebCarWash.Infrastructure\obj\Debug\net8.0\refint\WebCarWash.Infrastructure.dll
+C:\Rawan's Data\R5 DEPI\WebCarWash\WebCarWash.Infrastructure\obj\Debug\net8.0\WebCarWash.Infrastructure.pdb
+C:\Rawan's Data\R5 DEPI\WebCarWash\WebCarWash.Infrastructure\obj\Debug\net8.0\ref\WebCarWash.Infrastructure.dll
+C:\Rawan's Data\R5 DEPI\WebCarWash\WebCarWash.Infrastructure\bin\Debug\net8.0\WebCarWash.Infrastructure.runtimeconfig.json
+C:\Rawan's Data\R5 DEPI\WebCarWash\WebCarWash.Infrastructure\obj\Debug\net8.0\WebCarWash.Infrastructure.genruntimeconfig.cache
+G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Infrastructure\bin\Debug\net8.0\WebCarWash.Infrastructure.deps.json
+G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Infrastructure\bin\Debug\net8.0\WebCarWash.Infrastructure.runtimeconfig.json
+G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Infrastructure\bin\Debug\net8.0\WebCarWash.Infrastructure.dll
+G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Infrastructure\bin\Debug\net8.0\WebCarWash.Infrastructure.pdb
+G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Infrastructure\bin\Debug\net8.0\WebCarWash.Application.dll
+G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Infrastructure\bin\Debug\net8.0\WebCarWash.Domain.dll
+G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Infrastructure\bin\Debug\net8.0\WebCarWash.Application.pdb
+G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Infrastructure\bin\Debug\net8.0\WebCarWash.Domain.pdb
+G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Infrastructure\obj\Debug\net8.0\WebCarWash.Infrastructure.csproj.AssemblyReference.cache
+G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Infrastructure\obj\Debug\net8.0\WebCarWash.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Infrastructure\obj\Debug\net8.0\WebCarWash.Infrastructure.AssemblyInfoInputs.cache
+G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Infrastructure\obj\Debug\net8.0\WebCarWash.Infrastructure.AssemblyInfo.cs
+G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Infrastructure\obj\Debug\net8.0\WebCarWash.Infrastructure.csproj.CoreCompileInputs.cache
+G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Infrastructure\obj\Debug\net8.0\WebCarWa.A447BBAF.Up2Date
+G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Infrastructure\obj\Debug\net8.0\WebCarWash.Infrastructure.dll
+G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Infrastructure\obj\Debug\net8.0\refint\WebCarWash.Infrastructure.dll
+G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Infrastructure\obj\Debug\net8.0\WebCarWash.Infrastructure.pdb
+G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Infrastructure\obj\Debug\net8.0\WebCarWash.Infrastructure.genruntimeconfig.cache
+G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Infrastructure\obj\Debug\net8.0\ref\WebCarWash.Infrastructure.dll
