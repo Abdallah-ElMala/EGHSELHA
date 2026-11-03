@@ -21,3 +21,15 @@ G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Domain\obj\Debug\net8.0\
 G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Domain\obj\Debug\net8.0\refint\WebCarWash.Domain.dll
 G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Domain\obj\Debug\net8.0\WebCarWash.Domain.pdb
 G:\Depi_Training(.net)\WebCarWash\WebCarWash\WebCarWash.Domain\obj\Debug\net8.0\ref\WebCarWash.Domain.dll
+G:\Depi_Training(.net)\EGSELHA_Repo\WebCarWash.Domain\bin\Debug\net8.0\WebCarWash.Domain.deps.json
+G:\Depi_Training(.net)\EGSELHA_Repo\WebCarWash.Domain\bin\Debug\net8.0\WebCarWash.Domain.dll
+G:\Depi_Training(.net)\EGSELHA_Repo\WebCarWash.Domain\bin\Debug\net8.0\WebCarWash.Domain.pdb
+G:\Depi_Training(.net)\EGSELHA_Repo\WebCarWash.Domain\obj\Debug\net8.0\WebCarWash.Domain.GeneratedMSBuildEditorConfig.editorconfig
+G:\Depi_Training(.net)\EGSELHA_Repo\WebCarWash.Domain\obj\Debug\net8.0\WebCarWash.Domain.AssemblyInfoInputs.cache
+G:\Depi_Training(.net)\EGSELHA_Repo\WebCarWash.Domain\obj\Debug\net8.0\WebCarWash.Domain.AssemblyInfo.cs
+G:\Depi_Training(.net)\EGSELHA_Repo\WebCarWash.Domain\obj\Debug\net8.0\WebCarWash.Domain.csproj.CoreCompileInputs.cache
+G:\Depi_Training(.net)\EGSELHA_Repo\WebCarWash.Domain\obj\Debug\net8.0\WebCarWash.Domain.sourcelink.json
+G:\Depi_Training(.net)\EGSELHA_Repo\WebCarWash.Domain\obj\Debug\net8.0\WebCarWash.Domain.dll
+G:\Depi_Training(.net)\EGSELHA_Repo\WebCarWash.Domain\obj\Debug\net8.0\refint\WebCarWash.Domain.dll
+G:\Depi_Training(.net)\EGSELHA_Repo\WebCarWash.Domain\obj\Debug\net8.0\WebCarWash.Domain.pdb
+G:\Depi_Training(.net)\EGSELHA_Repo\WebCarWash.Domain\obj\Debug\net8.0\ref\WebCarWash.Domain.dll
