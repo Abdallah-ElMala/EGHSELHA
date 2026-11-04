@@ -1,7 +1,0 @@
-<Solution>
-  <Project Path="WebCarWash.API/WebCarWash.API.csproj" />
-  <Project Path="WebCarWash.Application/WebCarWash.Application.csproj" />
-  <Project Path="WebCarWash.Domain/WebCarWash.Domain.csproj" />
-  <Project Path="WebCarWash.Infrastructure/WebCarWash.Infrastructure.csproj" />
-  <Project Path="WebCarWash/WebCarWash.csproj" />
-</Solution>
