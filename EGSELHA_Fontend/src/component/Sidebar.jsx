@@ -4,7 +4,7 @@ import { useTech } from '../context/TechnicianContext'
 
 const navItems = [
   { label: 'Dashboard', to: '/technician', icon: LayoutDashboard, end: true },
-  { label: 'My Jobs', to: '/technician/jobs', icon: BriefcaseBusiness, badge: 3 },
+  { label: 'My Jobs', to: '/technician/jobs', icon: BriefcaseBusiness },
   { label: 'Profile', to: '/technician/profile', icon: UserRound },
   { label: 'Earnings', to: '/technician/earnings', icon: Wallet },
   { label: 'Settings', to: '/technician/settings', icon: Settings },
