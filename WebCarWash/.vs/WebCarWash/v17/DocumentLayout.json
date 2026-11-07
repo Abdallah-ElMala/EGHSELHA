@@ -110,7 +110,7 @@
               "RelativeDocumentMoniker": "WebCarWash.Domain\\Enums\\BookingStatus.cs",
               "ToolTip": "G:\\Depi_Training(.net)\\EGSELHA_Repo\\WebCarWash\\WebCarWash.Domain\\Enums\\BookingStatus.cs",
               "RelativeToolTip": "WebCarWash.Domain\\Enums\\BookingStatus.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAUAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAdAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-11-07T15:50:51.753Z",
               "EditorCaption": ""
@@ -125,8 +125,7 @@
               "RelativeToolTip": "WebCarWash.Domain\\Enums\\BookingType.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-11-07T15:50:50.249Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-11-07T15:50:50.249Z"
             },
             {
               "$type": "Document",

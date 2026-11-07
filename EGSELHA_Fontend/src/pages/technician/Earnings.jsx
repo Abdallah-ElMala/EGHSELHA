@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react'
-import { Wallet, CalendarDays, Clock3, TrendingUp, Download, ChevronRight, ArrowLeft, Search, Filter } from 'lucide-react'
+import { Wallet, CalendarDays, Clock3, TrendingUp, Download, ChevronRight, ArrowLeft, Search, Filter, CreditCard, Send } from 'lucide-react'
 import PageTitle from '../../component/PageTitle'
 import Stat from '../../component/Stat'
 import { useTech } from '../../context/TechnicianContext'
@@ -15,17 +15,25 @@ export default function Earnings() {
   const [statusFilter, setStatusFilter] = useState('All')
   const [searchQuery, setSearchQuery] = useState('')
 
-  useEffect(() => {
-    const fetchEarnings = async () => {
-      try {
-        const data = await technicianApi.getEarnings()
-        setEarnings(data)
-      } catch (error) {
-        console.error('Earnings API Error:', error)
-      } finally {
-        setLoading(false)
-      }
+  // Request Payout Modal state
+  const [payoutModalOpen, setPayoutModalOpen] = useState(false)
+  const [payoutAmount, setPayoutAmount] = useState(500)
+  const [payoutMethod, setPayoutMethod] = useState('Instapay')
+  const [accountDetails, setAccountDetails] = useState('mostafa@instapay')
+  const [submittingPayout, setSubmittingPayout] = useState(false)
+
+  const fetchEarnings = async () => {
+    try {
+      const data = await technicianApi.getEarnings()
+      setEarnings(data)
+    } catch (error) {
+      console.error('Earnings API Error:', error)
+    } finally {
+      setLoading(false)
     }
+  }
+
+  useEffect(() => {
     fetchEarnings()
   }, [])
 
@@ -51,11 +59,32 @@ export default function Earnings() {
     return filteredTransactions.reduce((sum, t) => sum + (Number(t.amount) || 0), 0)
   }, [filteredTransactions])
 
+  const handleRequestPayout = async (e) => {
+    e.preventDefault()
+    if (payoutAmount <= 0) return
+
+    setSubmittingPayout(true)
+    try {
+      await technicianApi.requestPayout({
+        amount: Number(payoutAmount),
+        payoutMethod,
+        accountDetails
+      })
+      notify(`Payout request of EGP ${payoutAmount} submitted via ${payoutMethod}!`)
+      setPayoutModalOpen(false)
+      fetchEarnings() // Refresh earnings
+    } catch (err) {
+      console.error(err)
+      notify('Failed to request payout.')
+    } finally {
+      setSubmittingPayout(false)
+    }
+  }
+
   if (loading) {
     return <div className="empty-state"><p>Loading earnings…</p></div>
   }
 
-  // إذا تم الضغط على View All، نعرض صفحة كاملة لكل المعاملات
   if (showAllTransactions) {
     return (
       <>
@@ -101,13 +130,11 @@ export default function Earnings() {
             </button>
           </div>
 
-          {/* Quick summary strip */}
           <div style={{ display: 'flex', justifyContent: 'space-between', padding: '16px 0 10px', color: 'var(--muted)', fontSize: 11 }}>
             <span>Showing <b>{filteredTransactions.length}</b> transactions</span>
             <span>Total sum: <b style={{ color: '#1687f8' }}>EGP {totalFilteredAmount.toLocaleString()}</b></span>
           </div>
 
-          {/* Full Transactions Table */}
           <div className="table-wrap">
             <table>
               <thead>
@@ -149,7 +176,6 @@ export default function Earnings() {
     )
   }
 
-  // العرض العادي للصفحة
   return (
     <>
       <PageTitle
@@ -157,9 +183,14 @@ export default function Earnings() {
         title="Earnings"
         desc="Track your income, payouts and completed services."
         action={
-          <button className="btn outline" onClick={() => notify('Your earnings report is being prepared (demo).')}>
-            <Download size={16} /> Export report
-          </button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button className="btn primary" onClick={() => setPayoutModalOpen(true)}>
+              <CreditCard size={16} /> Request Payout
+            </button>
+            <button className="btn outline" onClick={() => notify('Your earnings report is being prepared.')}>
+              <Download size={16} /> Export report
+            </button>
+          </div>
         }
       />
 
@@ -244,6 +275,67 @@ export default function Earnings() {
           </table>
         </div>
       </section>
+
+      {/* Request Payout Modal */}
+      {payoutModalOpen && (
+        <div style={{
+          position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px'
+        }}>
+          <div className="panel" style={{ width: '100%', maxWidth: '460px', padding: '24px', backgroundColor: '#fff', borderRadius: '12px' }}>
+            <h2 style={{ marginTop: 0 }}>Request Payout</h2>
+            <p style={{ color: '#64748b', fontSize: '0.9rem' }}>
+              Withdraw your accumulated car wash earnings directly to your mobile wallet or bank account.
+            </p>
+
+            <form onSubmit={handleRequestPayout}>
+              <div style={{ marginBottom: '14px' }}>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: '6px' }}>Withdrawal Amount (EGP)</label>
+                <input
+                  type="number"
+                  min="100"
+                  step="50"
+                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                  value={payoutAmount}
+                  onChange={(e) => setPayoutAmount(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div style={{ marginBottom: '14px' }}>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: '6px' }}>Payout Method</label>
+                <select
+                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                  value={payoutMethod}
+                  onChange={(e) => setPayoutMethod(e.target.value)}
+                >
+                  <option value="Instapay">Instapay (Instant transfer)</option>
+                  <option value="Vodafone Cash">Vodafone Cash (Mobile wallet)</option>
+                  <option value="Bank Transfer">Bank Transfer (IBAN)</option>
+                </select>
+              </div>
+
+              <div style={{ marginBottom: '18px' }}>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: '6px' }}>Destination Details</label>
+                <input
+                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                  placeholder="e.g. username@instapay or 010xxxxxxxx"
+                  value={accountDetails}
+                  onChange={(e) => setAccountDetails(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                <button type="button" className="btn outline" onClick={() => setPayoutModalOpen(false)}>Cancel</button>
+                <button type="submit" className="btn primary" disabled={submittingPayout}>
+                  {submittingPayout ? 'Processing...' : 'Submit Withdrawal'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   )
 }

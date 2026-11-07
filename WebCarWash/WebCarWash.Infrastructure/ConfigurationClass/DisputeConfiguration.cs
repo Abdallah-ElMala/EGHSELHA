@@ -1,4 +1,4 @@
-﻿using WebCarWash.Domain.Entities;
+using WebCarWash.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -18,7 +18,9 @@ namespace WebCarWash.Infrastructure.ConfigrationClass
             builder.Property(d => d.Reason).IsRequired().HasMaxLength(1000);
             builder.Property(d => d.Status).HasConversion<string>().HasMaxLength(30).IsRequired();
             builder.Property(d => d.AdminNotes).HasMaxLength(1000);
-            builder.Property(d => d.EvidenceUrls).HasConversion(JsonValueConverter.Create<string>());
+            builder.Property(d => d.EvidenceUrls)
+                .HasConversion(JsonValueConverter.Create<string>())
+                .Metadata.SetValueComparer(JsonValueConverter.CreateComparer<string>());
 
             builder.HasOne(d => d.Booking)
                 .WithOne(b => b.Dispute)

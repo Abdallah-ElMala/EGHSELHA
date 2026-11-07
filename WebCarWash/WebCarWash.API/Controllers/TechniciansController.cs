@@ -160,5 +160,142 @@ namespace WebCarWash.API.Controllers
             await _technicianService.MarkNotificationsAsReadAsync(GetCurrentTechnicianId(techId));
             return Ok(new { message = "All notifications marked as read." });
         }
+
+        // ==========================================
+        // Technician Specification Endpoints
+        // ==========================================
+
+        /// <summary>
+        /// 1. Update live GPS location of technician.
+        /// </summary>
+        [HttpPut("location")]
+        public async Task<IActionResult> UpdateGPSLocation(
+            [FromBody] UpdateLocationDto dto,
+            [FromHeader(Name = "X-Technician-Id")] Guid? techId)
+        {
+            var success = await _technicianService.UpdateGPSLocationAsync(GetCurrentTechnicianId(techId), dto.Latitude, dto.Longitude);
+            return Ok(new { success, message = "Location updated." });
+        }
+
+        /// <summary>
+        /// 2. Toggle technician online/offline availability.
+        /// </summary>
+        [HttpPut("availability")]
+        public async Task<IActionResult> ToggleAvailability(
+            [FromBody] bool isOnline,
+            [FromHeader(Name = "X-Technician-Id")] Guid? techId)
+        {
+            var success = await _technicianService.ToggleAvailabilityAsync(GetCurrentTechnicianId(techId), isOnline);
+            return Ok(new { success, isOnline });
+        }
+
+        /// <summary>
+        /// 3. Mark technician arrived at booking location.
+        /// </summary>
+        [HttpPut("jobs/{id}/arrived")]
+        public async Task<IActionResult> MarkArrived(
+            string id,
+            [FromHeader(Name = "X-Technician-Id")] Guid? techId)
+        {
+            var success = await _technicianService.MarkArrivedAsync(GetCurrentTechnicianId(techId), id);
+            return Ok(new { success, message = $"Technician arrived at booking {id}." });
+        }
+
+        /// <summary>
+        /// 4. Upload mandatory QA photo (Before or After).
+        /// </summary>
+        [HttpPost("jobs/{id}/photos")]
+        public async Task<ActionResult<PhotoQADto>> UploadQAPhoto(
+            string id,
+            [FromBody] UploadQAPhotoDto dto,
+            [FromHeader(Name = "X-Technician-Id")] Guid? techId)
+        {
+            var photo = await _technicianService.UploadQAPhotoAsync(GetCurrentTechnicianId(techId), id, dto);
+            return Ok(photo);
+        }
+
+        /// <summary>
+        /// Get all QA photos for a booking.
+        /// </summary>
+        [HttpGet("jobs/{id}/photos")]
+        public async Task<ActionResult<IEnumerable<PhotoQADto>>> GetQAPhotos(
+            string id,
+            [FromHeader(Name = "X-Technician-Id")] Guid? techId)
+        {
+            var photos = await _technicianService.GetQAPhotosAsync(GetCurrentTechnicianId(techId), id);
+            return Ok(photos);
+        }
+
+        /// <summary>
+        /// 5. Propose on-site inspection upsell for extra stains/cleaning.
+        /// </summary>
+        [HttpPost("jobs/{id}/upsell")]
+        public async Task<ActionResult<InspectionUpsellDto>> ProposeUpsell(
+            string id,
+            [FromBody] ProposeUpsellDto dto,
+            [FromHeader(Name = "X-Technician-Id")] Guid? techId)
+        {
+            var upsell = await _technicianService.ProposeUpsellAsync(GetCurrentTechnicianId(techId), id, dto);
+            return Ok(upsell);
+        }
+
+        /// <summary>
+        /// Get upsell details for a booking.
+        /// </summary>
+        [HttpGet("jobs/{id}/upsell")]
+        public async Task<ActionResult<InspectionUpsellDto>> GetUpsell(
+            string id,
+            [FromHeader(Name = "X-Technician-Id")] Guid? techId)
+        {
+            var upsell = await _technicianService.GetUpsellAsync(GetCurrentTechnicianId(techId), id);
+            return Ok(upsell);
+        }
+
+        /// <summary>
+        /// 6. Request earnings payout / withdrawal.
+        /// </summary>
+        [HttpPost("payout")]
+        public async Task<ActionResult<PayoutDto>> RequestPayout(
+            [FromBody] RequestPayoutDto dto,
+            [FromHeader(Name = "X-Technician-Id")] Guid? techId)
+        {
+            var payout = await _technicianService.RequestPayoutAsync(GetCurrentTechnicianId(techId), dto);
+            return Ok(payout);
+        }
+
+        /// <summary>
+        /// Get payout history.
+        /// </summary>
+        [HttpGet("payouts")]
+        public async Task<ActionResult<IEnumerable<PayoutDto>>> GetPayouts(
+            [FromHeader(Name = "X-Technician-Id")] Guid? techId)
+        {
+            var list = await _technicianService.GetPayoutHistoryAsync(GetCurrentTechnicianId(techId));
+            return Ok(list);
+        }
+
+        /// <summary>
+        /// 7. Get pending 45-second Job Offers.
+        /// </summary>
+        [HttpGet("offers")]
+        public async Task<ActionResult<IEnumerable<JobOfferDto>>> GetJobOffers(
+            [FromHeader(Name = "X-Technician-Id")] Guid? techId)
+        {
+            var offers = await _technicianService.GetJobOffersAsync(GetCurrentTechnicianId(techId));
+            return Ok(offers);
+        }
+
+        /// <summary>
+        /// Respond to 45-second Job Offer (Accept / Pass).
+        /// </summary>
+        [HttpPost("offers/{id}/respond")]
+        public async Task<IActionResult> RespondToJobOffer(
+            Guid id,
+            [FromBody] RespondJobOfferDto dto,
+            [FromHeader(Name = "X-Technician-Id")] Guid? techId)
+        {
+            var success = await _technicianService.RespondToJobOfferAsync(GetCurrentTechnicianId(techId), id, dto.Accept);
+            return Ok(new { success, message = dto.Accept ? "Job offer accepted." : "Job offer passed." });
+        }
     }
 }

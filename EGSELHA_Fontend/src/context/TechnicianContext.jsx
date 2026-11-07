@@ -62,12 +62,27 @@ export function TechnicianProvider({ children }) {
     }
   }
 
+  // دالة تحديث الملف الشخصي وربطها بالـ API
+  const updateProfile = async (newProfileData) => {
+    try {
+      await technicianApi.updateProfile(newProfileData)
+      setProfile(newProfileData)
+      notify('Profile changes saved successfully.')
+      return true
+    } catch (err) {
+      console.error('Profile update error:', err)
+      notify('Failed to save profile changes.')
+      return false
+    }
+  }
+
   return (
     <TechnicianContext.Provider
       value={{
         jobs,
         setJobs,
         updateStatus,
+        updateProfile,
         notice,
         notify,
         dark,

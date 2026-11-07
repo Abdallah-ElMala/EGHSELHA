@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,8 +8,8 @@ namespace WebCarWash.Domain.Enums
 {
     public enum VehicleSize
     {
-        SEDAN = 1,
-        SUV = 2,
-        TRUCK_VAN = 3
+        SEDAN = 0,
+        SUV = 1,
+        TRUCK_VAN = 2
     }
 }

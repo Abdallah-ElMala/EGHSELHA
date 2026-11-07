@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,9 +8,9 @@ namespace WebCarWash.Domain.Enums
 {
     public enum BookingType
     {
-        FAST_TRACK = 1,
-        SCHEDULED = 2,
-        SUBSCRIPTION_WEEKLY = 3,
-        SUBSCRIPTION_MONTHLY = 4
+        FAST_TRACK = 0,
+        SCHEDULED = 1,
+        SUBSCRIPTION_WEEKLY = 2,
+        SUBSCRIPTION_MONTHLY = 3
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,9 +8,9 @@ namespace WebCarWash.Domain.Enums
 {
     public enum ParkingType
     {
-        PRIVATE_GARAGE = 1,
-        DRIVEWAY = 2,
-        STREET = 3,
-        UNDERGROUND = 4
+        PRIVATE_GARAGE = 0,
+        DRIVEWAY = 1,
+        STREET = 2,
+        UNDERGROUND = 3
     }
 }

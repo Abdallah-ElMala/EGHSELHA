@@ -1,4 +1,4 @@
-﻿using WebCarWash.Domain.Entities;
+using WebCarWash.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -16,7 +16,9 @@ namespace WebCarWash.Infrastructure.ConfigrationClass
             builder.ToTable("Reviews");
             builder.HasKey(r => r.Id);
             builder.Property(r => r.CommentText).HasMaxLength(1000);
-            builder.Property(r => r.SelectedTags).HasConversion(JsonValueConverter.Create<string>());
+            builder.Property(r => r.SelectedTags)
+                .HasConversion(JsonValueConverter.Create<string>())
+                .Metadata.SetValueComparer(JsonValueConverter.CreateComparer<string>());
 
             builder.HasOne(r => r.Booking)
                 .WithOne(b => b.Review)

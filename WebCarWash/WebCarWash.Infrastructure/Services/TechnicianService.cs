@@ -326,6 +326,308 @@ namespace WebCarWash.Infrastructure.Services
             return true;
         }
 
+        public async Task<bool> UpdateGPSLocationAsync(Guid technicianId, float lat, float lng)
+        {
+            var tech = await _context.Technicians.FirstOrDefaultAsync(t => t.Id == technicianId);
+            if (tech != null)
+            {
+                tech.UpdateGPSLocation(lat, lng);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
+        }
+
+        public async Task<bool> ToggleAvailabilityAsync(Guid technicianId, bool isOnline)
+        {
+            var tech = await _context.Technicians.FirstOrDefaultAsync(t => t.Id == technicianId);
+            if (tech != null)
+            {
+                tech.ToggleAvailability(isOnline);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
+        }
+
+        public async Task<bool> MarkArrivedAsync(Guid technicianId, string bookingIdOrNumber)
+        {
+            var booking = await _context.Bookings
+                .FirstOrDefaultAsync(b => b.BookingNumber == bookingIdOrNumber || b.Id.ToString() == bookingIdOrNumber);
+
+            if (booking != null)
+            {
+                booking.Status = BookingStatus.ARRIVED;
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return true;
+        }
+
+        public async Task<PhotoQADto?> UploadQAPhotoAsync(Guid technicianId, string bookingIdOrNumber, UploadQAPhotoDto dto)
+        {
+            var booking = await _context.Bookings
+                .FirstOrDefaultAsync(b => b.BookingNumber == bookingIdOrNumber || b.Id.ToString() == bookingIdOrNumber);
+
+            var bookingId = booking?.Id ?? (Guid.TryParse(bookingIdOrNumber, out var parsedGuid) ? parsedGuid : Guid.NewGuid());
+
+            var photo = new PhotoQA
+            {
+                BookingId = bookingId,
+                PhotoType = dto.PhotoType,
+                Category = dto.Category,
+                ImageUrl = dto.ImageUrl,
+                GpsLatitude = dto.GpsLatitude,
+                GpsLongitude = dto.GpsLongitude,
+                Timestamp = DateTime.UtcNow,
+                IsVerified = true
+            };
+
+            photo.ValidateLocation();
+
+            if (booking != null)
+            {
+                _context.PhotoQAs.Add(photo);
+                await _context.SaveChangesAsync();
+            }
+
+            return new PhotoQADto
+            {
+                Id = photo.Id,
+                BookingId = photo.BookingId,
+                PhotoType = photo.PhotoType.ToString(),
+                Category = photo.Category.ToString(),
+                ImageUrl = photo.ImageUrl,
+                Timestamp = photo.Timestamp,
+                GpsLatitude = photo.GpsLatitude,
+                GpsLongitude = photo.GpsLongitude,
+                IsVerified = photo.IsVerified
+            };
+        }
+
+        public async Task<IEnumerable<PhotoQADto>> GetQAPhotosAsync(Guid technicianId, string bookingIdOrNumber)
+        {
+            var booking = await _context.Bookings
+                .FirstOrDefaultAsync(b => b.BookingNumber == bookingIdOrNumber || b.Id.ToString() == bookingIdOrNumber);
+
+            if (booking != null)
+            {
+                var photos = await _context.PhotoQAs
+                    .Where(p => p.BookingId == booking.Id)
+                    .OrderBy(p => p.Timestamp)
+                    .ToListAsync();
+
+                return photos.Select(p => new PhotoQADto
+                {
+                    Id = p.Id,
+                    BookingId = p.BookingId,
+                    PhotoType = p.PhotoType.ToString(),
+                    Category = p.Category.ToString(),
+                    ImageUrl = p.ImageUrl,
+                    Timestamp = p.Timestamp,
+                    GpsLatitude = p.GpsLatitude,
+                    GpsLongitude = p.GpsLongitude,
+                    IsVerified = p.IsVerified
+                });
+            }
+
+            return Enumerable.Empty<PhotoQADto>();
+        }
+
+        public async Task<InspectionUpsellDto?> ProposeUpsellAsync(Guid technicianId, string bookingIdOrNumber, ProposeUpsellDto dto)
+        {
+            var booking = await _context.Bookings
+                .Include(b => b.InspectionUpsell)
+                .FirstOrDefaultAsync(b => b.BookingNumber == bookingIdOrNumber || b.Id.ToString() == bookingIdOrNumber);
+
+            var bookingId = booking?.Id ?? (Guid.TryParse(bookingIdOrNumber, out var parsedGuid) ? parsedGuid : Guid.NewGuid());
+
+            var upsell = new InspectionUpsell
+            {
+                BookingId = bookingId,
+                TechnicianNote = dto.Reason,
+                AdditionalPrice = dto.AdditionalPrice,
+                EvidencePhotoUrl = dto.EvidencePhotoUrl ?? string.Empty,
+                Status = UpsellStatus.PENDING,
+                RequestedAt = DateTime.UtcNow
+            };
+
+            if (booking != null)
+            {
+                _context.InspectionUpsells.Add(upsell);
+                await _context.SaveChangesAsync();
+            }
+
+            return new InspectionUpsellDto
+            {
+                Id = upsell.Id,
+                BookingId = upsell.BookingId,
+                TechnicianNote = upsell.TechnicianNote,
+                AdditionalPrice = upsell.AdditionalPrice,
+                EvidencePhotoUrl = upsell.EvidencePhotoUrl,
+                Status = upsell.Status.ToString(),
+                RequestedAt = upsell.RequestedAt
+            };
+        }
+
+        public async Task<InspectionUpsellDto?> GetUpsellAsync(Guid technicianId, string bookingIdOrNumber)
+        {
+            var booking = await _context.Bookings
+                .Include(b => b.InspectionUpsell)
+                .FirstOrDefaultAsync(b => b.BookingNumber == bookingIdOrNumber || b.Id.ToString() == bookingIdOrNumber);
+
+            if (booking?.InspectionUpsell != null)
+            {
+                var u = booking.InspectionUpsell;
+                return new InspectionUpsellDto
+                {
+                    Id = u.Id,
+                    BookingId = u.BookingId,
+                    TechnicianNote = u.TechnicianNote,
+                    AdditionalPrice = u.AdditionalPrice,
+                    EvidencePhotoUrl = u.EvidencePhotoUrl,
+                    Status = u.Status.ToString(),
+                    RequestedAt = u.RequestedAt,
+                    RespondedAt = u.RespondedAt
+                };
+            }
+
+            return null;
+        }
+
+        public async Task<PayoutDto?> RequestPayoutAsync(Guid technicianId, RequestPayoutDto dto)
+        {
+            var tech = await _context.Technicians.FirstOrDefaultAsync(t => t.Id == technicianId);
+            if (tech != null)
+            {
+                if (dto.Amount > tech.TotalBalance && tech.TotalBalance > 0)
+                {
+                    dto.Amount = tech.TotalBalance;
+                }
+                var payout = tech.RequestPayout(dto.PayoutMethod, dto.Amount, dto.AccountDetails);
+                _context.Payouts.Add(payout);
+                await _context.SaveChangesAsync();
+
+                return new PayoutDto
+                {
+                    Id = payout.Id,
+                    Amount = payout.Amount,
+                    PayoutMethod = payout.PayoutMethod,
+                    AccountDetails = payout.AccountDetails,
+                    Status = payout.Status,
+                    RequestedAt = payout.RequestedAt
+                };
+            }
+
+            return new PayoutDto
+            {
+                Id = Guid.NewGuid(),
+                Amount = dto.Amount,
+                PayoutMethod = dto.PayoutMethod,
+                AccountDetails = dto.AccountDetails,
+                Status = "Pending",
+                RequestedAt = DateTime.UtcNow
+            };
+        }
+
+        public async Task<IEnumerable<PayoutDto>> GetPayoutHistoryAsync(Guid technicianId)
+        {
+            var payouts = await _context.Payouts
+                .Where(p => p.TechnicianId == technicianId)
+                .OrderByDescending(p => p.RequestedAt)
+                .ToListAsync();
+
+            if (payouts.Any())
+            {
+                return payouts.Select(p => new PayoutDto
+                {
+                    Id = p.Id,
+                    Amount = p.Amount,
+                    PayoutMethod = p.PayoutMethod,
+                    AccountDetails = p.AccountDetails,
+                    Status = p.Status,
+                    RequestedAt = p.RequestedAt,
+                    ProcessedAt = p.ProcessedAt
+                });
+            }
+
+            return new List<PayoutDto>
+            {
+                new() { Id = Guid.NewGuid(), Amount = 1200f, PayoutMethod = "Instapay", AccountDetails = "mostafa@instapay", Status = "Processed", RequestedAt = DateTime.UtcNow.AddDays(-2), ProcessedAt = DateTime.UtcNow.AddDays(-2).AddHours(2) },
+                new() { Id = Guid.NewGuid(), Amount = 800f, PayoutMethod = "Vodafone Cash", AccountDetails = "01001234567", Status = "Processed", RequestedAt = DateTime.UtcNow.AddDays(-7), ProcessedAt = DateTime.UtcNow.AddDays(-7).AddHours(1) }
+            };
+        }
+
+        public async Task<IEnumerable<JobOfferDto>> GetJobOffersAsync(Guid technicianId)
+        {
+            var offers = await _context.JobOffers
+                .Include(o => o.Booking)
+                    .ThenInclude(b => b.Customer)
+                .Include(o => o.Booking)
+                    .ThenInclude(b => b.ServicePackage)
+                .Include(o => o.Booking)
+                    .ThenInclude(b => b.Vehicle)
+                .Where(o => o.TechnicianId == technicianId && o.Status == JobOfferStatus.OFFERED && o.ExpiresAt > DateTime.UtcNow)
+                .OrderByDescending(o => o.OfferedAt)
+                .ToListAsync();
+
+            if (offers.Any())
+            {
+                return offers.Select(o => new JobOfferDto
+                {
+                    Id = o.Id,
+                    BookingId = o.BookingId,
+                    BookingNumber = o.Booking?.BookingNumber ?? "#BK-OFFER",
+                    CustomerName = o.Booking?.Customer?.FullName ?? "New Customer",
+                    CustomerAddress = o.Booking?.Address ?? "Nasr City, Cairo",
+                    DistanceText = o.Booking?.DistanceText ?? "2.8 km",
+                    ServiceName = o.Booking?.ServicePackage?.Name ?? "Premium Wash",
+                    VehicleModel = o.Booking?.Vehicle != null ? $"{o.Booking.Vehicle.Make} {o.Booking.Vehicle.Model}" : "Sedan",
+                    PayoutAmount = o.PayoutAmount > 0 ? o.PayoutAmount : 280f,
+                    OfferedAt = o.OfferedAt,
+                    ExpiresAt = o.ExpiresAt,
+                    RemainingSeconds = Math.Max(0, (int)(o.ExpiresAt - DateTime.UtcNow).TotalSeconds),
+                    Status = o.Status.ToString()
+                });
+            }
+
+            return new List<JobOfferDto>
+            {
+                new()
+                {
+                    Id = Guid.Parse("33333333-3333-3333-3333-333333333333"),
+                    BookingId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccc0001"),
+                    BookingNumber = "#BK-0030",
+                    CustomerName = "Tamer Hosny",
+                    CustomerAddress = "Nasr City, Abbas El Akkad",
+                    DistanceText = "1.8 km",
+                    ServiceName = "Ultimate Detail",
+                    VehicleModel = "BMW 520i (Black)",
+                    PayoutAmount = 490f,
+                    OfferedAt = DateTime.UtcNow,
+                    ExpiresAt = DateTime.UtcNow.AddSeconds(45),
+                    RemainingSeconds = 45,
+                    Status = "OFFERED"
+                }
+            };
+        }
+
+        public async Task<bool> RespondToJobOfferAsync(Guid technicianId, Guid offerId, bool accept)
+        {
+            var offer = await _context.JobOffers
+                .Include(o => o.Booking)
+                .FirstOrDefaultAsync(o => o.Id == offerId);
+
+            var tech = await _context.Technicians.FirstOrDefaultAsync(t => t.Id == technicianId);
+
+            if (offer != null && tech != null)
+            {
+                return tech.RespondToJobOffer(offer, accept);
+            }
+
+            return true;
+        }
+
         #region Helpers & Default Mock Data
 
         private static string MapBookingStatusToFrontend(BookingStatus status) => status switch

@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "G:\\Depi_Training(.net)\\EGSELHA_Repo\\WebCarWash\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{3D576BD0-FE44-4F3F-810B-3B5EB722E046}|WebCarWash.Application\\WebCarWash.Application.csproj|g:\\depi_training(.net)\\egselha_repo\\webcarwash\\webcarwash.application\\dtos\\customer\\customerdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3D576BD0-FE44-4F3F-810B-3B5EB722E046}|WebCarWash.Application\\WebCarWash.Application.csproj|solutionrelative:webcarwash.application\\dtos\\customer\\customerdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{66F6C682-BE86-42F0-BFF6-DC1530A9E21B}|WebCarWash.Domain\\WebCarWash.Domain.csproj|g:\\depi_training(.net)\\egselha_repo\\webcarwash\\webcarwash.domain\\enums\\bookingstatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{66F6C682-BE86-42F0-BFF6-DC1530A9E21B}|WebCarWash.Domain\\WebCarWash.Domain.csproj|solutionrelative:webcarwash.domain\\enums\\bookingstatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -105,6 +109,19 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "CustomerDtos.cs",
+              "DocumentMoniker": "G:\\Depi_Training(.net)\\EGSELHA_Repo\\WebCarWash\\WebCarWash.Application\\DTOs\\Customer\\CustomerDtos.cs",
+              "RelativeDocumentMoniker": "WebCarWash.Application\\DTOs\\Customer\\CustomerDtos.cs",
+              "ToolTip": "G:\\Depi_Training(.net)\\EGSELHA_Repo\\WebCarWash\\WebCarWash.Application\\DTOs\\Customer\\CustomerDtos.cs",
+              "RelativeToolTip": "WebCarWash.Application\\DTOs\\Customer\\CustomerDtos.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-11-07T20:42:06.89Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
               "Title": "BookingStatus.cs",
               "DocumentMoniker": "G:\\Depi_Training(.net)\\EGSELHA_Repo\\WebCarWash\\WebCarWash.Domain\\Enums\\BookingStatus.cs",
               "RelativeDocumentMoniker": "WebCarWash.Domain\\Enums\\BookingStatus.cs",
@@ -117,7 +134,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "BookingType.cs",
               "DocumentMoniker": "G:\\Depi_Training(.net)\\EGSELHA_Repo\\WebCarWash\\WebCarWash.Domain\\Enums\\BookingType.cs",
               "RelativeDocumentMoniker": "WebCarWash.Domain\\Enums\\BookingType.cs",
@@ -125,12 +142,11 @@
               "RelativeToolTip": "WebCarWash.Domain\\Enums\\BookingType.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-11-07T15:50:50.249Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-11-07T15:50:50.249Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "dbo.Users.sql",
               "DocumentMoniker": "ViewDataWindow_MSSQL__/./WebCarWashDb/True/SqlTable/dbo.Users.sql",
               "ToolTip": "ViewDataWindow_MSSQL__/./WebCarWashDb/True/SqlTable/dbo.Users.sql",
@@ -139,7 +155,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "dbo.Technicians.sql",
               "DocumentMoniker": "ViewDataWindow_MSSQL__/./WebCarWashDb/True/SqlTable/dbo.Technicians.sql",
               "ToolTip": "ViewDataWindow_MSSQL__/./WebCarWashDb/True/SqlTable/dbo.Technicians.sql",
@@ -148,7 +164,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "TechniciansController.cs",
               "DocumentMoniker": "G:\\Depi_Training(.net)\\EGSELHA_Repo\\WebCarWash\\WebCarWash.API\\Controllers\\TechniciansController.cs",
               "RelativeDocumentMoniker": "WebCarWash.API\\Controllers\\TechniciansController.cs",
@@ -160,7 +176,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 10,
               "Title": "PayoutConfiguration.cs",
               "DocumentMoniker": "G:\\Depi_Training(.net)\\EGSELHA_Repo\\WebCarWash\\WebCarWash.Infrastructure\\ConfigurationClass\\PayoutConfiguration.cs",
               "RelativeDocumentMoniker": "WebCarWash.Infrastructure\\ConfigurationClass\\PayoutConfiguration.cs",
@@ -172,7 +188,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "TechnicianService.cs",
               "DocumentMoniker": "G:\\Depi_Training(.net)\\EGSELHA_Repo\\WebCarWash\\WebCarWash.Infrastructure\\Services\\TechnicianService.cs",
               "RelativeDocumentMoniker": "WebCarWash.Infrastructure\\Services\\TechnicianService.cs",
@@ -184,7 +200,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "TechnicianSettingsDto.cs",
               "DocumentMoniker": "G:\\Depi_Training(.net)\\EGSELHA_Repo\\WebCarWash\\WebCarWash.Application\\DTOs\\Technician\\TechnicianSettingsDto.cs",
               "RelativeDocumentMoniker": "WebCarWash.Application\\DTOs\\Technician\\TechnicianSettingsDto.cs",
@@ -196,7 +212,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "TechnicianDashboardDto.cs",
               "DocumentMoniker": "G:\\Depi_Training(.net)\\EGSELHA_Repo\\WebCarWash\\WebCarWash.Application\\DTOs\\Technician\\TechnicianDashboardDto.cs",
               "RelativeDocumentMoniker": "WebCarWash.Application\\DTOs\\Technician\\TechnicianDashboardDto.cs",
@@ -208,7 +224,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 11,
               "Title": "TechnicianApplicationConfiguration.cs",
               "DocumentMoniker": "G:\\Depi_Training(.net)\\EGSELHA_Repo\\WebCarWash\\WebCarWash.Infrastructure\\ConfigurationClass\\TechnicianApplicationConfiguration.cs",
               "RelativeDocumentMoniker": "WebCarWash.Infrastructure\\ConfigurationClass\\TechnicianApplicationConfiguration.cs",
@@ -220,7 +236,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 13,
               "Title": "TechnicianProfileDto.cs",
               "DocumentMoniker": "G:\\Depi_Training(.net)\\EGSELHA_Repo\\WebCarWash\\WebCarWash.Application\\DTOs\\Technician\\TechnicianProfileDto.cs",
               "RelativeDocumentMoniker": "WebCarWash.Application\\DTOs\\Technician\\TechnicianProfileDto.cs",
@@ -232,7 +248,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
               "Title": "CarWashDBContext.cs",
               "DocumentMoniker": "G:\\Depi_Training(.net)\\EGSELHA_Repo\\WebCarWash\\WebCarWash.Infrastructure\\Data\\CarWashDBContext.cs",
               "RelativeDocumentMoniker": "WebCarWash.Infrastructure\\Data\\CarWashDBContext.cs",
@@ -244,7 +260,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 12,
               "Title": "TechnicianNotificationDto.cs",
               "DocumentMoniker": "G:\\Depi_Training(.net)\\EGSELHA_Repo\\WebCarWash\\WebCarWash.Application\\DTOs\\Technician\\TechnicianNotificationDto.cs",
               "RelativeDocumentMoniker": "WebCarWash.Application\\DTOs\\Technician\\TechnicianNotificationDto.cs",
@@ -256,7 +272,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 14,
               "Title": "TechnicianEarningsDto.cs",
               "DocumentMoniker": "G:\\Depi_Training(.net)\\EGSELHA_Repo\\WebCarWash\\WebCarWash.Application\\DTOs\\Technician\\TechnicianEarningsDto.cs",
               "RelativeDocumentMoniker": "WebCarWash.Application\\DTOs\\Technician\\TechnicianEarningsDto.cs",
@@ -268,7 +284,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 15,
               "Title": "TechnicianDocument.cs",
               "DocumentMoniker": "G:\\Depi_Training(.net)\\EGSELHA_Repo\\WebCarWash\\WebCarWash.Domain\\Entities\\TechnicianDocument.cs",
               "RelativeDocumentMoniker": "WebCarWash.Domain\\Entities\\TechnicianDocument.cs",
@@ -280,7 +296,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 16,
               "Title": "TechnicianApplication.cs",
               "DocumentMoniker": "G:\\Depi_Training(.net)\\EGSELHA_Repo\\WebCarWash\\WebCarWash.Domain\\Entities\\TechnicianApplication.cs",
               "RelativeDocumentMoniker": "WebCarWash.Domain\\Entities\\TechnicianApplication.cs",
@@ -292,7 +308,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 17,
               "Title": "Technician.cs",
               "DocumentMoniker": "G:\\Depi_Training(.net)\\EGSELHA_Repo\\WebCarWash\\WebCarWash.Domain\\Entities\\Technician.cs",
               "RelativeDocumentMoniker": "WebCarWash.Domain\\Entities\\Technician.cs",
@@ -304,7 +320,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 18,
               "Title": "ServiceZone.cs",
               "DocumentMoniker": "G:\\Depi_Training(.net)\\EGSELHA_Repo\\WebCarWash\\WebCarWash.Domain\\Entities\\ServiceZone.cs",
               "RelativeDocumentMoniker": "WebCarWash.Domain\\Entities\\ServiceZone.cs",
@@ -316,7 +332,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 19,
               "Title": "Payout.cs",
               "DocumentMoniker": "G:\\Depi_Training(.net)\\EGSELHA_Repo\\WebCarWash\\WebCarWash.Domain\\Entities\\Payout.cs",
               "RelativeDocumentMoniker": "WebCarWash.Domain\\Entities\\Payout.cs",
@@ -328,7 +344,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 20,
               "Title": "Payment.cs",
               "DocumentMoniker": "G:\\Depi_Training(.net)\\EGSELHA_Repo\\WebCarWash\\WebCarWash.Domain\\Entities\\Payment.cs",
               "RelativeDocumentMoniker": "WebCarWash.Domain\\Entities\\Payment.cs",
@@ -340,7 +356,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 21,
               "Title": "DbInitializer.cs",
               "DocumentMoniker": "G:\\Depi_Training(.net)\\EGSELHA_Repo\\WebCarWash\\WebCarWash.Infrastructure\\Data\\DbInitializer.cs",
               "RelativeDocumentMoniker": "WebCarWash.Infrastructure\\Data\\DbInitializer.cs",

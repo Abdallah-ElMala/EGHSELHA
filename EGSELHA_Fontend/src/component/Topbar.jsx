@@ -25,6 +25,13 @@ export default function Topbar({ onMenu }) {
       <button className="hamburger" onClick={onMenu}><Menu /></button>
       <div className="breadcrumb">Workspace <ChevronRight size={14} /> <b>{title}</b></div>
       <div className="top-actions">
+        <button
+          className="btn outline"
+          style={{ fontSize: '11px', padding: '6px 12px', borderColor: '#087cf0', color: '#087cf0' }}
+          onClick={() => navigate('/customer')}
+        >
+          Switch to Customer Portal
+        </button>
         <button className="icon-btn" onClick={() => navigate('/technician/notifications')} aria-label="Notifications">
           <Bell size={19} /><i />
         </button>

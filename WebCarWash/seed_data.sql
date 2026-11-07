@@ -6,6 +6,9 @@
 
 USE WebCarWashDb;
 GO
+SET QUOTED_IDENTIFIER ON;
+SET ANSI_NULLS ON;
+GO
 
 -- ============================================================
 -- 1. ServiceZones
