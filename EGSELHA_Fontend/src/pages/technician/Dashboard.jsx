@@ -8,7 +8,10 @@ import {
   ChevronRight,
   MapPin,
   Navigation,
-  CheckCircle2
+  CheckCircle2,
+  BellRing,
+  Check,
+  X
 } from 'lucide-react'
 
 import PageTitle from '../../component/PageTitle'
@@ -20,15 +23,29 @@ import { technicianApi } from '../../services/technicianApi'
 
 export default function Dashboard() {
   const navigate = useNavigate()
-  const { notify,profile } = useTech()
+  const { notify, profile } = useTech()
   const [dashboard, setDashboard] = useState(null)
   const [loadingDash, setLoadingDash] = useState(true)
+
+  // 45-Second Job Offer Dispatch state
+  const [activeOffer, setActiveOffer] = useState(null)
+  const [secondsLeft, setSecondsLeft] = useState(45)
 
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
         const data = await technicianApi.getDashboard()
         setDashboard(data)
+
+        // Ping real-time GPS location (behavior: updateGPSLocation)
+        await technicianApi.updateLocation(30.0561, 31.3414).catch(() => {})
+
+        // Check for dispatched job offers (behavior: respondToJobOffer)
+        const offers = await technicianApi.getJobOffers().catch(() => [])
+        if (offers && offers.length > 0) {
+          setActiveOffer(offers[0])
+          setSecondsLeft(offers[0].remainingSeconds || 45)
+        }
       } catch (error) {
         console.error('Dashboard API Error:', error)
       } finally {
@@ -37,6 +54,46 @@ export default function Dashboard() {
     }
     fetchDashboard()
   }, [])
+
+  // 45-second timer countdown
+  useEffect(() => {
+    if (!activeOffer || secondsLeft <= 0) return
+    const timer = setInterval(() => {
+      setSecondsLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer)
+          handlePassOffer(true)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [activeOffer, secondsLeft])
+
+  const handleAcceptOffer = async () => {
+    if (!activeOffer) return
+    try {
+      await technicianApi.respondToJobOffer(activeOffer.id, true)
+      notify(`Job Offer ${activeOffer.bookingNumber} accepted! Navigating to job details...`)
+      setActiveOffer(null)
+      navigate(`/technician/jobs/${encodeURIComponent(activeOffer.bookingNumber)}`)
+    } catch (err) {
+      console.error(err)
+      notify('Failed to accept job offer.')
+    }
+  }
+
+  const handlePassOffer = async (isAutoExpired = false) => {
+    if (!activeOffer) return
+    try {
+      await technicianApi.respondToJobOffer(activeOffer.id, false)
+      notify(isAutoExpired ? 'Job offer expired (45s limit reached).' : 'Job offer declined.')
+      setActiveOffer(null)
+    } catch (err) {
+      console.error(err)
+    }
+  }
 
   if (loadingDash) {
     return <div className="empty-state"><p>Loading dashboard…</p></div>
@@ -71,6 +128,86 @@ export default function Dashboard() {
           </button>
         }
       />
+
+      {/* 45-Second Dispatched Job Offer Alert */}
+      {activeOffer && (
+        <div style={{
+          margin: '0 0 24px 0',
+          padding: '20px',
+          borderRadius: '14px',
+          background: 'linear-gradient(135deg, #eff6ff 0%, #e0f2fe 100%)',
+          border: '2px solid #3b82f6',
+          boxShadow: '0 10px 25px -5px rgba(59, 130, 246, 0.2)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '14px'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{
+                background: '#2563eb',
+                color: '#fff',
+                width: '38px',
+                height: '38px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                animation: 'pulse 1.5s infinite'
+              }}>
+                <BellRing size={20} />
+              </div>
+              <div>
+                <b style={{ color: '#1e3a8a', fontSize: '1.1rem' }}>⚡ Fast-Track Dispatch: New Job Offer ({activeOffer.bookingNumber})</b>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: '#1d4ed8' }}>
+                  {activeOffer.serviceName} · {activeOffer.vehicleModel} · {activeOffer.customerAddress} ({activeOffer.distanceText})
+                </p>
+              </div>
+            </div>
+
+            <div style={{
+              background: secondsLeft <= 10 ? '#ef4444' : '#2563eb',
+              color: '#fff',
+              padding: '6px 14px',
+              borderRadius: '20px',
+              fontWeight: 700,
+              fontSize: '0.9rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <Clock3 size={16} /> {secondsLeft}s left
+            </div>
+          </div>
+
+          {/* Offer details & CTA */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #bfdbfe', paddingTop: '12px' }}>
+            <div>
+              <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Estimated Payout:</span>
+              <span style={{ marginLeft: '8px', fontSize: '1.25rem', fontWeight: 800, color: '#16a34a' }}>
+                EGP {activeOffer.payoutAmount}
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                className="btn outline"
+                style={{ borderColor: '#94a3b8', color: '#475569' }}
+                onClick={() => handlePassOffer(false)}
+              >
+                <X size={16} /> Pass
+              </button>
+              <button
+                className="btn primary"
+                style={{ backgroundColor: '#16a34a', borderColor: '#16a34a' }}
+                onClick={handleAcceptOffer}
+              >
+                <Check size={16} /> Accept Job ({secondsLeft}s)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <section className="stats-grid">
         <Stat

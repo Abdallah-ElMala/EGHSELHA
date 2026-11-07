@@ -1,9 +1,7 @@
-﻿using EGHSELHA.Domain.Enums;
+using EGHSELHA.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EGHSELHA.Domain.Models
 {
@@ -31,10 +29,73 @@ namespace EGHSELHA.Domain.Models
         public Technician() => Role = UserRole.TECHNICIAN;
 
         public void ToggleAvailability(bool isOnline) => IsOnline = isOnline;
-        public void UpdateGPSLocation(float lat, float lng) { CurrentLatitude = lat; CurrentLongitude = lng; }
-        public bool RespondToJobOffer(Guid offerId, bool decision) => decision;
-        public void MarkArrived(Guid bookingId) { }
-        public PhotoQA UploadQAPhoto(PhotoQA photoData) => photoData;
+
+        public void UpdateGPSLocation(float lat, float lng)
+        {
+            CurrentLatitude = lat;
+            CurrentLongitude = lng;
+        }
+
+        public bool RespondToJobOffer(JobOffer offer, bool decision)
+        {
+            if (offer == null) return false;
+            if (decision)
+            {
+                var accepted = offer.Accept();
+                if (accepted && offer.Booking != null)
+                {
+                    offer.Booking.TechnicianId = Id;
+                    offer.Booking.Status = BookingStatus.DISPATCHED;
+                }
+                return accepted;
+            }
+            else
+            {
+                offer.Pass();
+                return true;
+            }
+        }
+
+        public bool RespondToJobOffer(Guid offerId, bool decision)
+        {
+            var offer = JobOffers.FirstOrDefault(o => o.Id == offerId);
+            return offer != null ? RespondToJobOffer(offer, decision) : decision;
+        }
+
+        public void MarkArrived(Booking booking)
+        {
+            if (booking != null && booking.TechnicianId == Id)
+            {
+                booking.Status = BookingStatus.ARRIVED;
+            }
+        }
+
+        public void MarkArrived(Guid bookingId)
+        {
+            var booking = Bookings.FirstOrDefault(b => b.Id == bookingId);
+            if (booking != null) MarkArrived(booking);
+        }
+
+        public PhotoQA UploadQAPhoto(PhotoQA photoData)
+        {
+            photoData.ValidateLocation();
+            return photoData;
+        }
+
+        public InspectionUpsell ProposeUpsell(Booking booking, string reason, float price, string photoUrl = "")
+        {
+            var upsell = new InspectionUpsell
+            {
+                BookingId = booking.Id,
+                TechnicianNote = reason,
+                AdditionalPrice = price,
+                EvidencePhotoUrl = photoUrl,
+                Status = UpsellStatus.PENDING,
+                RequestedAt = DateTime.UtcNow
+            };
+            booking.InspectionUpsell = upsell;
+            return upsell;
+        }
 
         public InspectionUpsell ProposeUpsell(Guid bookingId, string reason, float price) => new()
         {
@@ -45,15 +106,44 @@ namespace EGHSELHA.Domain.Models
             RequestedAt = DateTime.UtcNow
         };
 
-        public void MarkCompleted(Guid bookingId) { }
-
-        public Payout RequestPayout(string method, float amount) => new()
+        public void MarkCompleted(Booking booking)
         {
-            TechnicianId = Id,
-            PayoutMethod = method,
-            Amount = amount,
-            Status = "Pending",
-            RequestedAt = DateTime.UtcNow
-        };
+            if (booking != null && booking.TechnicianId == Id)
+            {
+                booking.Status = BookingStatus.COMPLETED;
+                var earnings = booking.TotalPrice * 0.7f;
+                TodayEarnings += earnings;
+                TotalBalance += earnings;
+            }
+        }
+
+        public void MarkCompleted(Guid bookingId)
+        {
+            var booking = Bookings.FirstOrDefault(b => b.Id == bookingId);
+            if (booking != null) MarkCompleted(booking);
+        }
+
+        public Payout RequestPayout(string method, float amount, string accountDetails = "")
+        {
+            if (amount <= 0 || amount > TotalBalance)
+            {
+                throw new InvalidOperationException("Invalid payout amount or insufficient balance.");
+            }
+
+            TotalBalance -= amount;
+
+            var payout = new Payout
+            {
+                TechnicianId = Id,
+                PayoutMethod = method,
+                Amount = amount,
+                AccountDetails = accountDetails,
+                Status = "Pending",
+                RequestedAt = DateTime.UtcNow
+            };
+
+            Payouts.Add(payout);
+            return payout;
+        }
     }
 }

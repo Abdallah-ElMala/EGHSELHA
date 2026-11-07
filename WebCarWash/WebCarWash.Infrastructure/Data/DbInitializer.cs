@@ -77,6 +77,17 @@ namespace WebCarWash.Infrastructure.Data
             };
             context.ServicePackages.AddRange(pkgPremium, pkgDeep, pkgBasic, pkgUltimate);
 
+            // 2.1 Add-Ons
+            if (!await context.AddOns.AnyAsync())
+            {
+                context.AddOns.AddRange(
+                    new AddOn { Id = Guid.Parse("11111111-aaaa-aaaa-aaaa-aaaaaaaa0001"), Name = "Engine Bay Steam Cleaning", Price = 150f, Description = "Degrease and steam-clean engine compartment safely", IsActive = true },
+                    new AddOn { Id = Guid.Parse("11111111-aaaa-aaaa-aaaa-aaaaaaaa0002"), Name = "Ozone Odor & Bacteria Elimination", Price = 120f, Description = "Medical-grade ozone treatment to destroy stubborn odors", IsActive = true },
+                    new AddOn { Id = Guid.Parse("11111111-aaaa-aaaa-aaaa-aaaaaaaa0003"), Name = "Leather Deep Feed & UV Shield", Price = 100f, Description = "Protective hydrophobic barrier against cracking and fading", IsActive = true },
+                    new AddOn { Id = Guid.Parse("11111111-aaaa-aaaa-aaaa-aaaaaaaa0004"), Name = "Rain-X Hydrophobic Glass Coat", Price = 80f, Description = "Repels rainwater and dirt for superior night driving clarity", IsActive = true }
+                );
+            }
+
             // 3. Technician (Mostafa Ali)
             var techId = Guid.Parse("11111111-1111-1111-1111-111111111111");
             var technician = new Technician

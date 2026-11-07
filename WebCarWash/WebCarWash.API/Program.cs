@@ -35,6 +35,7 @@ builder.Services.AddDbContext<CarWashDbContext>(options =>
 
 // Register Application & Infrastructure Services
 builder.Services.AddScoped<ITechnicianService, TechnicianService>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
 
 // Register Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -71,7 +72,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 // Use CORS
 app.UseCors("AllowAll");

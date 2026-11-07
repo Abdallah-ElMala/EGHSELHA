@@ -55,10 +55,17 @@ namespace WebCarWash.Domain.Entities
 
         public float CalculateFinalPrice()
         {
-            TotalPrice = (BasePackagePrice * VehicleMultiplier)
+            float discount = BookingType switch
+            {
+                BookingType.SUBSCRIPTION_WEEKLY => 0.90f,
+                BookingType.SUBSCRIPTION_MONTHLY => 0.85f,
+                _ => 1.0f
+            };
+
+            TotalPrice = MathF.Round(((BasePackagePrice * VehicleMultiplier)
                        + AddOnsSubtotal
                        + (DistanceSurcharge * PeakSurgeMultiplier)
-                       + UpsellTotal;
+                       + UpsellTotal) * discount);
             RemainingBalance = TotalPrice - DepositAmount;
             return TotalPrice;
         }

@@ -1,5 +1,5 @@
-// src/api/technicianApi.js
-const BASE_URL = 'https://localhost:58299/api/Technicians';
+// src/services/technicianApi.js
+const BASE_URL = 'http://localhost:58300/api/Technicians';
 
 export const technicianApi = {
   // 1. جلب بيانات الـ Dashboard
@@ -24,7 +24,7 @@ export const technicianApi = {
     return await res.json();
   },
 
-  // 4. تحديث حالة الحجز (On The Way, In Progress, Completed)
+  // 4. تحديث حالة الحجز (On The Way, Arrived, In Progress, Completed)
   updateJobStatus: async (id, newStatus) => {
     const res = await fetch(`${BASE_URL}/jobs/${encodeURIComponent(id)}/status`, {
       method: 'PUT',
@@ -76,6 +76,94 @@ export const technicianApi = {
   markAllNotificationsRead: async () => {
     const res = await fetch(`${BASE_URL}/notifications/read-all`, {
       method: 'POST',
+    });
+    return await res.json();
+  },
+
+  // ==========================================
+  // Core Technician Specification Behaviors
+  // ==========================================
+
+  // 1. تحديث الموقع الحي (GPS)
+  updateLocation: async (latitude, longitude) => {
+    const res = await fetch(`${BASE_URL}/location`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ latitude, longitude }),
+    });
+    return await res.json();
+  },
+
+  // 2. تفعيل / إيقاف توفر الفني (Availability)
+  toggleAvailability: async (isOnline) => {
+    const res = await fetch(`${BASE_URL}/availability`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(isOnline),
+    });
+    return await res.json();
+  },
+
+  // 3. تأكيد الوصول لموقع العميل (markArrived)
+  markArrived: async (id) => {
+    const res = await fetch(`${BASE_URL}/jobs/${encodeURIComponent(id)}/arrived`, {
+      method: 'PUT',
+    });
+    return await res.json();
+  },
+
+  // 4. رفع صور الفحص والجودة (PhotoQA: 4 قبل و 4 بعد)
+  uploadQAPhoto: async (id, photoData) => {
+    const res = await fetch(`${BASE_URL}/jobs/${encodeURIComponent(id)}/photos`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(photoData),
+    });
+    return await res.json();
+  },
+  getQAPhotos: async (id) => {
+    const res = await fetch(`${BASE_URL}/jobs/${encodeURIComponent(id)}/photos`);
+    return await res.json();
+  },
+
+  // 5. اقتراح تنظيف إضافي بعد الفحص (InspectionUpsell)
+  proposeUpsell: async (id, upsellData) => {
+    const res = await fetch(`${BASE_URL}/jobs/${encodeURIComponent(id)}/upsell`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(upsellData),
+    });
+    return await res.json();
+  },
+  getUpsell: async (id) => {
+    const res = await fetch(`${BASE_URL}/jobs/${encodeURIComponent(id)}/upsell`);
+    return await res.json();
+  },
+
+  // 6. طلب سحب الأرباح (Request Payout)
+  requestPayout: async (payoutData) => {
+    const res = await fetch(`${BASE_URL}/payout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payoutData),
+    });
+    return await res.json();
+  },
+  getPayouts: async () => {
+    const res = await fetch(`${BASE_URL}/payouts`);
+    return await res.json();
+  },
+
+  // 7. استقبال والرد على عروض الغسيل خلال 45 ثانية (Job Offers)
+  getJobOffers: async () => {
+    const res = await fetch(`${BASE_URL}/offers`);
+    return await res.json();
+  },
+  respondToJobOffer: async (offerId, accept) => {
+    const res = await fetch(`${BASE_URL}/offers/${encodeURIComponent(offerId)}/respond`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ accept }),
     });
     return await res.json();
   }

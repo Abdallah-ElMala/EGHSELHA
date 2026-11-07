@@ -18,5 +18,18 @@ namespace WebCarWash.Application.Interfaces
         Task<bool> UpdateSettingsAsync(Guid technicianId, TechnicianSettingsDto dto);
         Task<IEnumerable<TechnicianNotificationDto>> GetNotificationsAsync(Guid technicianId);
         Task<bool> MarkNotificationsAsReadAsync(Guid technicianId);
+
+        // --- Core Specification Behaviors ---
+        Task<bool> UpdateGPSLocationAsync(Guid technicianId, float lat, float lng);
+        Task<bool> ToggleAvailabilityAsync(Guid technicianId, bool isOnline);
+        Task<bool> MarkArrivedAsync(Guid technicianId, string bookingIdOrNumber);
+        Task<PhotoQADto?> UploadQAPhotoAsync(Guid technicianId, string bookingIdOrNumber, UploadQAPhotoDto dto);
+        Task<IEnumerable<PhotoQADto>> GetQAPhotosAsync(Guid technicianId, string bookingIdOrNumber);
+        Task<InspectionUpsellDto?> ProposeUpsellAsync(Guid technicianId, string bookingIdOrNumber, ProposeUpsellDto dto);
+        Task<InspectionUpsellDto?> GetUpsellAsync(Guid technicianId, string bookingIdOrNumber);
+        Task<PayoutDto?> RequestPayoutAsync(Guid technicianId, RequestPayoutDto dto);
+        Task<IEnumerable<PayoutDto>> GetPayoutHistoryAsync(Guid technicianId);
+        Task<IEnumerable<JobOfferDto>> GetJobOffersAsync(Guid technicianId);
+        Task<bool> RespondToJobOfferAsync(Guid technicianId, Guid offerId, bool accept);
     }
 }

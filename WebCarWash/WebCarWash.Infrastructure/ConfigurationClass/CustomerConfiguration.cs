@@ -1,4 +1,4 @@
-﻿using WebCarWash.Domain.Entities;
+using WebCarWash.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -14,7 +14,9 @@ namespace WebCarWash.Infrastructure.ConfigrationClass
         public void Configure(EntityTypeBuilder<Customer> builder)
         {
             builder.ToTable("Customers");
-            builder.Property(c => c.SavedAddresses).HasConversion(JsonValueConverter.Create<string>());
+            builder.Property(c => c.SavedAddresses)
+                .HasConversion(JsonValueConverter.Create<string>())
+                .Metadata.SetValueComparer(JsonValueConverter.CreateComparer<string>());
 
             builder.HasMany(c => c.Vehicles)
                 .WithOne(v => v.Customer)

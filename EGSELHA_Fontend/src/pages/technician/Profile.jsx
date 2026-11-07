@@ -4,20 +4,14 @@ import { useTech } from '../../context/TechnicianContext'
 import { technicianApi } from '../../services/technicianApi'
 
 export default function Profile() {
-  const { profile, setProfile, photoPreview, setPhotoPreview, notify } = useTech()
+  const { profile, setProfile, photoPreview, setPhotoPreview, updateProfile } = useTech()
   const change = (e) => setProfile({ ...profile, [e.target.name]: e.target.value })
   const initials = profile?.name
     ? profile.name.split(' ').map((x) => x[0]).join('').slice(0, 2)
     : ''
 
   const handleSave = async () => {
-    try {
-      await technicianApi.updateProfile(profile)
-      notify('Profile changes saved successfully.')
-    } catch (error) {
-      console.error('Profile save error:', error)
-      notify('Failed to save profile changes.')
-    }
+    await updateProfile(profile)
   }
 
   if (!profile) return <div className="empty-state"><p>Loading profile…</p></div>
