@@ -9,6 +9,7 @@ namespace WebCarWash.Domain.Entities
     {
         public float WalletBalance { get; set; }
         public int LoyaltyPoints { get; set; }
+        public string? GateNotes { get; set; }
         public List<string> SavedAddresses { get; set; } = new();
 
         public ICollection<Vehicle> Vehicles { get; set; } = new List<Vehicle>();

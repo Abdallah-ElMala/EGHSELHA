@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace WebCarWash.Application.DTOs.Technician
 {
@@ -9,9 +10,14 @@ namespace WebCarWash.Application.DTOs.Technician
         public string Phone { get; set; } = string.Empty;
         public string Area { get; set; } = string.Empty;
         public string Bio { get; set; } = string.Empty;
-        public float Rating { get; set; } = 4.9f;
-        public int ReviewCount { get; set; } = 128;
-        public int JobsDone { get; set; } = 246;
+        public string? DateOfBirth { get; set; }
+        public List<string> Equipment { get; set; } = new();
+        public string VehicleType { get; set; } = string.Empty;
+        public string VehicleName { get; set; } = string.Empty;
+        public string VehiclePlate { get; set; } = string.Empty;
+        public float Rating { get; set; }
+        public int ReviewCount { get; set; }
+        public int JobsDone { get; set; }
         public bool IsVerified { get; set; } = true;
         public string? PhotoPreview { get; set; }
     }

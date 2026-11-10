@@ -34,6 +34,12 @@ namespace WebCarWash.Domain.Entities
 
         public Guid CustomerId { get; set; }
         public Guid? TechnicianId { get; set; }
+        public DateTime? AcceptedAt { get; set; }
+        public DateTime? OnTheWayAt { get; set; }
+        public DateTime? ArrivedAt { get; set; }
+        public DateTime? WashingStartedAt { get; set; }
+        public DateTime? CompletedAt { get; set; }
+        public string? CancelledBy { get; set; }
         public Guid VehicleId { get; set; }
         public Guid ServicePackageId { get; set; }
         public Guid ServiceZoneId { get; set; }
@@ -62,11 +68,12 @@ namespace WebCarWash.Domain.Entities
                 _ => 1.0f
             };
 
-            TotalPrice = MathF.Round(((BasePackagePrice * VehicleMultiplier)
+            var rawTotal = ((BasePackagePrice * VehicleMultiplier)
                        + AddOnsSubtotal
                        + (DistanceSurcharge * PeakSurgeMultiplier)
-                       + UpsellTotal) * discount);
-            RemainingBalance = TotalPrice - DepositAmount;
+                       + UpsellTotal) * discount;
+            TotalPrice = (float)Math.Round(rawTotal, MidpointRounding.AwayFromZero);
+            RemainingBalance = MathF.Max(0f, TotalPrice - DepositAmount);
             return TotalPrice;
         }
 
@@ -82,6 +89,40 @@ namespace WebCarWash.Domain.Entities
             OfferedAt = DateTime.UtcNow,
             ExpiresAt = DateTime.UtcNow.AddSeconds(45)
         };
+
+        public const int CancellationGraceMinutes = 2;
+
+        public bool CanCustomerCancel(DateTime utcNow)
+        {
+            if (Status == BookingStatus.CANCELLED || Status == BookingStatus.COMPLETED)
+            {
+                return false;
+            }
+
+            // Before any technician accepts, customer can freely cancel/delete anytime
+            if (TechnicianId == null && (Status == BookingStatus.PENDING || Status == BookingStatus.DEPOSIT_PAID))
+            {
+                return true;
+            }
+
+            // After technician accepts, customer has a 2-minute grace window
+            if (Status == BookingStatus.DISPATCHED && AcceptedAt.HasValue)
+            {
+                return utcNow <= AcceptedAt.Value.AddMinutes(CancellationGraceMinutes);
+            }
+
+            return false;
+        }
+
+        public int GetCancelSecondsRemaining(DateTime utcNow)
+        {
+            if (Status == BookingStatus.DISPATCHED && AcceptedAt.HasValue)
+            {
+                var remaining = (AcceptedAt.Value.AddMinutes(CancellationGraceMinutes) - utcNow).TotalSeconds;
+                return remaining > 0 ? (int)Math.Ceiling(remaining) : 0;
+            }
+            return 0;
+        }
 
         public bool CancelBooking(string reason)
         {

@@ -12,6 +12,7 @@ namespace WebCarWash.Application.DTOs.Customer
         public string Email { get; set; } = string.Empty;
         public float WalletBalance { get; set; }
         public int LoyaltyPoints { get; set; }
+        public string? GateNotes { get; set; }
         public List<string> SavedAddresses { get; set; } = new();
     }
 
@@ -20,6 +21,7 @@ namespace WebCarWash.Application.DTOs.Customer
         public string? FullName { get; set; }
         public string? Phone { get; set; }
         public string? Email { get; set; }
+        public string? GateNotes { get; set; }
     }
 
     public class AddVehicleDto
@@ -74,12 +76,38 @@ namespace WebCarWash.Application.DTOs.Customer
         public string VehicleName { get; set; } = string.Empty;
         public string LicensePlate { get; set; } = string.Empty;
         public float TotalPrice { get; set; }
+        public float BasePackagePrice { get; set; }
+        public float VehicleMultiplier { get; set; } = 1.0f;
+        public float AddOnsSubtotal { get; set; }
+        public float DistanceSurcharge { get; set; }
+        public float PeakSurgeMultiplier { get; set; } = 1.0f;
+        public float UpsellTotal { get; set; }
         public float DepositAmount { get; set; } = 200f;
         public float RemainingBalance { get; set; }
+        public List<string> AddOnNames { get; set; } = new();
         public string? TechnicianName { get; set; }
+        public string? TechnicianPhone { get; set; }
+        public float? TechnicianLatitude { get; set; }
+        public float? TechnicianLongitude { get; set; }
         public bool HasPendingUpsell { get; set; }
         public float? PendingUpsellPrice { get; set; }
         public Guid? PendingUpsellId { get; set; }
+        public string? PendingUpsellReason { get; set; }
+        public bool HasReview { get; set; }
+        public bool HasDispute { get; set; }
+        public DateTime? AcceptedAt { get; set; }
+        public DateTime? CancelDeadlineUtc { get; set; }
+        public bool CanCancel { get; set; }
+        public int CancelSecondsRemaining { get; set; }
+        public bool IsLockedIn { get; set; }
+    }
+
+    public class CancelBookingResultDto
+    {
+        public bool Success { get; set; }
+        public bool Deleted { get; set; }
+        public string Status { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
     }
 
     public class PayDepositRequestDto
@@ -159,5 +187,44 @@ namespace WebCarWash.Application.DTOs.Customer
     public class DeleteAddressDto
     {
         public string Address { get; set; } = string.Empty;
+    }
+
+    public class WalletTopUpDto
+    {
+        public float Amount { get; set; } = 500f;
+    }
+
+    public class CustomerCatalogDto
+    {
+        public List<CustomerCatalogPackageDto> Packages { get; set; } = new();
+        public List<CustomerCatalogAddOnDto> AddOns { get; set; } = new();
+        public List<CustomerCatalogZoneDto> Zones { get; set; } = new();
+    }
+
+    public class CustomerCatalogPackageDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public float BasePrice { get; set; }
+        public int DurationMinutes { get; set; }
+        public bool RequiresElectricity { get; set; }
+        public bool RequiresWater { get; set; }
+        public bool RequiresPrivateParking { get; set; }
+    }
+
+    public class CustomerCatalogAddOnDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public float Price { get; set; }
+        public string Description { get; set; } = string.Empty;
+    }
+
+    public class CustomerCatalogZoneDto
+    {
+        public Guid Id { get; set; }
+        public string ZoneName { get; set; } = string.Empty;
+        public float BaseDistanceSurcharge { get; set; }
+        public float PeakSurgeMultiplier { get; set; }
     }
 }

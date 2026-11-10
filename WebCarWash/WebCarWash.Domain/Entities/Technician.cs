@@ -20,6 +20,10 @@ namespace WebCarWash.Domain.Entities
 
         public string ServiceArea { get; set; } = string.Empty;
         public string ShortBio { get; set; } = string.Empty;
+        public DateTime? DateOfBirth { get; set; }
+        public string? VehicleType { get; set; }
+        public string? VehicleName { get; set; }
+        public string? VehiclePlate { get; set; }
         public string WorkingDays { get; set; } = "Sunday – Thursday";
         public string WorkingHours { get; set; } = "09:00 AM – 06:00 PM";
         public bool PushNotificationsEnabled { get; set; } = true;
@@ -120,7 +124,7 @@ namespace WebCarWash.Domain.Entities
             if (booking != null && booking.TechnicianId == Id)
             {
                 booking.Status = BookingStatus.COMPLETED;
-                var techEarnings = booking.TotalPrice * 0.7f;
+                var techEarnings = (float)Math.Round(booking.TotalPrice * 0.7f, MidpointRounding.AwayFromZero);
                 TodayEarnings += techEarnings;
                 TotalBalance += techEarnings;
             }

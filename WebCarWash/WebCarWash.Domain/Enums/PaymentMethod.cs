@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,6 +11,7 @@ namespace WebCarWash.Domain.Enums
         CREDIT_CARD = 1,
         VODAFONE_CASH = 2,
         INSTAPAY = 3,
-        CASH = 4
+        CASH = 4,
+        WALLET = 5
     }
 }

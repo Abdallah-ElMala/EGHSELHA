@@ -26,6 +26,15 @@ namespace WebCarWash.API.Controllers
         }
 
         /// <summary>
+        /// Get live catalog (packages, active add-ons, active zones) configured by Admin.
+        /// </summary>
+        [HttpGet("catalog")]
+        public async Task<ActionResult<CustomerCatalogDto>> GetCatalog()
+        {
+            return Ok(await _customerService.GetCatalogAsync());
+        }
+
+        /// <summary>
         /// Get Customer profile details, wallet balance, loyalty points, and saved addresses.
         /// </summary>
         [HttpGet("profile")]
@@ -44,6 +53,20 @@ namespace WebCarWash.API.Controllers
             [FromHeader(Name = "X-Customer-Id")] Guid? customerId)
         {
             var updated = await _customerService.UpdateProfileAsync(GetCurrentCustomerId(customerId), dto);
+            if (updated == null) return NotFound(new { message = "Customer not found." });
+            return Ok(updated);
+        }
+
+        /// <summary>
+        /// Top up customer wallet balance.
+        /// </summary>
+        [HttpPost("wallet/topup")]
+        public async Task<ActionResult<CustomerProfileDto>> TopUpWallet(
+            [FromBody] WalletTopUpDto dto,
+            [FromHeader(Name = "X-Customer-Id")] Guid? customerId)
+        {
+            if (dto.Amount <= 0) return BadRequest(new { message = "Top-up amount must be greater than zero." });
+            var updated = await _customerService.TopUpWalletAsync(GetCurrentCustomerId(customerId), dto.Amount);
             if (updated == null) return NotFound(new { message = "Customer not found." });
             return Ok(updated);
         }
@@ -118,6 +141,20 @@ namespace WebCarWash.API.Controllers
         }
 
         /// <summary>
+        /// Cancel or delete a booking: unrestricted before technician accepts, or within 2 minutes after acceptance.
+        /// </summary>
+        [HttpDelete("bookings/{id}")]
+        [HttpPost("bookings/{id}/cancel")]
+        public async Task<ActionResult<CancelBookingResultDto>> CancelBooking(
+            Guid id,
+            [FromHeader(Name = "X-Customer-Id")] Guid? customerId)
+        {
+            var result = await _customerService.CancelOrDeleteBookingAsync(GetCurrentCustomerId(customerId), id);
+            if (!result.Success) return BadRequest(result);
+            return Ok(result);
+        }
+
+        /// <summary>
         /// 3. payDeposit(bookingId): Pays mandatory 200 EGP upfront deposit to lock in and confirm booking.
         /// </summary>
         [HttpPost("bookings/{id}/deposit")]
@@ -127,6 +164,10 @@ namespace WebCarWash.API.Controllers
             [FromHeader(Name = "X-Customer-Id")] Guid? customerId)
         {
             var payment = await _customerService.PayDepositAsync(GetCurrentCustomerId(customerId), id, dto);
+            if (payment.Status == "FAILED")
+            {
+                return BadRequest(new { message = "Insufficient wallet balance for the 200 EGP deposit. Please top up your wallet or choose another payment method." });
+            }
             return Ok(payment);
         }
 

@@ -1,9 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WebCarWash.Application.DTOs.Technician;
 using WebCarWash.Application.Interfaces;
+using WebCarWash.Domain.Enums;
 
 namespace WebCarWash.API.Controllers
 {
@@ -12,12 +17,19 @@ namespace WebCarWash.API.Controllers
     public class TechniciansController : ControllerBase
     {
         private readonly ITechnicianService _technicianService;
+        private readonly IWebHostEnvironment _env;
+        private static readonly HashSet<string> AllowedImageExtensions = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ".jpg", ".jpeg", ".png", ".webp"
+        };
+        private const long MaxPhotoBytes = 10 * 1024 * 1024;
         // Default Demo Technician ID for "Mostafa Ali"
         private static readonly Guid DefaultDemoTechId = Guid.Parse("11111111-1111-1111-1111-111111111111");
 
-        public TechniciansController(ITechnicianService technicianService)
+        public TechniciansController(ITechnicianService technicianService, IWebHostEnvironment env)
         {
             _technicianService = technicianService;
+            _env = env;
         }
 
         private Guid GetCurrentTechnicianId([FromHeader(Name = "X-Technician-Id")] Guid? headerTechId)
@@ -71,10 +83,10 @@ namespace WebCarWash.API.Controllers
             [FromBody] UpdateJobStatusDto dto,
             [FromHeader(Name = "X-Technician-Id")] Guid? techId)
         {
-            var success = await _technicianService.UpdateJobStatusAsync(GetCurrentTechnicianId(techId), id, dto.Status);
+            var (success, errorMessage) = await _technicianService.UpdateJobStatusDetailedAsync(GetCurrentTechnicianId(techId), id, dto.Status);
             if (!success)
             {
-                return BadRequest(new { message = "Failed to update job status." });
+                return BadRequest(new { message = errorMessage ?? "Failed to update job status." });
             }
             return Ok(new { message = $"Booking {id} marked as {dto.Status}." });
         }
@@ -83,9 +95,11 @@ namespace WebCarWash.API.Controllers
         /// Get Earnings overview, KPIs, weekly 7-days chart, and recent transactions.
         /// </summary>
         [HttpGet("earnings")]
-        public async Task<ActionResult<TechnicianEarningsDto>> GetEarnings([FromHeader(Name = "X-Technician-Id")] Guid? techId)
+        public async Task<ActionResult<TechnicianEarningsDto>> GetEarnings(
+            [FromQuery] string? range,
+            [FromHeader(Name = "X-Technician-Id")] Guid? techId)
         {
-            var result = await _technicianService.GetEarningsAsync(GetCurrentTechnicianId(techId));
+            var result = await _technicianService.GetEarningsAsync(GetCurrentTechnicianId(techId), range);
             return Ok(result);
         }
 
@@ -215,6 +229,66 @@ namespace WebCarWash.API.Controllers
         }
 
         /// <summary>
+        /// 4b. Upload real QA image file (multipart/form-data) to static disk storage and record PhotoQA.
+        /// </summary>
+        [HttpPost("jobs/{id}/photos/upload")]
+        [RequestSizeLimit(MaxPhotoBytes)]
+        public async Task<ActionResult<PhotoQADto>> UploadQAPhotoFile(
+            string id,
+            IFormFile file,
+            [FromForm] string? photoType,
+            [FromForm] string? category,
+            [FromForm] float? latitude,
+            [FromForm] float? longitude,
+            [FromHeader(Name = "X-Technician-Id")] Guid? techId)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest(new { message = "An image file is required." });
+            }
+            if (file.Length > MaxPhotoBytes)
+            {
+                return BadRequest(new { message = "Image exceeds maximum allowed size of 10 MB." });
+            }
+
+            var ext = Path.GetExtension(file.FileName);
+            if (string.IsNullOrWhiteSpace(ext) || !AllowedImageExtensions.Contains(ext))
+            {
+                return BadRequest(new { message = "Unsupported image format. Use JPG, PNG, or WEBP." });
+            }
+
+            var webRoot = _env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot");
+            var uploadDir = Path.Combine(webRoot, "uploads", "qa");
+            Directory.CreateDirectory(uploadDir);
+
+            var fileName = $"{Guid.NewGuid():N}{ext.ToLowerInvariant()}";
+            var filePath = Path.Combine(uploadDir, fileName);
+            await using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            var parsedType = Enum.TryParse<PhotoType>(photoType?.Trim(), true, out var pt)
+                ? pt
+                : PhotoType.BEFORE;
+            var parsedCategory = Enum.TryParse<PhotoCategory>(category?.Trim(), true, out var pc)
+                ? pc
+                : PhotoCategory.FRONT;
+
+            var dto = new UploadQAPhotoDto
+            {
+                ImageUrl = $"/uploads/qa/{fileName}",
+                PhotoType = parsedType,
+                Category = parsedCategory,
+                GpsLatitude = latitude ?? 0f,
+                GpsLongitude = longitude ?? 0f
+            };
+
+            var photo = await _technicianService.UploadQAPhotoAsync(GetCurrentTechnicianId(techId), id, dto);
+            return Ok(photo);
+        }
+
+        /// <summary>
         /// Get all QA photos for a booking.
         /// </summary>
         [HttpGet("jobs/{id}/photos")]
@@ -260,6 +334,10 @@ namespace WebCarWash.API.Controllers
             [FromHeader(Name = "X-Technician-Id")] Guid? techId)
         {
             var payout = await _technicianService.RequestPayoutAsync(GetCurrentTechnicianId(techId), dto);
+            if (payout == null)
+            {
+                return BadRequest(new { message = "Invalid payout amount or insufficient available balance." });
+            }
             return Ok(payout);
         }
 
@@ -289,13 +367,13 @@ namespace WebCarWash.API.Controllers
         /// Respond to 45-second Job Offer (Accept / Pass).
         /// </summary>
         [HttpPost("offers/{id}/respond")]
-        public async Task<IActionResult> RespondToJobOffer(
+        public async Task<ActionResult<JobOfferResponseDto>> RespondToJobOffer(
             Guid id,
             [FromBody] RespondJobOfferDto dto,
             [FromHeader(Name = "X-Technician-Id")] Guid? techId)
         {
-            var success = await _technicianService.RespondToJobOfferAsync(GetCurrentTechnicianId(techId), id, dto.Accept);
-            return Ok(new { success, message = dto.Accept ? "Job offer accepted." : "Job offer passed." });
+            var result = await _technicianService.RespondToJobOfferAsync(GetCurrentTechnicianId(techId), id, dto.Accept);
+            return Ok(result);
         }
     }
 }

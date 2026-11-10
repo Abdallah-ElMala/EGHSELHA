@@ -21,6 +21,48 @@ namespace WebCarWash.Infrastructure.Services
             _context = context;
         }
 
+        public async Task<CustomerCatalogDto> GetCatalogAsync()
+        {
+            var packages = await _context.ServicePackages
+                .OrderBy(p => p.BasePrice)
+                .ToListAsync();
+            var addOns = await _context.AddOns
+                .Where(a => a.IsActive)
+                .OrderByDescending(a => a.Price)
+                .ToListAsync();
+            var zones = await _context.ServiceZones
+                .Where(z => z.Status == ZoneStatus.ACTIVE)
+                .ToListAsync();
+
+            return new CustomerCatalogDto
+            {
+                Packages = packages.Select(p => new CustomerCatalogPackageDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    BasePrice = p.BasePrice,
+                    DurationMinutes = p.DurationMinutes,
+                    RequiresElectricity = p.RequiresElectricity,
+                    RequiresWater = p.RequiresWater,
+                    RequiresPrivateParking = p.RequiresPrivateParking
+                }).ToList(),
+                AddOns = addOns.Select(a => new CustomerCatalogAddOnDto
+                {
+                    Id = a.Id,
+                    Name = a.Name,
+                    Price = a.Price,
+                    Description = a.Description
+                }).ToList(),
+                Zones = zones.Select(z => new CustomerCatalogZoneDto
+                {
+                    Id = z.Id,
+                    ZoneName = z.ZoneName,
+                    BaseDistanceSurcharge = z.BaseDistanceSurcharge,
+                    PeakSurgeMultiplier = z.PeakSurgeMultiplier
+                }).ToList()
+            };
+        }
+
         public async Task<CustomerProfileDto?> GetProfileAsync(Guid customerId)
         {
             var customer = await _context.Customers
@@ -38,6 +80,7 @@ namespace WebCarWash.Infrastructure.Services
                     Email = "ahmed.khaled@example.com",
                     WalletBalance = 650f,
                     LoyaltyPoints = 250,
+                    GateNotes = "Gate 3, Villa 22. Please call upon arrival.",
                     SavedAddresses = new List<string> { "Nasr City, Abbas El Akkad, Cairo", "Heliopolis, Korba, Cairo" }
                 };
             }
@@ -50,6 +93,7 @@ namespace WebCarWash.Infrastructure.Services
                 Email = customer.Email,
                 WalletBalance = customer.WalletBalance,
                 LoyaltyPoints = customer.LoyaltyPoints,
+                GateNotes = customer.GateNotes,
                 SavedAddresses = customer.SavedAddresses ?? new List<string>()
             };
         }
@@ -62,7 +106,19 @@ namespace WebCarWash.Infrastructure.Services
             if (!string.IsNullOrWhiteSpace(dto.FullName)) customer.FullName = dto.FullName.Trim();
             if (!string.IsNullOrWhiteSpace(dto.Phone)) customer.Phone = dto.Phone.Trim();
             if (!string.IsNullOrWhiteSpace(dto.Email)) customer.Email = dto.Email.Trim();
+            if (dto.GateNotes != null) customer.GateNotes = dto.GateNotes.Trim();
 
+            await _context.SaveChangesAsync();
+            return await GetProfileAsync(customerId);
+        }
+
+        public async Task<CustomerProfileDto?> TopUpWalletAsync(Guid customerId, float amount)
+        {
+            if (amount <= 0) return null;
+            var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Id == customerId);
+            if (customer == null) return null;
+
+            customer.WalletBalance += amount;
             await _context.SaveChangesAsync();
             return await GetProfileAsync(customerId);
         }
@@ -172,16 +228,20 @@ namespace WebCarWash.Infrastructure.Services
             // Add-ons subtotal
             float addOnsSubtotal = 0f;
             var addOnEntities = new List<BookingAddOn>();
+            var addOnNames = new List<string>();
             if (dto.AddOnIds != null && dto.AddOnIds.Any())
             {
-                var addOns = await _context.AddOns.Where(a => dto.AddOnIds.Contains(a.Id)).ToListAsync();
+                var distinctIds = dto.AddOnIds.Distinct().ToList();
+                var addOns = await _context.AddOns.Where(a => distinctIds.Contains(a.Id)).ToListAsync();
                 foreach (var addon in addOns)
                 {
                     addOnsSubtotal += addon.Price;
+                    addOnNames.Add(addon.Name);
                     addOnEntities.Add(new BookingAddOn
                     {
                         AddOnId = addon.Id,
-                        PriceAtBooking = addon.Price
+                        PriceAtBooking = addon.Price,
+                        AddOn = addon
                     });
                 }
             }
@@ -193,8 +253,13 @@ namespace WebCarWash.Infrastructure.Services
                 _ => 1.0f
             };
 
-            var totalPrice = MathF.Round(((basePrice * vehicleMult) + addOnsSubtotal + (distanceSurcharge * peakSurge)) * discountMultiplier);
-            var bookingNumber = $"#BK-{new Random().Next(1000, 9999)}";
+            var rawTotal = ((basePrice * vehicleMult) + addOnsSubtotal + (distanceSurcharge * peakSurge)) * discountMultiplier;
+            var totalPrice = (float)Math.Round(rawTotal, MidpointRounding.AwayFromZero);
+            var bookingNumber = $"#BK-{Random.Shared.Next(1000, 9999)}";
+            while (await _context.Bookings.AnyAsync(b => b.BookingNumber == bookingNumber))
+            {
+                bookingNumber = $"#BK-{Random.Shared.Next(1000, 9999)}";
+            }
 
             var booking = new Booking
             {
@@ -218,7 +283,7 @@ namespace WebCarWash.Infrastructure.Services
                 PeakSurgeMultiplier = peakSurge,
                 TotalPrice = totalPrice,
                 DepositAmount = 200f,
-                RemainingBalance = totalPrice - 200f,
+                RemainingBalance = MathF.Max(0f, totalPrice - 200f),
                 Status = BookingStatus.PENDING,
                 BookingAddOns = addOnEntities
             };
@@ -242,8 +307,18 @@ namespace WebCarWash.Infrastructure.Services
                 VehicleName = vehicle != null ? $"{vehicle.Make} {vehicle.Model}" : "Car",
                 LicensePlate = vehicle?.LicensePlate ?? "ABC 123",
                 TotalPrice = booking.TotalPrice,
+                BasePackagePrice = booking.BasePackagePrice,
+                VehicleMultiplier = booking.VehicleMultiplier,
+                AddOnsSubtotal = booking.AddOnsSubtotal,
+                DistanceSurcharge = booking.DistanceSurcharge,
+                PeakSurgeMultiplier = booking.PeakSurgeMultiplier,
+                UpsellTotal = booking.UpsellTotal,
                 DepositAmount = booking.DepositAmount,
-                RemainingBalance = booking.RemainingBalance
+                RemainingBalance = booking.RemainingBalance,
+                AddOnNames = addOnNames,
+                CanCancel = true,
+                CancelSecondsRemaining = 0,
+                IsLockedIn = false
             };
         }
 
@@ -254,6 +329,10 @@ namespace WebCarWash.Infrastructure.Services
                 .Include(b => b.Vehicle)
                 .Include(b => b.Technician)
                 .Include(b => b.InspectionUpsell)
+                .Include(b => b.Review)
+                .Include(b => b.Dispute)
+                .Include(b => b.BookingAddOns)
+                    .ThenInclude(ba => ba.AddOn)
                 .Where(b => b.CustomerId == customerId)
                 .OrderByDescending(b => b.ScheduledAt)
                 .ToListAsync();
@@ -273,20 +352,196 @@ namespace WebCarWash.Infrastructure.Services
                 .Include(b => b.Vehicle)
                 .Include(b => b.Technician)
                 .Include(b => b.InspectionUpsell)
+                .Include(b => b.Review)
+                .Include(b => b.Dispute)
+                .Include(b => b.BookingAddOns)
+                    .ThenInclude(ba => ba.AddOn)
                 .FirstOrDefaultAsync(b => b.Id == bookingId && b.CustomerId == customerId);
 
             return booking != null ? MapBookingToDto(booking) : null;
         }
 
+        public async Task<CancelBookingResultDto> CancelOrDeleteBookingAsync(Guid customerId, Guid bookingId)
+        {
+            var booking = await _context.Bookings
+                .Include(b => b.JobOffers)
+                .Include(b => b.Payments)
+                .Include(b => b.BookingAddOns)
+                .FirstOrDefaultAsync(b => b.Id == bookingId && b.CustomerId == customerId);
+
+            if (booking == null)
+            {
+                return new CancelBookingResultDto
+                {
+                    Success = false,
+                    Status = "NOT_FOUND",
+                    Message = "Booking not found."
+                };
+            }
+
+            var now = DateTime.UtcNow;
+            if (!booking.CanCustomerCancel(now))
+            {
+                var reason = booking.Status == BookingStatus.COMPLETED
+                    ? "Completed bookings cannot be cancelled."
+                    : booking.Status == BookingStatus.CANCELLED
+                    ? "Booking is already cancelled."
+                    : "The 2-minute cancellation window after technician acceptance has expired. Your technician is locked in and coming to you.";
+
+                return new CancelBookingResultDto
+                {
+                    Success = false,
+                    Status = booking.Status.ToString(),
+                    Message = reason
+                };
+            }
+
+            // Before any technician accepts: delete completely so it does not appear to any technician
+            if (booking.TechnicianId == null)
+            {
+                var relatedNotifications = await _context.Notifications
+                    .Where(n => n.Description.Contains(booking.BookingNumber))
+                    .ToListAsync();
+
+                if (relatedNotifications.Any())
+                {
+                    _context.Notifications.RemoveRange(relatedNotifications);
+                }
+
+                _context.Bookings.Remove(booking);
+                await _context.SaveChangesAsync();
+
+                return new CancelBookingResultDto
+                {
+                    Success = true,
+                    Deleted = true,
+                    Status = "DELETED",
+                    Message = $"Booking {booking.BookingNumber} cancelled and removed before technician acceptance."
+                };
+            }
+
+            // Within 2-minute grace window after technician accepted: mark cancelled & notify technician
+            var techId = booking.TechnicianId.Value;
+            booking.Status = BookingStatus.CANCELLED;
+            booking.CancelledBy = "CUSTOMER";
+            foreach (var offer in booking.JobOffers)
+            {
+                if (offer.Status == JobOfferStatus.OFFERED || offer.Status == JobOfferStatus.ACCEPTED)
+                {
+                    offer.Expire();
+                }
+            }
+
+            _context.Notifications.Add(new Notification
+            {
+                UserId = techId,
+                Title = "Booking Cancelled by Customer",
+                Description = $"Customer cancelled booking {booking.BookingNumber} within the 2-minute grace window.",
+                Type = "AlertCircle",
+                IsRead = false,
+                CreatedAt = now
+            });
+
+            await _context.SaveChangesAsync();
+
+            return new CancelBookingResultDto
+            {
+                Success = true,
+                Deleted = false,
+                Status = "CANCELLED",
+                Message = $"Booking {booking.BookingNumber} cancelled within the 2-minute grace period. Technician has been notified."
+            };
+        }
+
         public async Task<CustomerPaymentResultDto> PayDepositAsync(Guid customerId, Guid bookingId, PayDepositRequestDto dto)
         {
             var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Id == customerId);
-            var booking = await _context.Bookings.FirstOrDefaultAsync(b => b.Id == bookingId);
+            var booking = await _context.Bookings
+                .Include(b => b.ServicePackage)
+                .Include(b => b.Payments)
+                .FirstOrDefaultAsync(b => b.Id == bookingId);
 
             if (booking != null && customer != null)
             {
-                var payment = customer.PayDeposit(booking, dto.PaymentMethod);
-                _context.Payments.Add(payment);
+                Payment payment;
+                if (booking.Status == BookingStatus.PENDING)
+                {
+                    if (dto.PaymentMethod == PaymentMethod.WALLET)
+                    {
+                        if (customer.WalletBalance < 200f)
+                        {
+                            return new CustomerPaymentResultDto
+                            {
+                                PaymentId = Guid.Empty,
+                                BookingId = booking.Id,
+                                Amount = 200f,
+                                PaymentMethod = dto.PaymentMethod.ToString(),
+                                Status = "FAILED",
+                                TransactionRef = string.Empty,
+                                PaidAt = DateTime.UtcNow
+                            };
+                        }
+                        customer.WalletBalance -= 200f;
+                    }
+
+                    payment = customer.PayDeposit(booking, dto.PaymentMethod);
+                    _context.Payments.Add(payment);
+                }
+                else
+                {
+                    payment = booking.Payments.FirstOrDefault(p => p.PaymentType == PaymentType.DEPOSIT) ?? new Payment
+                    {
+                        BookingId = booking.Id,
+                        Amount = 200f,
+                        PaymentType = PaymentType.DEPOSIT,
+                        PaymentMethod = dto.PaymentMethod,
+                        Status = PaymentStatus.SUCCESS,
+                        TransactionRef = $"TXN-DEP-{Guid.NewGuid().ToString()[..8].ToUpper()}",
+                        PaidAt = DateTime.UtcNow
+                    };
+                }
+
+                // Dispatch a JobOffer to an available technician if not already assigned/offered
+                if (booking.TechnicianId == null)
+                {
+                    var hasActiveOffer = await _context.JobOffers.AnyAsync(o =>
+                        o.BookingId == booking.Id &&
+                        (o.Status == JobOfferStatus.OFFERED || o.Status == JobOfferStatus.ACCEPTED));
+
+                    if (!hasActiveOffer)
+                    {
+                        var tech = await _context.Technicians
+                            .Where(t => t.IsOnline && t.ServiceZoneId == booking.ServiceZoneId)
+                            .FirstOrDefaultAsync()
+                            ?? await _context.Technicians.Where(t => t.IsOnline).FirstOrDefaultAsync()
+                            ?? await _context.Technicians.FirstOrDefaultAsync();
+
+                        if (tech != null)
+                        {
+                            var jobOffer = new JobOffer
+                            {
+                                BookingId = booking.Id,
+                                TechnicianId = tech.Id,
+                                Status = JobOfferStatus.OFFERED,
+                                PayoutAmount = (float)Math.Round(booking.TotalPrice * 0.7f, MidpointRounding.AwayFromZero),
+                                OfferedAt = DateTime.UtcNow,
+                                ExpiresAt = DateTime.UtcNow.AddMinutes(30)
+                            };
+                            _context.JobOffers.Add(jobOffer);
+
+                            _context.Notifications.Add(new Notification
+                            {
+                                UserId = tech.Id,
+                                Title = "New Booking Request",
+                                Description = $"Booking {booking.BookingNumber} ({booking.ServicePackage?.Name ?? "Car Wash"}) is confirmed and waiting for your acceptance.",
+                                Type = "BriefcaseBusiness",
+                                IsRead = false,
+                                CreatedAt = DateTime.UtcNow
+                            });
+                        }
+                    }
+                }
+
                 await _context.SaveChangesAsync();
 
                 return new CustomerPaymentResultDto
@@ -323,6 +578,11 @@ namespace WebCarWash.Infrastructure.Services
 
             if (upsell != null)
             {
+                if (upsell.Status != UpsellStatus.PENDING)
+                {
+                    return false;
+                }
+
                 if (customer != null)
                 {
                     customer.ApproveUpsell(upsell, decision);
@@ -343,10 +603,23 @@ namespace WebCarWash.Infrastructure.Services
             var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Id == customerId);
             var booking = await _context.Bookings
                 .Include(b => b.Technician)
+                .Include(b => b.Review)
                 .FirstOrDefaultAsync(b => b.Id == bookingId);
 
             if (customer != null && booking != null)
             {
+                if (booking.Review != null)
+                {
+                    return new CustomerReviewResultDto
+                    {
+                        ReviewId = booking.Review.Id,
+                        BookingId = booking.Id,
+                        AverageRating = booking.Review.AverageRating,
+                        LoyaltyPointsEarned = 0,
+                        ReviewedAt = DateTime.UtcNow
+                    };
+                }
+
                 var review = customer.SubmitReview(
                     booking,
                     dto.PunctualityRating,
@@ -417,10 +690,24 @@ namespace WebCarWash.Infrastructure.Services
         public async Task<CustomerDisputeResultDto> FileDisputeAsync(Guid customerId, Guid bookingId, FileCustomerDisputeDto dto)
         {
             var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Id == customerId);
-            var booking = await _context.Bookings.FirstOrDefaultAsync(b => b.Id == bookingId);
+            var booking = await _context.Bookings
+                .Include(b => b.Dispute)
+                .FirstOrDefaultAsync(b => b.Id == bookingId);
 
             if (customer != null && booking != null)
             {
+                if (booking.Dispute != null)
+                {
+                    return new CustomerDisputeResultDto
+                    {
+                        DisputeId = booking.Dispute.Id,
+                        BookingId = booking.Id,
+                        Reason = booking.Dispute.Reason,
+                        Status = booking.Dispute.Status.ToString(),
+                        FiledAt = booking.Dispute.FiledAt
+                    };
+                }
+
                 var dispute = customer.FileDispute(booking, dto.Reason, dto.EvidenceUrls);
                 _context.Disputes.Add(dispute);
                 await _context.SaveChangesAsync();
@@ -480,24 +767,50 @@ namespace WebCarWash.Infrastructure.Services
             return false;
         }
 
-        private static CustomerBookingDto MapBookingToDto(Booking b) => new()
+        private static CustomerBookingDto MapBookingToDto(Booking b)
         {
-            Id = b.Id,
-            BookingNumber = b.BookingNumber,
-            Status = b.Status.ToString(),
-            BookingType = b.BookingType.ToString(),
-            ScheduledAt = b.ScheduledAt,
-            Address = b.Address,
-            ServiceName = b.ServicePackage?.Name ?? "Car Wash",
-            VehicleName = b.Vehicle != null ? $"{b.Vehicle.Make} {b.Vehicle.Model}" : "Sedan",
-            LicensePlate = b.Vehicle?.LicensePlate ?? "",
-            TotalPrice = b.TotalPrice,
-            DepositAmount = b.DepositAmount,
-            RemainingBalance = b.RemainingBalance,
-            TechnicianName = b.Technician?.FullName,
-            HasPendingUpsell = b.InspectionUpsell != null && b.InspectionUpsell.Status == UpsellStatus.PENDING,
-            PendingUpsellPrice = b.InspectionUpsell?.AdditionalPrice,
-            PendingUpsellId = b.InspectionUpsell?.Id
-        };
+            var now = DateTime.UtcNow;
+            var canCancel = b.CanCustomerCancel(now);
+            var remainingSec = b.GetCancelSecondsRemaining(now);
+            var deadline = b.AcceptedAt?.AddMinutes(Booking.CancellationGraceMinutes);
+
+            return new CustomerBookingDto
+            {
+                Id = b.Id,
+                BookingNumber = b.BookingNumber,
+                Status = b.Status.ToString(),
+                BookingType = b.BookingType.ToString(),
+                ScheduledAt = b.ScheduledAt,
+                Address = b.Address,
+                ServiceName = b.ServicePackage?.Name ?? "Car Wash",
+                VehicleName = b.Vehicle != null ? $"{b.Vehicle.Make} {b.Vehicle.Model}" : "Sedan",
+                LicensePlate = b.Vehicle?.LicensePlate ?? "",
+                TotalPrice = b.TotalPrice,
+                BasePackagePrice = b.BasePackagePrice > 0 ? b.BasePackagePrice : (b.ServicePackage?.BasePrice ?? b.TotalPrice),
+                VehicleMultiplier = b.VehicleMultiplier > 0 ? b.VehicleMultiplier : 1.0f,
+                AddOnsSubtotal = b.AddOnsSubtotal,
+                DistanceSurcharge = b.DistanceSurcharge,
+                PeakSurgeMultiplier = b.PeakSurgeMultiplier > 0 ? b.PeakSurgeMultiplier : 1.0f,
+                UpsellTotal = b.UpsellTotal,
+                DepositAmount = b.DepositAmount,
+                RemainingBalance = MathF.Max(0f, b.TotalPrice - b.DepositAmount),
+                AddOnNames = b.BookingAddOns?.Where(ba => ba.AddOn != null).Select(ba => ba.AddOn.Name).ToList() ?? new List<string>(),
+                TechnicianName = b.Technician?.FullName,
+                TechnicianPhone = b.Technician?.Phone,
+                TechnicianLatitude = b.Technician?.CurrentLatitude,
+                TechnicianLongitude = b.Technician?.CurrentLongitude,
+                HasPendingUpsell = b.InspectionUpsell != null && b.InspectionUpsell.Status == UpsellStatus.PENDING,
+                PendingUpsellPrice = b.InspectionUpsell?.AdditionalPrice,
+                PendingUpsellId = b.InspectionUpsell?.Id,
+                PendingUpsellReason = b.InspectionUpsell?.TechnicianNote,
+                HasReview = b.Review != null,
+                HasDispute = b.Dispute != null,
+                AcceptedAt = b.AcceptedAt,
+                CancelDeadlineUtc = deadline,
+                CanCancel = canCancel,
+                CancelSecondsRemaining = remainingSec,
+                IsLockedIn = !canCancel && b.Status != BookingStatus.CANCELLED && b.Status != BookingStatus.COMPLETED
+            };
+        }
     }
 }

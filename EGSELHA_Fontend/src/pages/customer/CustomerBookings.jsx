@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   CalendarCheck,
@@ -24,8 +24,9 @@ import { customerApi } from '../../services/customerApi'
 
 export default function CustomerBookings() {
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const initialFilter = searchParams.get('filter') || 'all'
+  const payBookingId = searchParams.get('payBookingId')
 
   const { bookings, profile, notify, refreshData } = useCustomer()
 
@@ -33,7 +34,52 @@ export default function CustomerBookings() {
 
   // Modal states
   const [payDepositModal, setPayDepositModal] = useState(null)
-  const [payMethod, setPayMethod] = useState(0) // 0: Card, 1: Vodafone Cash, 2: Instapay, 3: Cash
+  const [cancellingId, setCancellingId] = useState(null)
+  const [nowMs, setNowMs] = useState(() => Date.now())
+
+  useEffect(() => {
+    const hasActiveCountdown = bookings.some(
+      (b) => b.status === 'DISPATCHED' && b.cancelDeadlineUtc && new Date(b.cancelDeadlineUtc).getTime() > Date.now()
+    )
+    if (!hasActiveCountdown) return
+    const timer = setInterval(() => setNowMs(Date.now()), 1000)
+    return () => clearInterval(timer)
+  }, [bookings])
+
+  const formatMmSs = (sec) => {
+    const m = Math.floor(sec / 60)
+    const s = sec % 60
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+  }
+
+  const handleCancelBooking = async (booking) => {
+    setCancellingId(booking.id)
+    try {
+      const res = await customerApi.cancelBooking(booking.id)
+      if (!res.ok || !res.success) {
+        notify(res.message || 'Cancellation window has expired.')
+      } else {
+        notify(res.message || `Booking ${booking.bookingNumber} cancelled.`)
+      }
+      await refreshData()
+    } catch (err) {
+      console.error(err)
+      notify('Failed to cancel booking.')
+    } finally {
+      setCancellingId(null)
+    }
+  }
+
+  useEffect(() => {
+    if (payBookingId && bookings.length > 0) {
+      const target = bookings.find((b) => b.id === payBookingId && b.status === 'PENDING')
+      if (target) {
+        setPayDepositModal(target)
+        setSearchParams({}, { replace: true })
+      }
+    }
+  }, [payBookingId, bookings, setSearchParams])
+  const [payMethod, setPayMethod] = useState(1) // 1: Card, 2: Vodafone Cash, 3: Instapay, 4: Cash, 5: Wallet
   const [payingDeposit, setPayingDeposit] = useState(false)
 
   // Review Modal state (14. Review specifications)
@@ -83,7 +129,7 @@ export default function CustomerBookings() {
       refreshData()
     } catch (err) {
       console.error(err)
-      notify('Failed to process deposit payment.')
+      notify(err?.message || 'Failed to process deposit payment.')
     } finally {
       setPayingDeposit(false)
     }
@@ -212,8 +258,16 @@ export default function CustomerBookings() {
         ) : (
           filteredBookings.map((b) => {
             const isCompleted = b.status === 'COMPLETED'
-            const isDepositPaid = b.status !== 'PENDING' && b.status !== 'CANCELLED'
+            const isCancelled = b.status === 'CANCELLED'
+            const isDepositPaid = b.status !== 'PENDING' && !isCancelled
             const isPendingDeposit = b.status === 'PENDING'
+            const isUnacceptedByTech = b.status === 'PENDING' || b.status === 'DEPOSIT_PAID'
+            const deadlineMs = b.cancelDeadlineUtc ? new Date(b.cancelDeadlineUtc).getTime() : 0
+            const graceSecondsLeft = b.status === 'DISPATCHED' && deadlineMs > 0
+              ? Math.max(0, Math.ceil((deadlineMs - nowMs) / 1000))
+              : 0
+            const canCancelNow = !isCompleted && !isCancelled && (isUnacceptedByTech || (b.status === 'DISPATCHED' && graceSecondsLeft > 0))
+            const isLockedIn = !isCompleted && !isCancelled && !canCancelNow
             const packageTitle = b.serviceName || b.packageName || 'Wash Package'
             const vehicleInfo = b.vehicleName ? ` · ${b.vehicleName}` : ''
 
@@ -269,6 +323,9 @@ export default function CustomerBookings() {
                       </div>
                       <small style={{ color: '#64748b', fontSize: '11px', display: 'block', marginTop: '3px' }}>
                         Scheduled: {new Date(b.scheduledAt || Date.now()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} · {b.address}
+                        {b.technicianName && (
+                          <span style={{ color: '#087cf0', fontWeight: 700 }}> · Technician: {b.technicianName}</span>
+                        )}
                       </small>
                     </div>
                   </div>
@@ -280,14 +337,47 @@ export default function CustomerBookings() {
                         fontWeight: 700,
                         padding: '4px 12px',
                         borderRadius: '20px',
-                        backgroundColor: isCompleted ? '#eafbf2' : b.status === 'ON_THE_WAY' || b.status === 'ARRIVED' ? '#eff6ff' : b.status === 'DEPOSIT_PAID' ? '#ecfdf5' : '#fff7ed',
-                        color: isCompleted ? '#1da46f' : b.status === 'ON_THE_WAY' || b.status === 'ARRIVED' ? '#2563eb' : b.status === 'DEPOSIT_PAID' ? '#059669' : '#c2410c'
+                        backgroundColor: isCompleted ? '#eafbf2' : b.status === 'DISPATCHED' ? '#dcfce7' : b.status === 'ON_THE_WAY' || b.status === 'ARRIVED' || b.status === 'WASHING' ? '#eff6ff' : b.status === 'DEPOSIT_PAID' ? '#ecfdf5' : '#fff7ed',
+                        color: isCompleted ? '#1da46f' : b.status === 'DISPATCHED' ? '#15803d' : b.status === 'ON_THE_WAY' || b.status === 'ARRIVED' || b.status === 'WASHING' ? '#2563eb' : b.status === 'DEPOSIT_PAID' ? '#059669' : '#c2410c'
                       }}
                     >
-                      {b.status}
+                      {b.status === 'PENDING' ? 'Pending Deposit'
+                        : b.status === 'DEPOSIT_PAID' ? 'Confirmed · Awaiting Tech'
+                        : b.status === 'DISPATCHED' ? 'Accepted by Technician'
+                        : b.status === 'ON_THE_WAY' ? 'Technician On The Way'
+                        : b.status === 'ARRIVED' ? 'Technician Arrived'
+                        : b.status === 'WASHING' ? 'Washing In Progress'
+                        : b.status}
                     </span>
                     <strong style={{ fontSize: '16px', color: '#102a40' }}>EGP {b.totalPrice}</strong>
                   </div>
+                </div>
+
+                {/* Price & Add-Ons Breakdown Pills */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+                  <span style={{ fontSize: '10px', fontWeight: 600, padding: '3px 9px', borderRadius: '8px', background: '#f8fafc', border: '1px solid #e2e8f0', color: '#475569' }}>
+                    Base: EGP {b.basePackagePrice ?? b.totalPrice}
+                  </span>
+                  {(b.vehicleMultiplier ?? 1) > 1 && (
+                    <span style={{ fontSize: '10px', fontWeight: 600, padding: '3px 9px', borderRadius: '8px', background: '#f0f9ff', border: '1px solid #bae6fd', color: '#0369a1' }}>
+                      Vehicle {b.vehicleMultiplier}×
+                    </span>
+                  )}
+                  {(b.addOnsSubtotal ?? 0) > 0 && (
+                    <span style={{ fontSize: '10px', fontWeight: 600, padding: '3px 9px', borderRadius: '8px', background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1d4ed8' }}>
+                      Add-Ons: +EGP {b.addOnsSubtotal}{b.addOnNames?.length ? ` (${b.addOnNames.join(', ')})` : ''}
+                    </span>
+                  )}
+                  {(b.distanceSurcharge ?? 0) > 0 && (
+                    <span style={{ fontSize: '10px', fontWeight: 600, padding: '3px 9px', borderRadius: '8px', background: '#f8fafc', border: '1px solid #e2e8f0', color: '#475569' }}>
+                      Distance Fee: +EGP {b.distanceSurcharge}
+                    </span>
+                  )}
+                  {(b.upsellTotal ?? 0) > 0 && (
+                    <span style={{ fontSize: '10px', fontWeight: 600, padding: '3px 9px', borderRadius: '8px', background: '#fff7ed', border: '1px solid #fdba74', color: '#c2410c' }}>
+                      Upsell: +EGP {b.upsellTotal}
+                    </span>
+                  )}
                 </div>
 
                 {/* Upsell Banner if Pending (Behavior 4) */}
@@ -300,7 +390,7 @@ export default function CustomerBookings() {
                           Technician Requested Extra Cleaning (+EGP {b.pendingUpsellPrice || 150})
                         </b>
                         <small style={{ fontSize: '11px', color: '#c2410c' }}>
-                          Reason: Mud and severe interior stain treatment required.
+                          Reason: {b.pendingUpsellReason || 'Extra stain or heavy cleaning required after on-site inspection.'}
                         </small>
                       </div>
                     </div>
@@ -315,12 +405,33 @@ export default function CustomerBookings() {
                   </div>
                 )}
 
+                {/* Technician Acceptance / 2-Min Grace Period / Lock-in Notice */}
+                {b.status === 'DISPATCHED' && graceSecondsLeft > 0 && (
+                  <div style={{ padding: '10px 14px', background: '#fffbeb', border: '1px solid #fcd34d', borderRadius: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#92400e' }}>
+                      <Clock size={16} color="#d97706" />
+                      <span>
+                        <b>Technician accepted your booking!</b> You have <b>{formatMmSs(graceSecondsLeft)}</b> left to cancel before the job is locked in.
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {isLockedIn && (
+                  <div style={{ padding: '10px 14px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#166534' }}>
+                    <CheckCircle size={16} color="#16a34a" />
+                    <span>
+                      <b>Confirmed & Locked In:</b> Cancellation window ended — {b.technicianName || 'your technician'} is assigned and heading to you.
+                    </span>
+                  </div>
+                )}
+
                 {/* Footer action buttons */}
                 <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ fontSize: '11px', color: '#64748b' }}>Deposit:</span>
-                    <b style={{ fontSize: '12px', color: isDepositPaid ? '#1da46f' : '#ea580c' }}>
-                      {isDepositPaid ? '✓ Paid (200 EGP)' : '⚠ Unpaid (Required)'}
+                    <b style={{ fontSize: '12px', color: isDepositPaid ? '#1da46f' : isCancelled ? '#dc2626' : '#ea580c' }}>
+                      {isCancelled ? 'Cancelled' : isDepositPaid ? '✓ Paid (200 EGP)' : '⚠ Unpaid (Required)'}
                     </b>
                     {isDepositPaid && b.remainingBalance !== undefined && (
                       <span style={{ fontSize: '11px', color: '#64748b', marginLeft: '6px' }}>
@@ -329,7 +440,24 @@ export default function CustomerBookings() {
                     )}
                   </div>
 
-                  <div style={{ display: 'flex', gap: '8px' }}>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    {/* Cancel / Delete Booking Button */}
+                    {canCancelNow && (
+                      <button
+                        className="btn outline"
+                        style={{ fontSize: '11px', padding: '8px 14px', color: '#dc2626', borderColor: '#fca5a5' }}
+                        disabled={cancellingId === b.id}
+                        onClick={() => handleCancelBooking(b)}
+                      >
+                        <X size={14} />
+                        {cancellingId === b.id
+                          ? 'Cancelling...'
+                          : isUnacceptedByTech
+                          ? 'Delete / Cancel'
+                          : `Cancel (${formatMmSs(graceSecondsLeft)})`}
+                      </button>
+                    )}
+
                     {/* Pay Deposit Button (Behavior 3) */}
                     {isPendingDeposit && (
                       <button
@@ -408,10 +536,11 @@ export default function CustomerBookings() {
                   </label>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                     {[
-                      { id: 0, label: 'Credit Card (Visa/Mastercard)' },
-                      { id: 1, label: 'Vodafone Cash Wallet' },
-                      { id: 2, label: 'Instapay Transfer' },
-                      { id: 3, label: 'Cash Upon Arrival' }
+                      { id: 1, label: 'Credit Card (Visa/Mastercard)' },
+                      { id: 2, label: 'Vodafone Cash Wallet' },
+                      { id: 3, label: 'Instapay Transfer' },
+                      { id: 4, label: 'Cash Upon Arrival' },
+                      { id: 5, label: `Wallet Balance (EGP ${profile?.walletBalance ?? 0})` }
                     ].map((m) => (
                       <div
                         key={m.id}
@@ -658,25 +787,41 @@ export default function CustomerBookings() {
               {/* Breakdown */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-                  <span style={{ color: '#64748b' }}>Base Package ({invoiceModal.packageName})</span>
-                  <b style={{ color: '#1e293b' }}>EGP {invoiceModal.totalPrice ? Math.round(invoiceModal.totalPrice * 0.75) : 250}</b>
+                  <span style={{ color: '#64748b' }}>Base Package ({invoiceModal.serviceName || invoiceModal.packageName || 'Car Wash'})</span>
+                  <b style={{ color: '#1e293b' }}>EGP {invoiceModal.basePackagePrice ?? invoiceModal.totalPrice}</b>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-                  <span style={{ color: '#64748b' }}>Vehicle Size Factor & Distance</span>
-                  <b style={{ color: '#1e293b' }}>+EGP 50</b>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-                  <span style={{ color: '#64748b' }}>VAT (14% Included)</span>
-                  <b style={{ color: '#1e293b' }}>EGP {Math.round(invoiceModal.totalPrice * 0.14) || 42}</b>
-                </div>
+                {(invoiceModal.vehicleMultiplier ?? 1) > 1 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+                    <span style={{ color: '#64748b' }}>Vehicle Size Multiplier ({invoiceModal.vehicleMultiplier}×)</span>
+                    <b style={{ color: '#1e293b' }}>+EGP {Math.round(((invoiceModal.basePackagePrice ?? 0) * ((invoiceModal.vehicleMultiplier ?? 1) - 1)) * 100) / 100}</b>
+                  </div>
+                )}
+                {(invoiceModal.addOnsSubtotal ?? 0) > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+                    <span style={{ color: '#64748b' }}>Extra Add-Ons {invoiceModal.addOnNames?.length ? `(${invoiceModal.addOnNames.join(', ')})` : ''}</span>
+                    <b style={{ color: '#087cf0' }}>+EGP {invoiceModal.addOnsSubtotal}</b>
+                  </div>
+                )}
+                {(invoiceModal.distanceSurcharge ?? 0) > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+                    <span style={{ color: '#64748b' }}>Zone Distance Fee</span>
+                    <b style={{ color: '#1e293b' }}>+EGP {invoiceModal.distanceSurcharge}</b>
+                  </div>
+                )}
+                {(invoiceModal.upsellTotal ?? 0) > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+                    <span style={{ color: '#64748b' }}>Approved On-Site Upsell</span>
+                    <b style={{ color: '#c2410c' }}>+EGP {invoiceModal.upsellTotal}</b>
+                  </div>
+                )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', borderTop: '1px solid #e2e8f0', paddingTop: '8px' }}>
                   <span style={{ fontWeight: 700, color: '#102a40' }}>Total Amount</span>
-                  <b style={{ color: '#087cf0', fontSize: '16px' }}>EGP {invoiceModal.totalPrice || 300}</b>
+                  <b style={{ color: '#087cf0', fontSize: '16px' }}>EGP {invoiceModal.totalPrice}</b>
                 </div>
 
                 <div style={{ background: '#f8fafc', padding: '10px 14px', borderRadius: '8px', marginTop: '6px', display: 'flex', justifyContent: 'space-between', fontSize: '11px' }}>
-                  <span style={{ color: '#16a34a', fontWeight: 600 }}>Deposit Paid: EGP 200</span>
-                  <span style={{ color: '#475569', fontWeight: 600 }}>Balance Settled: EGP {(invoiceModal.totalPrice || 300) - 200}</span>
+                  <span style={{ color: '#16a34a', fontWeight: 600 }}>Deposit Paid: EGP {invoiceModal.depositAmount ?? 200}</span>
+                  <span style={{ color: '#475569', fontWeight: 600 }}>Balance Settled: EGP {Math.max(0, (invoiceModal.totalPrice ?? 0) - (invoiceModal.depositAmount ?? 200))}</span>
                 </div>
               </div>
             </div>

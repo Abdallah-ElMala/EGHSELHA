@@ -8,13 +8,16 @@ namespace WebCarWash.Application.Interfaces
     public interface ICustomerService
     {
         Task<CustomerProfileDto?> GetProfileAsync(Guid customerId);
+        Task<CustomerCatalogDto> GetCatalogAsync();
         Task<CustomerProfileDto?> UpdateProfileAsync(Guid customerId, UpdateCustomerProfileDto dto);
+        Task<CustomerProfileDto?> TopUpWalletAsync(Guid customerId, float amount);
         Task<CustomerVehicleDto> AddVehicleAsync(Guid customerId, AddVehicleDto dto);
         Task<bool> DeleteVehicleAsync(Guid customerId, Guid vehicleId);
         Task<IEnumerable<CustomerVehicleDto>> GetVehiclesAsync(Guid customerId);
         Task<CustomerBookingDto> CreateBookingAsync(Guid customerId, CreateCustomerBookingDto dto);
         Task<IEnumerable<CustomerBookingDto>> GetBookingsAsync(Guid customerId);
         Task<CustomerBookingDto?> GetBookingDetailsAsync(Guid customerId, Guid bookingId);
+        Task<CancelBookingResultDto> CancelOrDeleteBookingAsync(Guid customerId, Guid bookingId);
         Task<CustomerPaymentResultDto> PayDepositAsync(Guid customerId, Guid bookingId, PayDepositRequestDto dto);
         Task<bool> ApproveUpsellAsync(Guid customerId, Guid upsellId, bool decision);
         Task<CustomerReviewResultDto> SubmitReviewAsync(Guid customerId, Guid bookingId, SubmitCustomerReviewDto dto);

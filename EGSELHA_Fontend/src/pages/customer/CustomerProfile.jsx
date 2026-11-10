@@ -40,6 +40,9 @@ export default function CustomerProfile() {
       if (profile.fullName) setFullName(profile.fullName)
       if (profile.email) setEmail(profile.email)
       if (profile.phone) setPhone(profile.phone)
+      if (profile.gateNotes !== undefined && profile.gateNotes !== null) {
+        setGateNotes(profile.gateNotes)
+      }
       setLocalAddresses(profile.savedAddresses || [])
     }
   }, [profile])
@@ -82,7 +85,8 @@ export default function CustomerProfile() {
       await customerApi.updateProfile({
         fullName: fullName.trim(),
         phone: phone.trim(),
-        email: email.trim()
+        email: email.trim(),
+        gateNotes: gateNotes.trim()
       })
       notify('Personal information saved successfully to database!')
       setIsEditing(false)

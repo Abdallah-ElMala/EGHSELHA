@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +14,7 @@ namespace WebCarWash.Domain.Enums
         ARRIVED = 4,
         WASHING = 5,
         COMPLETED = 6,
-        CANCELLED = 7
+        CANCELLED = 7,
+        ON_THE_WAY = 8
     }
 }

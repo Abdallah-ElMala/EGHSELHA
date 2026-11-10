@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { TechnicianProvider } from '../context/TechnicianContext'
 import { CustomerProvider } from '../context/CustomerContext'
+import { AdminProvider } from '../context/AdminContext'
 
 // Technician Layout & Pages
 import TechnicianLayout from '../layouts/TechnicianLayout'
@@ -22,6 +23,16 @@ import CustomerBookWash from '../pages/customer/CustomerBookWash'
 import CustomerBookings from '../pages/customer/CustomerBookings'
 import CustomerReviews from '../pages/customer/CustomerReviews'
 
+// Admin Layout & Pages
+import AdminLayout from '../layouts/AdminLayout'
+import AdminDashboard from '../pages/admin/AdminDashboard'
+import AdminBookings from '../pages/admin/AdminBookings'
+import AdminTechnicians from '../pages/admin/AdminTechnicians'
+import AdminCustomers from '../pages/admin/AdminCustomers'
+import AdminCatalogZones from '../pages/admin/AdminCatalogZones'
+import AdminDisputes from '../pages/admin/AdminDisputes'
+import AdminPayouts from '../pages/admin/AdminPayouts'
+
 export default function AppRoutes() {
   return (
     <Routes>
@@ -40,7 +51,7 @@ export default function AppRoutes() {
         <Route index element={<CustomerHome />} />
         <Route path="dashboard" element={<CustomerDashboard />} />
         <Route path="profile" element={<CustomerProfile />} />
-        <Route path="vehicles" element={<CustomerProfile />} />
+        <Route path="vehicles" element={<CustomerVehicles />} />
         <Route path="reviews" element={<CustomerReviews />} />
         <Route path="book" element={<CustomerBookWash />} />
         <Route path="bookings" element={<CustomerBookings />} />
@@ -62,6 +73,24 @@ export default function AppRoutes() {
         <Route path="earnings" element={<Earnings />} />
         <Route path="settings" element={<SettingsPage />} />
         <Route path="notifications" element={<Notifications />} />
+      </Route>
+
+      {/* Admin Portal */}
+      <Route
+        path="/admin"
+        element={
+          <AdminProvider>
+            <AdminLayout />
+          </AdminProvider>
+        }
+      >
+        <Route index element={<AdminDashboard />} />
+        <Route path="bookings" element={<AdminBookings />} />
+        <Route path="technicians" element={<AdminTechnicians />} />
+        <Route path="customers" element={<AdminCustomers />} />
+        <Route path="catalog" element={<AdminCatalogZones />} />
+        <Route path="disputes" element={<AdminDisputes />} />
+        <Route path="payouts" element={<AdminPayouts />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/customer" replace />} />

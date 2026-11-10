@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Check, BriefcaseBusiness, UserRound, Wallet, Star } from 'lucide-react'
+import { Check, BriefcaseBusiness, UserRound, Wallet, Star, CheckCircle2, AlertCircle } from 'lucide-react'
 import PageTitle from '../../component/PageTitle'
 import { useTech } from '../../context/TechnicianContext'
 import { technicianApi } from '../../services/technicianApi'
@@ -10,10 +10,12 @@ const iconMap = {
   UserRound,
   Wallet,
   Star,
+  CheckCircle2,
+  AlertCircle,
 }
 
 export default function Notifications() {
-  const { notify } = useTech()
+  const { notify, setUnreadCount } = useTech()
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -35,6 +37,7 @@ export default function Notifications() {
     try {
       await technicianApi.markAllNotificationsRead()
       setItems((prev) => prev.map((n) => ({ ...n, isUnread: false })))
+      setUnreadCount(0)
       notify('All notifications marked as read.')
     } catch (error) {
       console.error('Mark all read error:', error)

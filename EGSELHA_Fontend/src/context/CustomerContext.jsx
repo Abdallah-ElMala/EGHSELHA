@@ -47,6 +47,12 @@ export function CustomerProvider({ children }) {
 
   useEffect(() => {
     refreshData()
+    const interval = setInterval(() => {
+      if (typeof document === 'undefined' || !document.hidden) {
+        refreshData()
+      }
+    }, 8000)
+    return () => clearInterval(interval)
   }, [])
 
   return (

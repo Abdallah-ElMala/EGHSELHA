@@ -14,7 +14,7 @@ const titles = {
 export default function Topbar({ onMenu }) {
   const { pathname } = useLocation()
   const navigate = useNavigate()
-  const { dark, setDark, profile } = useTech()
+  const { dark, setDark, profile, unreadCount } = useTech()
 
   const title = titles[pathname] ?? (pathname.startsWith('/technician/jobs/') ? 'Job Details' : 'Dashboard')
   const techName = profile?.name || 'Mostafa Ali'
@@ -32,8 +32,15 @@ export default function Topbar({ onMenu }) {
         >
           Switch to Customer Portal
         </button>
+        <button
+          className="btn outline"
+          style={{ fontSize: '11px', padding: '6px 12px', borderColor: '#7c3aed', color: '#7c3aed' }}
+          onClick={() => navigate('/admin')}
+        >
+          Admin Portal
+        </button>
         <button className="icon-btn" onClick={() => navigate('/technician/notifications')} aria-label="Notifications">
-          <Bell size={19} /><i />
+          <Bell size={19} />{unreadCount > 0 && <i />}
         </button>
         <button className="avatar" onClick={() => navigate('/technician/profile')}>{initials}</button>
         <div className="user-mini"><b>{techName}</b><small>Technician</small></div>

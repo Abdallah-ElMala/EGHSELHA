@@ -1,14 +1,21 @@
-import { useEffect, useState, useMemo } from 'react'
-import { Wallet, CalendarDays, Clock3, TrendingUp, Download, ChevronRight, ArrowLeft, Search, Filter, CreditCard, Send } from 'lucide-react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
+import { Wallet, CalendarDays, Clock3, TrendingUp, Download, ChevronRight, ArrowLeft, Search, CreditCard } from 'lucide-react'
 import PageTitle from '../../component/PageTitle'
 import Stat from '../../component/Stat'
 import { useTech } from '../../context/TechnicianContext'
 import { technicianApi } from '../../services/technicianApi'
 
+const RANGE_LABELS = {
+  '7d': 'Last 7 days',
+  '30d': 'Last 30 days',
+  year: 'Last 6 months'
+}
+
 export default function Earnings() {
   const { notify } = useTech()
   const [earnings, setEarnings] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [chartRange, setChartRange] = useState('7d')
 
   // View All Transactions state
   const [showAllTransactions, setShowAllTransactions] = useState(false)
@@ -22,23 +29,26 @@ export default function Earnings() {
   const [accountDetails, setAccountDetails] = useState('mostafa@instapay')
   const [submittingPayout, setSubmittingPayout] = useState(false)
 
-  const fetchEarnings = async () => {
+  const fetchEarnings = useCallback(async (selectedRange = chartRange) => {
     try {
-      const data = await technicianApi.getEarnings()
+      const data = await technicianApi.getEarnings(selectedRange)
       setEarnings(data)
     } catch (error) {
       console.error('Earnings API Error:', error)
     } finally {
       setLoading(false)
     }
-  }
+  }, [chartRange])
 
   useEffect(() => {
-    fetchEarnings()
-  }, [])
+    fetchEarnings(chartRange)
+    const timer = setInterval(() => fetchEarnings(chartRange), 5000)
+    return () => clearInterval(timer)
+  }, [chartRange, fetchEarnings])
 
   const transactions = earnings?.transactions ?? []
   const weekly = earnings?.weekly ?? []
+  const payouts = earnings?.payouts ?? []
 
   // Filtered transactions for "View all"
   const filteredTransactions = useMemo(() => {
@@ -72,13 +82,24 @@ export default function Earnings() {
       })
       notify(`Payout request of EGP ${payoutAmount} submitted via ${payoutMethod}!`)
       setPayoutModalOpen(false)
-      fetchEarnings() // Refresh earnings
+      fetchEarnings(chartRange)
     } catch (err) {
       console.error(err)
-      notify('Failed to request payout.')
+      notify(err?.message || 'Failed to request payout.')
     } finally {
       setSubmittingPayout(false)
     }
+  }
+
+  const getPayoutStatusBadge = (status) => {
+    const s = String(status || '').toLowerCase()
+    if (s === 'processed' || s === 'approved' || s === 'completed') {
+      return { text: 'Processed', bg: '#e8f8ef', color: '#1b9d67' }
+    }
+    if (s === 'cancelled' || s === 'canceled' || s === 'rejected' || s === 'failed') {
+      return { text: 'Cancelled · Refunded', bg: '#fef2f2', color: '#dc2626' }
+    }
+    return { text: 'Pending', bg: '#fff6df', color: '#c18a13' }
   }
 
   if (loading) {
@@ -100,7 +121,6 @@ export default function Earnings() {
         />
 
         <div className="panel" style={{ padding: '20px' }}>
-          {/* Controls row */}
           <div className="filter-row" style={{ paddingTop: 0 }}>
             {['All', 'Paid', 'Pending'].map((st) => (
               <button
@@ -159,7 +179,7 @@ export default function Earnings() {
                       <td>{r.date}</td>
                       <td><b>{r.service}</b></td>
                       <td>{r.customer}</td>
-                      <td><b>EGP {r.amount}</b></td>
+                      <td><b>EGP {r.amount}</b>{r.bookingTotal ? <small style={{ display: 'block', color: '#94a3b8', fontSize: '9px' }}>70% of EGP {r.bookingTotal}</small> : null}</td>
                       <td>
                         <span className={`payment-status ${r.status.toLowerCase()}`}>
                           {r.status}
@@ -226,14 +246,60 @@ export default function Earnings() {
 
       <section className="panel earnings-chart">
         <div className="panel-head">
-          <div><h2>Income overview</h2><p>Your earnings over the last 7 days</p></div>
-          <span className="select-like">Last 7 days⌄</span>
+          <div>
+            <h2>Income overview</h2>
+            <p>
+              {RANGE_LABELS[chartRange]} · Period total:{' '}
+              <b style={{ color: '#087cf0' }}>EGP {(earnings?.chartTotal ?? 0).toLocaleString()}</b>
+            </p>
+          </div>
+          <select
+            aria-label="Income overview range"
+            value={chartRange}
+            onChange={(e) => setChartRange(e.target.value)}
+            style={{
+              padding: '7px 12px',
+              borderRadius: '9px',
+              border: '1px solid #dce6ef',
+              background: '#fff',
+              color: '#30495e',
+              fontSize: '11px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              outline: 'none'
+            }}
+          >
+            <option value="7d">Last 7 days</option>
+            <option value="30d">Last 30 days</option>
+            <option value="year">Last 6 months</option>
+          </select>
         </div>
-        <div className="bar-chart">
-          {weekly.map((w) => (
-            <div className="bar-col" key={w.day}>
-              <div className="bar" style={{ height: w.percentage + '%' }} />
-              <span>{w.day}</span>
+
+        <div className="bar-chart" style={{ height: '210px', paddingTop: '24px' }}>
+          {weekly.map((w, idx) => (
+            <div
+              className="bar-col"
+              key={`${w.day}-${idx}`}
+              title={`${w.day} (${w.dateLabel || ''}): EGP ${(w.amount ?? 0).toLocaleString()}`}
+              style={{ gap: '4px' }}
+            >
+              {w.amount > 0 && (
+                <span style={{ fontSize: '10px', fontWeight: 700, color: '#087cf0', whiteSpace: 'nowrap' }}>
+                  EGP {Math.round(w.amount).toLocaleString()}
+                </span>
+              )}
+              <div
+                className="bar"
+                style={{
+                  height: `${w.percentage}%`,
+                  minHeight: w.amount > 0 ? '14px' : '4px',
+                  opacity: w.amount > 0 ? 1 : 0.25
+                }}
+              />
+              <span style={{ fontWeight: 700, color: '#334155' }}>{w.day}</span>
+              {w.dateLabel && (
+                <span style={{ fontSize: '8px', color: '#94a3b8' }}>{w.dateLabel}</span>
+              )}
             </div>
           ))}
         </div>
@@ -263,7 +329,7 @@ export default function Earnings() {
                   <td>{r.date}</td>
                   <td><b>{r.service}</b></td>
                   <td>{r.customer}</td>
-                  <td><b>EGP {r.amount}</b></td>
+                  <td><b>EGP {r.amount}</b>{r.bookingTotal ? <small style={{ display: 'block', color: '#94a3b8', fontSize: '9px' }}>70% of EGP {r.bookingTotal}</small> : null}</td>
                   <td>
                     <span className={`payment-status ${r.status.toLowerCase()}`}>
                       {r.status}
@@ -271,6 +337,67 @@ export default function Earnings() {
                   </td>
                 </tr>
               ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* Payout Requests History */}
+      <section className="panel transaction-panel" style={{ marginTop: '18px' }}>
+        <div className="panel-head">
+          <div>
+            <h2>Payout requests history</h2>
+            <p>Track pending withdrawals, approved transfers, and cancelled refunds</p>
+          </div>
+          <span style={{ fontSize: '11px', fontWeight: 700, color: '#16a34a' }}>
+            Available balance: EGP {(earnings?.availableBalance ?? 0).toLocaleString()}
+          </span>
+        </div>
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>REQUESTED DATE</th>
+                <th>METHOD</th>
+                <th>ACCOUNT</th>
+                <th>AMOUNT</th>
+                <th>STATUS</th>
+              </tr>
+            </thead>
+            <tbody>
+              {payouts.length === 0 ? (
+                <tr>
+                  <td colSpan={5} style={{ textAlign: 'center', padding: '24px 0', color: '#94a3b8' }}>
+                    No payout requests submitted yet.
+                  </td>
+                </tr>
+              ) : (
+                payouts.map((p) => {
+                  const badge = getPayoutStatusBadge(p.status)
+                  return (
+                    <tr key={p.id}>
+                      <td>{new Date(p.requestedAt).toLocaleDateString()}</td>
+                      <td><b>{p.payoutMethod}</b></td>
+                      <td>{p.accountDetails}</td>
+                      <td><b>EGP {Number(p.amount).toLocaleString()}</b></td>
+                      <td>
+                        <span
+                          style={{
+                            fontSize: '9px',
+                            fontWeight: 700,
+                            padding: '5px 10px',
+                            borderRadius: '20px',
+                            background: badge.bg,
+                            color: badge.color
+                          }}
+                        >
+                          {badge.text}
+                        </span>
+                      </td>
+                    </tr>
+                  )
+                })
+              )}
             </tbody>
           </table>
         </div>
@@ -285,7 +412,7 @@ export default function Earnings() {
           <div className="panel" style={{ width: '100%', maxWidth: '460px', padding: '24px', backgroundColor: '#fff', borderRadius: '12px' }}>
             <h2 style={{ marginTop: 0 }}>Request Payout</h2>
             <p style={{ color: '#64748b', fontSize: '0.9rem' }}>
-              Withdraw your accumulated car wash earnings directly to your mobile wallet or bank account.
+              Withdraw your accumulated car wash earnings. Available balance: <b style={{ color: '#16a34a' }}>EGP {earnings?.availableBalance?.toLocaleString() ?? 0}</b>
             </p>
 
             <form onSubmit={handleRequestPayout}>
@@ -293,8 +420,9 @@ export default function Earnings() {
                 <label style={{ display: 'block', fontWeight: 600, marginBottom: '6px' }}>Withdrawal Amount (EGP)</label>
                 <input
                   type="number"
-                  min="100"
-                  step="50"
+                  min="50"
+                  max={earnings?.availableBalance || undefined}
+                  step="1"
                   style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
                   value={payoutAmount}
                   onChange={(e) => setPayoutAmount(e.target.value)}

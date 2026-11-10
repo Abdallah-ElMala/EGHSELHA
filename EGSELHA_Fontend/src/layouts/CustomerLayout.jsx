@@ -1,29 +1,27 @@
 import { useState } from 'react'
-import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
+import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import {
   Home,
-  LayoutDashboard,
   CalendarCheck,
   Wallet,
   Star,
   User,
   LogOut,
-  CarFront,
-  Sparkles,
   ArrowRightLeft,
   X,
   Menu,
-  Bell,
   CheckCircle2
 } from 'lucide-react'
 import { useCustomer } from '../context/CustomerContext'
+import { customerApi } from '../services/customerApi'
+import BrandLogo from '../component/BrandLogo'
 
 export default function CustomerLayout() {
   const navigate = useNavigate()
-  const location = useLocation()
-  const { profile, toastMessage, notify } = useCustomer()
+  const { profile, toastMessage, notify, refreshData } = useCustomer()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [showWalletModal, setShowWalletModal] = useState(false)
+  const [toppingUp, setToppingUp] = useState(false)
 
   const customerName = profile?.fullName || 'Ahmed Raouf'
   const initials = customerName.split(' ').map((x) => x[0]).join('').slice(0, 2)
@@ -41,39 +39,18 @@ export default function CustomerLayout() {
       {/* Dark Left Sidebar matching Figma wireframe */}
       <aside
         style={{
-          width: '240px',
           background: 'linear-gradient(180deg, #07172c 0%, #0c233d 100%)',
           color: '#d9e8f5',
           display: 'flex',
           flexDirection: 'column',
-          position: 'fixed',
-          top: 0,
-          bottom: 0,
-          left: 0,
-          zIndex: 40,
           padding: '24px 16px',
-          boxShadow: '4px 0 20px rgba(0, 0, 0, 0.08)',
-          transition: 'transform 0.3s ease'
+          boxShadow: '4px 0 20px rgba(0, 0, 0, 0.08)'
         }}
-        className={mobileOpen ? 'mobile-open' : ''}
+        className={`portal-sidebar ${mobileOpen ? 'mobile-open' : ''}`}
       >
         {/* Brand Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '0 8px 32px 8px' }}>
-          <div
-            style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '50%',
-              background: 'linear-gradient(135deg, #087cf0 0%, #0056b3 100%)',
-              color: '#fff',
-              display: 'grid',
-              placeItems: 'center',
-              boxShadow: '0 4px 12px rgba(8, 124, 240, 0.35)',
-              flexShrink: 0
-            }}
-          >
-            <CarFront size={22} />
-          </div>
+          <BrandLogo size={40} variant="blue" />
           <div style={{ flex: 1, minWidth: 0 }}>
             <b style={{ display: 'block', color: '#fff', fontSize: '16px', letterSpacing: '0.5px', fontFamily: 'Manrope, sans-serif' }}>
               EGHSELHA
@@ -184,7 +161,28 @@ export default function CustomerLayout() {
           </button>
 
           <button
-            onClick={() => notify('Logged out (session cleared)')}
+            onClick={() => navigate('/admin')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '10px 12px',
+              borderRadius: '10px',
+              background: 'rgba(139, 92, 246, 0.16)',
+              border: '1px solid rgba(139, 92, 246, 0.35)',
+              color: '#c4b5fd',
+              fontSize: '11px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+          >
+            <ArrowRightLeft size={14} />
+            <span>Admin Control Portal</span>
+          </button>
+
+          <button
+            onClick={() => notify('Demo mode active')}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -215,7 +213,7 @@ export default function CustomerLayout() {
       </aside>
 
       {/* Main Panel Content Area */}
-      <div style={{ marginLeft: '240px', flex: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <div className="portal-main">
         {/* Top Header matching mockup */}
         <header
           style={{
@@ -225,19 +223,45 @@ export default function CustomerLayout() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '0 36px',
+            padding: '0 24px',
             position: 'sticky',
             top: 0,
             zIndex: 30
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <button
+              className="portal-hamburger"
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open menu"
+            >
+              <Menu size={20} />
+            </button>
             <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#0f2438', fontFamily: 'Manrope, sans-serif' }}>
               Welcome back, {customerName.split(' ')[0]}!
             </h2>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <button
+              onClick={() => navigate('/technician')}
+              className="btn outline"
+              style={{ fontSize: '11px', padding: '7px 12px', borderColor: '#087cf0', color: '#087cf0' }}
+              title="Open Technician Portal"
+            >
+              <ArrowRightLeft size={14} />
+              <span>Technician Portal</span>
+            </button>
+            <button
+              onClick={() => navigate('/admin')}
+              className="btn outline"
+              style={{ fontSize: '11px', padding: '7px 12px', borderColor: '#7c3aed', color: '#7c3aed' }}
+              title="Open Admin Portal"
+            >
+              <ArrowRightLeft size={14} />
+              <span>Admin Portal</span>
+            </button>
+
             {/* Quick Wallet pill */}
             <div
               onClick={() => setShowWalletModal(true)}
@@ -350,12 +374,22 @@ export default function CustomerLayout() {
 
               <button
                 className="btn primary full"
-                onClick={() => {
-                  notify('Top-up feature simulated (+EGP 500 added)!')
-                  setShowWalletModal(false)
+                disabled={toppingUp}
+                onClick={async () => {
+                  setToppingUp(true)
+                  try {
+                    await customerApi.topUpWallet(500)
+                    await refreshData()
+                    notify('Wallet topped up (+EGP 500 saved to your account)!')
+                    setShowWalletModal(false)
+                  } catch (err) {
+                    notify(err?.message || 'Failed to top up wallet.')
+                  } finally {
+                    setToppingUp(false)
+                  }
                 }}
               >
-                Top-up Wallet +EGP 500
+                {toppingUp ? 'Processing...' : 'Top-up Wallet +EGP 500'}
               </button>
             </div>
           </div>

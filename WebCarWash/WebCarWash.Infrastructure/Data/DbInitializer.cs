@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using WebCarWash.Domain.Entities;
 using WebCarWash.Domain.Enums;
+using WebCarWash.Infrastructure.Security;
 
 namespace WebCarWash.Infrastructure.Data
 {
@@ -15,69 +16,169 @@ namespace WebCarWash.Infrastructure.Data
             // Ensure Database is created / migrated
             await context.Database.EnsureCreatedAsync();
 
-            if (await context.Technicians.AnyAsync())
+            // Ensure AcceptedAt and GateNotes columns exist on existing SQL Server databases
+            await context.Database.ExecuteSqlRawAsync(@"
+                IF COL_LENGTH('Bookings', 'AcceptedAt') IS NULL
+                BEGIN
+                    ALTER TABLE [Bookings] ADD [AcceptedAt] datetime2 NULL;
+                END
+                IF COL_LENGTH('Bookings', 'OnTheWayAt') IS NULL
+                BEGIN
+                    ALTER TABLE [Bookings] ADD [OnTheWayAt] datetime2 NULL;
+                END
+                IF COL_LENGTH('Bookings', 'ArrivedAt') IS NULL
+                BEGIN
+                    ALTER TABLE [Bookings] ADD [ArrivedAt] datetime2 NULL;
+                END
+                IF COL_LENGTH('Bookings', 'WashingStartedAt') IS NULL
+                BEGIN
+                    ALTER TABLE [Bookings] ADD [WashingStartedAt] datetime2 NULL;
+                END
+                IF COL_LENGTH('Bookings', 'CompletedAt') IS NULL
+                BEGIN
+                    ALTER TABLE [Bookings] ADD [CompletedAt] datetime2 NULL;
+                END
+                IF COL_LENGTH('Bookings', 'CancelledBy') IS NULL
+                BEGIN
+                    ALTER TABLE [Bookings] ADD [CancelledBy] nvarchar(30) NULL;
+                END
+                IF COL_LENGTH('Customers', 'GateNotes') IS NULL
+                BEGIN
+                    ALTER TABLE [Customers] ADD [GateNotes] nvarchar(500) NULL;
+                END
+                IF COL_LENGTH('Technicians', 'DateOfBirth') IS NULL
+                BEGIN
+                    ALTER TABLE [Technicians] ADD [DateOfBirth] datetime2 NULL;
+                END
+                IF COL_LENGTH('Technicians', 'VehicleType') IS NULL
+                BEGIN
+                    ALTER TABLE [Technicians] ADD [VehicleType] nvarchar(100) NULL;
+                END
+                IF COL_LENGTH('Technicians', 'VehicleName') IS NULL
+                BEGIN
+                    ALTER TABLE [Technicians] ADD [VehicleName] nvarchar(150) NULL;
+                END
+                IF COL_LENGTH('Technicians', 'VehiclePlate') IS NULL
+                BEGIN
+                    ALTER TABLE [Technicians] ADD [VehiclePlate] nvarchar(50) NULL;
+                END");
+
+            await context.Database.ExecuteSqlRawAsync(@"
+                UPDATE [Technicians]
+                SET [DateOfBirth] = COALESCE([DateOfBirth], '1995-01-01'),
+                    [VehicleType] = COALESCE(NULLIF([VehicleType], ''), 'Service Van'),
+                    [VehicleName] = COALESCE(NULLIF([VehicleName], ''), 'Suzuki Carry 2022'),
+                    [VehiclePlate] = COALESCE(NULLIF([VehiclePlate], ''), N'س ص ع 4821')
+                WHERE [Id] = '11111111-1111-1111-1111-111111111111';");
+
+            var demoTech = await context.Technicians.FirstOrDefaultAsync(t => t.Id == Guid.Parse("11111111-1111-1111-1111-111111111111"));
+            if (demoTech != null && (demoTech.VerifiedEquipment == null || demoTech.VerifiedEquipment.Count == 0))
             {
-                return; // DB has been seeded
+                demoTech.VerifiedEquipment = new List<string>
+                {
+                    "Pressure Washer 2200 PSI",
+                    "Wet & Dry Vacuum Extractor",
+                    "120L Water Tank & Generator",
+                    "Microfiber Detailing Kit"
+                };
+                context.Entry(demoTech).Property(t => t.VerifiedEquipment).IsModified = true;
+                await context.SaveChangesAsync();
             }
 
-            // 1. Service Zone
-            var zone = new ServiceZone
+            // Backfill trip timestamps for legacy completed bookings that predate milestone tracking
+            var legacyCompleted = await context.Bookings
+                .Include(b => b.ServicePackage)
+                .Where(b => b.Status == BookingStatus.COMPLETED && b.CompletedAt == null)
+                .ToListAsync();
+            if (legacyCompleted.Any())
             {
-                Id = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                ZoneName = "East Cairo - Nasr City",
-                Status = ZoneStatus.ACTIVE,
-                BaseDistanceSurcharge = 20f,
-                PeakSurgeMultiplier = 1.0f,
-                MaxTechnicians = 10,
-                PolygonBoundary = new List<Point>
+                foreach (var b in legacyCompleted)
                 {
-                    new(30.05f, 31.34f),
-                    new(30.08f, 31.32f),
-                    new(30.02f, 31.49f)
+                    var workMins = Math.Max(30, b.ServicePackage?.DurationMinutes ?? 45);
+                    b.AcceptedAt ??= b.ScheduledAt.AddMinutes(-35);
+                    b.OnTheWayAt ??= b.ScheduledAt.AddMinutes(-20);
+                    b.ArrivedAt ??= b.ScheduledAt.AddMinutes(-5);
+                    b.WashingStartedAt ??= b.ScheduledAt;
+                    b.CompletedAt ??= b.ScheduledAt.AddMinutes(workMins);
                 }
-            };
-            context.ServiceZones.Add(zone);
+                await context.SaveChangesAsync();
+            }
 
-            // 2. Service Packages
-            var pkgPremium = new ServicePackage
+            // Always ensure catalog tables (Zone, ServicePackages, AddOns) are seeded
+            var zone = await context.ServiceZones.FirstOrDefaultAsync();
+            if (zone == null)
             {
-                Id = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbb0001"),
-                Name = "Premium Wash",
-                BasePrice = 350f,
-                DurationMinutes = 60,
-                RequiresWater = true,
-                RequiresElectricity = true
-            };
-            var pkgDeep = new ServicePackage
-            {
-                Id = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbb0002"),
-                Name = "Deep Clean",
-                BasePrice = 500f,
-                DurationMinutes = 90,
-                RequiresWater = true,
-                RequiresElectricity = true
-            };
-            var pkgBasic = new ServicePackage
-            {
-                Id = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbb0003"),
-                Name = "Basic Wash",
-                BasePrice = 200f,
-                DurationMinutes = 30,
-                RequiresWater = true
-            };
-            var pkgUltimate = new ServicePackage
-            {
-                Id = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbb0004"),
-                Name = "Ultimate Detail",
-                BasePrice = 700f,
-                DurationMinutes = 120,
-                RequiresWater = true,
-                RequiresElectricity = true,
-                RequiresPrivateParking = true
-            };
-            context.ServicePackages.AddRange(pkgPremium, pkgDeep, pkgBasic, pkgUltimate);
+                zone = new ServiceZone
+                {
+                    Id = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                    ZoneName = "East Cairo - Nasr City",
+                    Status = ZoneStatus.ACTIVE,
+                    BaseDistanceSurcharge = 20f,
+                    PeakSurgeMultiplier = 1.0f,
+                    MaxTechnicians = 10,
+                    PolygonBoundary = new List<Point>
+                    {
+                        new(30.05f, 31.34f),
+                        new(30.08f, 31.32f),
+                        new(30.02f, 31.49f)
+                    }
+                };
+                context.ServiceZones.Add(zone);
+            }
 
-            // 2.1 Add-Ons
+            ServicePackage pkgPremium;
+            ServicePackage pkgDeep;
+            ServicePackage pkgBasic;
+            ServicePackage pkgUltimate;
+
+            if (!await context.ServicePackages.AnyAsync())
+            {
+                pkgPremium = new ServicePackage
+                {
+                    Id = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbb0001"),
+                    Name = "Premium Wash",
+                    BasePrice = 350f,
+                    DurationMinutes = 60,
+                    RequiresWater = true,
+                    RequiresElectricity = true
+                };
+                pkgDeep = new ServicePackage
+                {
+                    Id = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbb0002"),
+                    Name = "Deep Clean",
+                    BasePrice = 500f,
+                    DurationMinutes = 90,
+                    RequiresWater = true,
+                    RequiresElectricity = true
+                };
+                pkgBasic = new ServicePackage
+                {
+                    Id = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbb0003"),
+                    Name = "Basic Wash",
+                    BasePrice = 200f,
+                    DurationMinutes = 30,
+                    RequiresWater = true
+                };
+                pkgUltimate = new ServicePackage
+                {
+                    Id = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbb0004"),
+                    Name = "Ultimate Detail",
+                    BasePrice = 700f,
+                    DurationMinutes = 140,
+                    RequiresWater = true,
+                    RequiresElectricity = true,
+                    RequiresPrivateParking = true
+                };
+                context.ServicePackages.AddRange(pkgPremium, pkgDeep, pkgBasic, pkgUltimate);
+            }
+            else
+            {
+                pkgPremium = await context.ServicePackages.FirstAsync(p => p.Id == Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbb0001"));
+                pkgDeep = await context.ServicePackages.FirstAsync(p => p.Id == Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbb0002"));
+                pkgBasic = await context.ServicePackages.FirstAsync(p => p.Id == Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbb0003"));
+                pkgUltimate = await context.ServicePackages.FirstAsync(p => p.Id == Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbb0004"));
+            }
+
             if (!await context.AddOns.AnyAsync())
             {
                 context.AddOns.AddRange(
@@ -88,6 +189,47 @@ namespace WebCarWash.Infrastructure.Data
                 );
             }
 
+            if (!await context.Admins.AnyAsync())
+            {
+                context.Admins.Add(new Admin
+                {
+                    Id = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddd0001"),
+                    FullName = "Admin Operations",
+                    Email = "admin@eghselha.com",
+                    Phone = "+20 100 000 0001",
+                    PasswordHash = PasswordHasher.Hash("admin123"),
+                    Permissions = "FULL_ACCESS",
+                    LastLogin = DateTime.UtcNow
+                });
+            }
+
+            if (!await context.TechnicianApplications.AnyAsync())
+            {
+                var existingTech = await context.Technicians.FirstOrDefaultAsync();
+                if (existingTech != null)
+                {
+                    context.TechnicianApplications.Add(new TechnicianApplication
+                    {
+                        TechnicianId = existingTech.Id,
+                        Status = "Approved",
+                        HasPressureWasher = true,
+                        HasVacuumExtractor = true,
+                        HasWaterTankGenerator = true,
+                        HasVehicle = true,
+                        SubmittedAt = DateTime.UtcNow.AddDays(-7)
+                    });
+                }
+            }
+
+            await context.SaveChangesAsync();
+
+            await UpgradeLegacyDemoPasswordsAsync(context);
+
+            if (await context.Technicians.AnyAsync())
+            {
+                return; // DB users/bookings already seeded
+            }
+
             // 3. Technician (Mostafa Ali)
             var techId = Guid.Parse("11111111-1111-1111-1111-111111111111");
             var technician = new Technician
@@ -96,12 +238,23 @@ namespace WebCarWash.Infrastructure.Data
                 FullName = "Mostafa Ali",
                 Email = "mostafa.ali@email.com",
                 Phone = "+20 100 123 4567",
-                PasswordHash = "hashed_demo_password",
+                PasswordHash = PasswordHasher.Hash("demo123"),
                 NationalId = "29501011234567",
+                DateOfBirth = new DateTime(1995, 1, 1),
+                VehicleType = "Service Van",
+                VehicleName = "Suzuki Carry 2022",
+                VehiclePlate = "س ص ع 4821",
+                VerifiedEquipment = new List<string>
+                {
+                    "Pressure Washer 2200 PSI",
+                    "Wet & Dry Vacuum Extractor",
+                    "120L Water Tank & Generator",
+                    "Microfiber Detailing Kit"
+                },
                 Rating = 4.9f,
                 AcceptanceRate = 98f,
-                TodayEarnings = 850f,
-                TotalBalance = 8450f,
+                TodayEarnings = 245f,
+                TotalBalance = 735f,
                 ServiceArea = "Nasr City, Cairo",
                 ShortBio = "Professional car care technician with 3+ years of experience.",
                 WorkingDays = "Sunday – Thursday",
@@ -121,7 +274,8 @@ namespace WebCarWash.Infrastructure.Data
                 FullName = "Ahmed Khaled",
                 Phone = "+20 100 999 1111",
                 Email = "ahmed.khaled@example.com",
-                PasswordHash = "hash1"
+                PasswordHash = PasswordHasher.Hash("demo123"),
+                GateNotes = "Gate 3, Villa 22. Please call upon arrival."
             };
             var custSara = new Customer
             {
@@ -129,7 +283,7 @@ namespace WebCarWash.Infrastructure.Data
                 FullName = "Sara Mahmoud",
                 Phone = "+20 101 222 3333",
                 Email = "sara.mahmoud@example.com",
-                PasswordHash = "hash2"
+                PasswordHash = PasswordHasher.Hash("demo123")
             };
             var custOmar = new Customer
             {
@@ -137,7 +291,7 @@ namespace WebCarWash.Infrastructure.Data
                 FullName = "Omar Hassan",
                 Phone = "+20 102 333 4444",
                 Email = "omar.hassan@example.com",
-                PasswordHash = "hash3"
+                PasswordHash = PasswordHasher.Hash("demo123")
             };
             var custMariam = new Customer
             {
@@ -145,7 +299,7 @@ namespace WebCarWash.Infrastructure.Data
                 FullName = "Mariam Adel",
                 Phone = "+20 103 444 5555",
                 Email = "mariam.adel@example.com",
-                PasswordHash = "hash4"
+                PasswordHash = PasswordHasher.Hash("demo123")
             };
             context.Customers.AddRange(custAhmed, custSara, custOmar, custMariam);
 
@@ -248,6 +402,36 @@ namespace WebCarWash.Infrastructure.Data
             );
 
             await context.SaveChangesAsync();
+        }
+
+        private static async Task UpgradeLegacyDemoPasswordsAsync(CarWashDbContext context)
+        {
+            var demoPasswords = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["admin@eghselha.com"] = "admin123",
+                ["mostafa.ali@email.com"] = "demo123",
+                ["ahmed.khaled@example.com"] = "demo123",
+                ["sara.mahmoud@example.com"] = "demo123",
+                ["omar.hassan@example.com"] = "demo123",
+                ["mariam.adel@example.com"] = "demo123"
+            };
+
+            var users = await context.Users.ToListAsync();
+            var changed = false;
+            foreach (var user in users)
+            {
+                if (!PasswordHasher.IsHashed(user.PasswordHash))
+                {
+                    var rawPassword = demoPasswords.TryGetValue(user.Email, out var pwd) ? pwd : "demo123";
+                    user.PasswordHash = PasswordHasher.Hash(rawPassword);
+                    changed = true;
+                }
+            }
+
+            if (changed)
+            {
+                await context.SaveChangesAsync();
+            }
         }
     }
 }

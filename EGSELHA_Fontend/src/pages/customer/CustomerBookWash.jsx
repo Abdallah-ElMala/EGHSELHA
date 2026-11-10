@@ -84,9 +84,52 @@ export default function CustomerBookWash() {
   const urlPackage = searchParams.get('package')
   const urlVehicle = searchParams.get('vehicle')
 
+  const [packages, setPackages] = useState(PACKAGES)
+  const [addonsCatalog, setAddonsCatalog] = useState(CATALOG_ADDONS)
+  const [zones, setZones] = useState([
+    { id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', zoneName: 'East Cairo - Nasr City', baseDistanceSurcharge: 20, peakSurgeMultiplier: 1.0 }
+  ])
+  const [selectedZoneId, setSelectedZoneId] = useState('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
+
   const [selectedVehicleId, setSelectedVehicleId] = useState(urlVehicle || vehicles[0]?.id || '')
   const [selectedPackageId, setSelectedPackageId] = useState(urlPackage || PACKAGES[1].id)
   const [selectedAddonIds, setSelectedAddonIds] = useState([])
+
+  useEffect(() => {
+    customerApi.getCatalog()
+      .then((cat) => {
+        if (cat?.packages?.length) {
+          setPackages((prev) =>
+            cat.packages.map((dbPkg) => {
+              const local = prev.find((p) => p.id.toLowerCase() === dbPkg.id.toLowerCase()) || prev[1]
+              return {
+                ...local,
+                ...dbPkg,
+                id: dbPkg.id.toLowerCase()
+              }
+            })
+          )
+        }
+        if (Array.isArray(cat?.addOns)) {
+          setAddonsCatalog(
+            cat.addOns.map((a) => ({
+              id: a.id.toLowerCase(),
+              name: a.name,
+              price: a.price,
+              desc: a.description
+            }))
+          )
+        }
+        if (cat?.zones?.length) {
+          const normalizedZones = cat.zones.map((z) => ({ ...z, id: z.id.toLowerCase() }))
+          setZones(normalizedZones)
+          setSelectedZoneId((curr) =>
+            normalizedZones.some((z) => z.id === curr) ? curr : normalizedZones[0].id
+          )
+        }
+      })
+      .catch(console.error)
+  }, [])
 
   useEffect(() => {
     const pkg = searchParams.get('package')
@@ -119,8 +162,10 @@ export default function CustomerBookWash() {
   const [hasWater, setHasWater] = useState(true)
 
   // Location / Address
-  const savedList = profile?.savedAddresses || ['Nasr City, Cairo', 'New Cairo, 5th Settlement', 'Sheikh Zayed, Beverly Hills']
-  const [selectedSavedAddress, setSelectedSavedAddress] = useState(savedList[0] || 'Nasr City, Cairo')
+  const savedList = profile?.savedAddresses?.length > 0
+    ? profile.savedAddresses
+    : ['Nasr City, Abbas El Akkad, Cairo', 'New Cairo, 5th Settlement', 'Heliopolis, Korba, Cairo']
+  const [selectedSavedAddress, setSelectedSavedAddress] = useState(savedList[0] || 'Nasr City, Abbas El Akkad, Cairo')
   const [customAddress, setCustomAddress] = useState('')
   const [useCustomAddress, setUseCustomAddress] = useState(false)
   const [saveNewAddress, setSaveNewAddress] = useState(false)
@@ -128,7 +173,8 @@ export default function CustomerBookWash() {
   const [submitting, setSubmitting] = useState(false)
 
   const selectedVehicle = vehicles.find((v) => v.id === selectedVehicleId) || vehicles[0]
-  const selectedPackage = PACKAGES.find((p) => p.id === selectedPackageId) || PACKAGES[1]
+  const selectedPackage = packages.find((p) => p.id === selectedPackageId.toLowerCase()) || packages[1] || packages[0]
+  const selectedZone = zones.find((z) => z.id === selectedZoneId.toLowerCase()) || zones[0]
 
   // Vehicle size multiplier: Sedan 1.0x, SUV 1.25x, Truck/Van 1.50x
   const vehicleMultiplier = useMemo(() => {
@@ -142,19 +188,22 @@ export default function CustomerBookWash() {
   // Add-ons subtotal
   const addOnsSubtotal = useMemo(() => {
     return selectedAddonIds.reduce((sum, id) => {
-      const item = CATALOG_ADDONS.find((a) => a.id === id)
+      const item = addonsCatalog.find((a) => a.id === id)
       return sum + (item ? item.price : 0)
     }, 0)
-  }, [selectedAddonIds])
+  }, [selectedAddonIds, addonsCatalog])
 
   // Subscription discount
   const discountMultiplier = bookingType === 2 ? 0.90 : bookingType === 3 ? 0.85 : 1.0
-  const distanceFee = 20
+  const distanceFee = (selectedZone?.baseDistanceSurcharge ?? 20) * (selectedZone?.peakSurgeMultiplier ?? 1.0)
 
-  // Total price calculation from Document formula:
-  // (basePackagePrice * vehicleMultiplier) + addOnsSubtotal + distanceFee
-  const packageCost = Math.round(selectedPackage.basePrice * vehicleMultiplier)
-  const totalPrice = Math.round((packageCost + addOnsSubtotal + distanceFee) * discountMultiplier)
+  // Total price calculation matching Backend Booking.CalculateFinalPrice():
+  // round(((basePackagePrice * vehicleMultiplier) + addOnsSubtotal + distanceFee) * discountMultiplier)
+  const packageCost = selectedPackage.basePrice * vehicleMultiplier
+  const vehicleSurcharge = Math.round((packageCost - selectedPackage.basePrice) * 100) / 100
+  const subtotalBeforeDiscount = packageCost + addOnsSubtotal + distanceFee
+  const totalPrice = Math.round(subtotalBeforeDiscount * discountMultiplier)
+  const discountSaved = Math.round(subtotalBeforeDiscount - totalPrice)
   const depositAmount = 200
   const remainingBalance = Math.max(0, totalPrice - depositAmount)
 
@@ -196,7 +245,7 @@ export default function CustomerBookWash() {
       const payload = {
         vehicleId: selectedVehicle.id,
         servicePackageId: selectedPackage.id,
-        serviceZoneId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+        serviceZoneId: selectedZone?.id || 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
         address: finalAddress,
         parkingType: Number(parkingType),
         hasElectricity,
@@ -209,9 +258,9 @@ export default function CustomerBookWash() {
       }
 
       const booking = await customerApi.createBooking(payload)
-      notify(`Booking ${booking.bookingNumber} created successfully! Please pay the 200 EGP deposit to confirm.`)
-      refreshData()
-      navigate('/customer/bookings')
+      notify(`Booking ${booking.bookingNumber} created! Pay the 200 EGP deposit to dispatch a technician.`)
+      await refreshData()
+      navigate(`/customer/bookings?payBookingId=${encodeURIComponent(booking.id)}`)
     } catch (err) {
       console.error(err)
       notify('Failed to create booking.')
@@ -301,7 +350,7 @@ export default function CustomerBookWash() {
                 2. Choose Wash Package
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: '14px' }}>
-                {PACKAGES.map((pkg) => {
+                {packages.map((pkg) => {
                   const isSelected = selectedPackageId === pkg.id
                   const calculatedTierPrice = Math.round(pkg.basePrice * vehicleMultiplier)
 
@@ -357,7 +406,7 @@ export default function CustomerBookWash() {
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: '12px' }}>
-                {CATALOG_ADDONS.map((addon) => {
+                {addonsCatalog.map((addon) => {
                   const isChecked = selectedAddonIds.includes(addon.id)
                   return (
                     <div
@@ -521,6 +570,24 @@ export default function CustomerBookWash() {
                 )}
               </div>
 
+              {/* Service Zone Selector */}
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
+                  Service Coverage Zone
+                </label>
+                <select
+                  value={selectedZoneId}
+                  onChange={(e) => setSelectedZoneId(e.target.value)}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '12px' }}
+                >
+                  {zones.map((z) => (
+                    <option key={z.id} value={z.id}>
+                      {z.zoneName} (Distance: +EGP {z.baseDistanceSurcharge}{z.peakSurgeMultiplier > 1 ? ` · Peak ${z.peakSurgeMultiplier}×` : ''})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               {/* Parking Type (3. ParkingType Enum) */}
               <div style={{ marginBottom: '16px' }}>
                 <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
@@ -642,7 +709,7 @@ export default function CustomerBookWash() {
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
                   <span style={{ color: '#64748b' }}>Vehicle Multiplier ({vehicleMultiplier}×)</span>
-                  <b style={{ color: '#1e293b' }}>+EGP {packageCost - selectedPackage.basePrice}</b>
+                  <b style={{ color: '#1e293b' }}>+EGP {vehicleSurcharge}</b>
                 </div>
 
                 {addOnsSubtotal > 0 && (
@@ -659,8 +726,8 @@ export default function CustomerBookWash() {
 
                 {discountMultiplier < 1.0 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-                    <span style={{ color: '#16a34a', fontWeight: 600 }}>Plan Discount</span>
-                    <b style={{ color: '#16a34a' }}>-{Math.round((1 - discountMultiplier) * 100)}%</b>
+                    <span style={{ color: '#16a34a', fontWeight: 600 }}>Plan Discount (-{Math.round((1 - discountMultiplier) * 100)}%)</span>
+                    <b style={{ color: '#16a34a' }}>-EGP {discountSaved}</b>
                   </div>
                 )}
               </div>

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Sparkles,
@@ -67,6 +67,28 @@ const PACKAGES = [
 export default function CustomerHome() {
   const navigate = useNavigate()
   const { profile, vehicles, bookings, notify } = useCustomer()
+  const [packages, setPackages] = useState(PACKAGES)
+
+  useEffect(() => {
+    customerApi.getCatalog()
+      .then((cat) => {
+        if (cat?.packages?.length) {
+          setPackages((prev) =>
+            cat.packages.map((dbPkg) => {
+              const local = prev.find((p) => p.id.toLowerCase() === dbPkg.id.toLowerCase()) || prev[1]
+              return {
+                ...local,
+                id: dbPkg.id.toLowerCase(),
+                name: dbPkg.name,
+                basePrice: dbPkg.basePrice,
+                duration: `${dbPkg.durationMinutes} mins`
+              }
+            })
+          )
+        }
+      })
+      .catch(console.error)
+  }, [])
 
   const customerFirstName = profile?.fullName ? profile.fullName.split(' ')[0] : 'Ahmed'
 
@@ -442,7 +464,7 @@ export default function CustomerHome() {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '18px' }}>
-          {PACKAGES.map((pkg) => (
+          {packages.map((pkg) => (
             <div
               key={pkg.id}
               style={{
@@ -692,38 +714,62 @@ export default function CustomerHome() {
             </div>
             <div className="modal-body">
               <div style={{ height: '230px', borderRadius: '12px', overflow: 'hidden', position: 'relative', background: '#dce8dc', border: '1px solid #c8d8c8', marginBottom: '16px' }}>
-                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '90%' }}>
                   <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(8, 124, 240, 0.25)', display: 'grid', placeItems: 'center', animation: 'pulse 1.5s infinite' }}>
                     <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#087cf0', color: '#fff', display: 'grid', placeItems: 'center' }}>
                       <MapPin size={16} />
                     </div>
                   </div>
-                  <b style={{ fontSize: '11px', background: '#fff', padding: '3px 10px', borderRadius: '6px', marginTop: '6px', color: '#1e293b', boxShadow: '0 2px 6px rgba(0,0,0,0.1)' }}>
-                    Technician Van: ~8 mins away (3.1 km)
+                  <b style={{ fontSize: '11px', background: '#fff', padding: '4px 10px', borderRadius: '6px', marginTop: '6px', color: '#1e293b', boxShadow: '0 2px 6px rgba(0,0,0,0.1)', textAlign: 'center' }}>
+                    {activeWash.technicianLatitude && activeWash.technicianLongitude
+                      ? `Live GPS: ${Number(activeWash.technicianLatitude).toFixed(4)}, ${Number(activeWash.technicianLongitude).toFixed(4)}`
+                      : `Address: ${activeWash.address || 'Cairo'}`}
                   </b>
+                  <a
+                    href={
+                      activeWash.technicianLatitude && activeWash.technicianLongitude
+                        ? `https://www.google.com/maps?q=${activeWash.technicianLatitude},${activeWash.technicianLongitude}`
+                        : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(activeWash.address || 'Cairo')}`
+                    }
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ fontSize: '11px', fontWeight: 700, color: '#087cf0', background: '#fff', padding: '4px 10px', borderRadius: '999px', marginTop: '6px', textDecoration: 'none', boxShadow: '0 2px 6px rgba(0,0,0,0.08)' }}
+                  >
+                    Open Live Pin in Google Maps
+                  </a>
                 </div>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px', background: '#f8fafc', borderRadius: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <img
-                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"
-                    alt="Technician"
-                    style={{ width: '42px', height: '42px', borderRadius: '50%', objectFit: 'cover' }}
-                  />
+                  <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: '#e0f2fe', color: '#0369a1', display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: '13px' }}>
+                    {(activeWash.technicianName || 'Tech').split(' ').map((x) => x[0]).join('').slice(0, 2).toUpperCase()}
+                  </div>
                   <div>
-                    <b style={{ fontSize: '13px', color: '#102a40' }}>{activeWash.technicianName || 'Mohamed Ali'}</b>
-                    <small style={{ fontSize: '11px', color: '#64748b', display: 'block' }}>Verified Specialist · ★ 4.9 (120 washes)</small>
+                    <b style={{ fontSize: '13px', color: '#102a40' }}>{activeWash.technicianName || 'Assigned Technician'}</b>
+                    <small style={{ fontSize: '11px', color: '#64748b', display: 'block' }}>
+                      {activeWash.technicianPhone || 'Technician assigned · On the way'}
+                    </small>
                   </div>
                 </div>
 
-                <button
-                  className="btn primary"
-                  style={{ fontSize: '11px', padding: '8px 14px' }}
-                  onClick={() => notify(`Calling ${activeWash.technicianName || 'Mohamed Ali'}... (+20 101 234 5678)`)}
-                >
-                  <Phone size={13} /> Call Tech
-                </button>
+                {activeWash.technicianPhone ? (
+                  <a
+                    href={`tel:${activeWash.technicianPhone.replace(/\s+/g, '')}`}
+                    className="btn primary"
+                    style={{ fontSize: '11px', padding: '8px 14px', textDecoration: 'none' }}
+                  >
+                    <Phone size={13} /> Call Tech
+                  </a>
+                ) : (
+                  <button
+                    className="btn outline"
+                    style={{ fontSize: '11px', padding: '8px 14px' }}
+                    onClick={() => notify('Awaiting technician assignment before calling.')}
+                  >
+                    <Phone size={13} /> Pending Tech
+                  </button>
+                )}
               </div>
             </div>
             <div className="modal-footer">

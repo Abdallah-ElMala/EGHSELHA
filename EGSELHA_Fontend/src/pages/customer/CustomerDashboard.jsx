@@ -28,69 +28,48 @@ export default function CustomerDashboard() {
   const [activeDepositBooking, setActiveDepositBooking] = useState(null)
   const [depositLoading, setDepositLoading] = useState(false)
 
-  // Derived or fallback data matching screenshot exactly
-  const totalBookingsCount = bookings.length > 0 ? bookings.length : 5
-  const completedCount = bookings.filter((b) => b.status === 'COMPLETED' || b.status === 'Completed').length || 4
-  const pendingCount = bookings.filter((b) => b.status !== 'COMPLETED' && b.status !== 'Completed').length || 1
+  // Derived counts from real bookings
+  const totalBookingsCount = bookings.length
+  const completedCount = bookings.filter((b) => b.status === 'COMPLETED' || b.status === 'Completed').length
+  const pendingCount = bookings.filter((b) => b.status !== 'COMPLETED' && b.status !== 'Completed' && b.status !== 'CANCELLED').length
 
   // Active / next booking
-  const nextWash = bookings.find(
-    (b) => b.status === 'ON_THE_WAY' || b.status === 'DISPATCHED' || b.status === 'IN_PROGRESS' || b.status === 'CONFIRMED'
-  ) || {
-    id: 'b1',
-    bookingNumber: '#BK-00124',
-    packageName: 'Premium Wash',
-    scheduledDate: '25 Apr 2025 - 10:00 AM',
-    totalPrice: 300,
-    status: 'On The Way',
-    technicianName: 'Mohamed Ali',
-    technicianRating: '4.8 (120 reviews)',
-    vehicleName: 'BMW 320i (White)'
+  const activeBooking = bookings.find(
+    (b) => b.status === 'ON_THE_WAY' || b.status === 'ARRIVED' || b.status === 'WASHING' || b.status === 'DISPATCHED' || b.status === 'DEPOSIT_PAID'
+  ) || bookings[0]
+
+  const nextWash = activeBooking ? {
+    id: activeBooking.id,
+    bookingNumber: activeBooking.bookingNumber,
+    packageName: activeBooking.serviceName || activeBooking.packageName || 'Car Wash',
+    scheduledDate: new Date(activeBooking.scheduledAt || Date.now()).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+    totalPrice: activeBooking.totalPrice ?? 0,
+    status: activeBooking.status,
+    technicianName: activeBooking.technicianName || 'Dispatching Technician',
+    technicianRating: '4.9',
+    vehicleName: activeBooking.vehicleName || 'Registered Vehicle'
+  } : {
+    id: 'none',
+    bookingNumber: 'No active wash',
+    packageName: 'No upcoming booking',
+    scheduledDate: 'Book a wash to get started',
+    totalPrice: 0,
+    status: 'NONE',
+    technicianName: '—',
+    technicianRating: '—',
+    vehicleName: '—'
   }
 
-  // Sample or live bookings for recent table
-  const defaultRecent = [
-    {
-      id: 'b1',
-      bookingNumber: '#BK-00124',
-      packageName: 'Premium Wash',
-      date: '25 Apr 2025',
-      price: 'EGP 300',
-      status: 'On The Way',
-      statusType: 'on-the-way'
-    },
-    {
-      id: 'b2',
-      bookingNumber: '#BK-00123',
-      packageName: 'Deep Clean',
-      date: '22 Apr 2025',
-      price: 'EGP 500',
-      status: 'Completed',
-      statusType: 'completed'
-    },
-    {
-      id: 'b3',
-      bookingNumber: '#BK-00122',
-      packageName: 'Basic Wash',
-      date: '18 Apr 2025',
-      price: 'EGP 200',
-      status: 'Completed',
-      statusType: 'completed'
-    }
-  ]
-
-  const displayBookings = bookings.length >= 3
-    ? bookings.slice(0, 5).map((b) => ({
-        id: b.id,
-        bookingNumber: b.bookingNumber || `#BK-${b.id?.slice(0, 5)}`,
-        packageName: b.packageName || 'Premium Wash',
-        date: new Date(b.scheduledDate || Date.now()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-        price: `EGP ${b.totalPrice || 300}`,
-        status: b.status === 'COMPLETED' ? 'Completed' : b.status === 'ON_THE_WAY' ? 'On The Way' : b.status || 'Pending',
-        statusType: b.status === 'COMPLETED' ? 'completed' : 'on-the-way',
-        raw: b
-      }))
-    : defaultRecent
+  const displayBookings = bookings.slice(0, 5).map((b) => ({
+    id: b.id,
+    bookingNumber: b.bookingNumber || `#BK-${b.id?.slice(0, 5)}`,
+    packageName: b.serviceName || b.packageName || 'Car Wash',
+    date: new Date(b.scheduledAt || b.scheduledDate || Date.now()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+    price: `EGP ${b.totalPrice ?? 0}`,
+    status: b.status === 'COMPLETED' ? 'Completed' : b.status === 'ON_THE_WAY' ? 'On The Way' : b.status || 'Pending',
+    statusType: b.status === 'COMPLETED' ? 'completed' : 'on-the-way',
+    raw: b
+  }))
 
   const pendingUpsellBooking = bookings.find((b) => b.hasPendingUpsell)
 
@@ -109,7 +88,7 @@ export default function CustomerDashboard() {
     if (!activeDepositBooking) return
     setDepositLoading(true)
     try {
-      await customerApi.payDeposit(activeDepositBooking.id, 200, 'CARD')
+      await customerApi.payDeposit(activeDepositBooking.id, 1)
       notify('Deposit of EGP 200 paid successfully! Booking confirmed.')
       setShowDepositModal(false)
       setActiveDepositBooking(null)

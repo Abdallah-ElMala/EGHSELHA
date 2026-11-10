@@ -11,7 +11,8 @@ namespace WebCarWash.Application.Interfaces
         Task<IEnumerable<TechnicianJobDto>> GetJobsAsync(Guid technicianId, string? status = null, string? search = null);
         Task<TechnicianJobDto?> GetJobDetailsAsync(Guid technicianId, string bookingIdOrNumber);
         Task<bool> UpdateJobStatusAsync(Guid technicianId, string bookingIdOrNumber, string newStatus);
-        Task<TechnicianEarningsDto?> GetEarningsAsync(Guid technicianId);
+        Task<(bool Success, string? ErrorMessage)> UpdateJobStatusDetailedAsync(Guid technicianId, string bookingIdOrNumber, string newStatus);
+        Task<TechnicianEarningsDto?> GetEarningsAsync(Guid technicianId, string? range = "7d");
         Task<TechnicianProfileDto?> GetProfileAsync(Guid technicianId);
         Task<bool> UpdateProfileAsync(Guid technicianId, TechnicianProfileDto dto);
         Task<TechnicianSettingsDto?> GetSettingsAsync(Guid technicianId);
@@ -30,6 +31,6 @@ namespace WebCarWash.Application.Interfaces
         Task<PayoutDto?> RequestPayoutAsync(Guid technicianId, RequestPayoutDto dto);
         Task<IEnumerable<PayoutDto>> GetPayoutHistoryAsync(Guid technicianId);
         Task<IEnumerable<JobOfferDto>> GetJobOffersAsync(Guid technicianId);
-        Task<bool> RespondToJobOfferAsync(Guid technicianId, Guid offerId, bool accept);
+        Task<JobOfferResponseDto> RespondToJobOfferAsync(Guid technicianId, Guid offerId, bool accept);
     }
 }

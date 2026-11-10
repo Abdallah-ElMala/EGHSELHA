@@ -23,28 +23,32 @@ import { technicianApi } from '../../services/technicianApi'
 
 export default function Dashboard() {
   const navigate = useNavigate()
-  const { notify, profile } = useTech()
+  const { notify, profile, jobs, offers, acceptOffer, passOffer, refreshData } = useTech()
   const [dashboard, setDashboard] = useState(null)
   const [loadingDash, setLoadingDash] = useState(true)
 
   // 45-Second Job Offer Dispatch state
-  const [activeOffer, setActiveOffer] = useState(null)
+  const activeOffer = offers && offers.length > 0 ? offers[0] : null
   const [secondsLeft, setSecondsLeft] = useState(45)
 
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
-        const data = await technicianApi.getDashboard()
+        const [data] = await Promise.all([
+          technicianApi.getDashboard(),
+          refreshData()
+        ])
         setDashboard(data)
 
         // Ping real-time GPS location (behavior: updateGPSLocation)
-        await technicianApi.updateLocation(30.0561, 31.3414).catch(() => {})
-
-        // Check for dispatched job offers (behavior: respondToJobOffer)
-        const offers = await technicianApi.getJobOffers().catch(() => [])
-        if (offers && offers.length > 0) {
-          setActiveOffer(offers[0])
-          setSecondsLeft(offers[0].remainingSeconds || 45)
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (pos) => technicianApi.updateLocation(pos.coords.latitude, pos.coords.longitude).catch(() => {}),
+            () => technicianApi.updateLocation(30.0561, 31.3414).catch(() => {}),
+            { timeout: 3000 }
+          )
+        } else {
+          await technicianApi.updateLocation(30.0561, 31.3414).catch(() => {})
         }
       } catch (error) {
         console.error('Dashboard API Error:', error)
@@ -54,6 +58,17 @@ export default function Dashboard() {
     }
     fetchDashboard()
   }, [])
+
+  // Keep dashboard stats/jobs synced when context jobs update via polling
+  useEffect(() => {
+    technicianApi.getDashboard().then(setDashboard).catch(() => {})
+  }, [jobs.length, offers.length])
+
+  useEffect(() => {
+    if (activeOffer) {
+      setSecondsLeft(activeOffer.remainingSeconds || 45)
+    }
+  }, [activeOffer?.id])
 
   // 45-second timer countdown
   useEffect(() => {
@@ -69,15 +84,15 @@ export default function Dashboard() {
       })
     }, 1000)
     return () => clearInterval(timer)
-  }, [activeOffer, secondsLeft])
+  }, [activeOffer?.id, secondsLeft])
 
   const handleAcceptOffer = async () => {
     if (!activeOffer) return
     try {
-      await technicianApi.respondToJobOffer(activeOffer.id, true)
-      notify(`Job Offer ${activeOffer.bookingNumber} accepted! Navigating to job details...`)
-      setActiveOffer(null)
-      navigate(`/technician/jobs/${encodeURIComponent(activeOffer.bookingNumber)}`)
+      const res = await acceptOffer(activeOffer.id)
+      const targetBooking = res?.bookingNumber || activeOffer.bookingNumber
+      notify(`Job Offer ${targetBooking} accepted! Navigating to job details...`)
+      navigate(`/technician/jobs/${encodeURIComponent(targetBooking)}`)
     } catch (err) {
       console.error(err)
       notify('Failed to accept job offer.')
@@ -87,9 +102,8 @@ export default function Dashboard() {
   const handlePassOffer = async (isAutoExpired = false) => {
     if (!activeOffer) return
     try {
-      await technicianApi.respondToJobOffer(activeOffer.id, false)
+      await passOffer(activeOffer.id)
       notify(isAutoExpired ? 'Job offer expired (45s limit reached).' : 'Job offer declined.')
-      setActiveOffer(null)
     } catch (err) {
       console.error(err)
     }
@@ -162,6 +176,11 @@ export default function Dashboard() {
                 <p style={{ margin: 0, fontSize: '0.85rem', color: '#1d4ed8' }}>
                   {activeOffer.serviceName} · {activeOffer.vehicleModel} · {activeOffer.customerAddress} ({activeOffer.distanceText})
                 </p>
+                {activeOffer.addOnNames?.length > 0 && (
+                  <p style={{ margin: '4px 0 0', fontSize: '0.78rem', color: '#0369a1', fontWeight: 600 }}>
+                    Add-Ons: {activeOffer.addOnNames.join(' · ')} (+EGP {activeOffer.addOnsSubtotal})
+                  </p>
+                )}
               </div>
             </div>
 
@@ -181,12 +200,20 @@ export default function Dashboard() {
           </div>
 
           {/* Offer details & CTA */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #bfdbfe', paddingTop: '12px' }}>
-            <div>
-              <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Estimated Payout:</span>
-              <span style={{ marginLeft: '8px', fontSize: '1.25rem', fontWeight: 800, color: '#16a34a' }}>
-                EGP {activeOffer.payoutAmount}
-              </span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #bfdbfe', paddingTop: '12px', flexWrap: 'wrap', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '18px', flexWrap: 'wrap' }}>
+              <div>
+                <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Booking Total:</span>
+                <span style={{ marginLeft: '6px', fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>
+                  EGP {activeOffer.totalPrice ?? activeOffer.payoutAmount}
+                </span>
+              </div>
+              <div style={{ fontSize: '0.82rem', color: '#475569' }}>
+                Deposit Paid: <b style={{ color: '#16a34a' }}>EGP {activeOffer.depositAmount ?? 200}</b> · Remaining: <b>EGP {activeOffer.remainingBalance ?? 0}</b>
+              </div>
+              <div style={{ fontSize: '0.82rem', color: '#15803d', fontWeight: 700 }}>
+                Your Tech Share (70%): EGP {activeOffer.payoutAmount}
+              </div>
             </div>
 
             <div style={{ display: 'flex', gap: '10px' }}>
