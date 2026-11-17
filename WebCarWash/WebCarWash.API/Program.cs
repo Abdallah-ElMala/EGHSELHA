@@ -13,7 +13,9 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using WebCarWash.API.Services;
 using WebCarWash.Application.Interfaces;
+using WebCarWash.Application.Interfaces.Repositories;
 using WebCarWash.Infrastructure.Data;
+using WebCarWash.Infrastructure.Repositories;
 using WebCarWash.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -72,6 +74,13 @@ builder.Services.AddAuthorization();
 builder.Services.AddDbContext<CarWashDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Register Repositories & Unit of Work
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+// Register AutoMapper Profiles
+builder.Services.AddAutoMapper(typeof(WebCarWash.Application.Common.Mappings.AuthMappingProfile).Assembly);
 
 // Register Application & Infrastructure Services
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();

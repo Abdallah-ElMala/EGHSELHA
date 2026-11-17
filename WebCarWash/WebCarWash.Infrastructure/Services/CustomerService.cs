@@ -2,70 +2,54 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using WebCarWash.Application.DTOs.Customer;
 using WebCarWash.Application.Interfaces;
+using WebCarWash.Application.Interfaces.Repositories;
 using WebCarWash.Domain.Entities;
 using WebCarWash.Domain.Enums;
-using WebCarWash.Infrastructure.Data;
 
 namespace WebCarWash.Infrastructure.Services
 {
     public class CustomerService : ICustomerService
     {
-        private readonly CarWashDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
         private static readonly Guid DefaultDemoCustomerId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccc0001");
 
-        public CustomerService(CarWashDbContext context)
+        public CustomerService(IUnitOfWork unitOfWork, IMapper mapper)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
         public async Task<CustomerCatalogDto> GetCatalogAsync()
         {
-            var packages = await _context.ServicePackages
+            var packages = await _unitOfWork.ServicePackages.Query()
                 .OrderBy(p => p.BasePrice)
                 .ToListAsync();
-            var addOns = await _context.AddOns
+
+            var addOns = await _unitOfWork.AddOns.Query()
                 .Where(a => a.IsActive)
                 .OrderByDescending(a => a.Price)
                 .ToListAsync();
-            var zones = await _context.ServiceZones
+
+            var zones = await _unitOfWork.ServiceZones.Query()
                 .Where(z => z.Status == ZoneStatus.ACTIVE)
                 .ToListAsync();
 
             return new CustomerCatalogDto
             {
-                Packages = packages.Select(p => new CustomerCatalogPackageDto
-                {
-                    Id = p.Id,
-                    Name = p.Name,
-                    BasePrice = p.BasePrice,
-                    DurationMinutes = p.DurationMinutes,
-                    RequiresElectricity = p.RequiresElectricity,
-                    RequiresWater = p.RequiresWater,
-                    RequiresPrivateParking = p.RequiresPrivateParking
-                }).ToList(),
-                AddOns = addOns.Select(a => new CustomerCatalogAddOnDto
-                {
-                    Id = a.Id,
-                    Name = a.Name,
-                    Price = a.Price,
-                    Description = a.Description
-                }).ToList(),
-                Zones = zones.Select(z => new CustomerCatalogZoneDto
-                {
-                    Id = z.Id,
-                    ZoneName = z.ZoneName,
-                    BaseDistanceSurcharge = z.BaseDistanceSurcharge,
-                    PeakSurgeMultiplier = z.PeakSurgeMultiplier
-                }).ToList()
+                Packages = _mapper.Map<List<CustomerCatalogPackageDto>>(packages),
+                AddOns = _mapper.Map<List<CustomerCatalogAddOnDto>>(addOns),
+                Zones = _mapper.Map<List<CustomerCatalogZoneDto>>(zones)
             };
         }
 
         public async Task<CustomerProfileDto?> GetProfileAsync(Guid customerId)
         {
-            var customer = await _context.Customers
+            var customer = await _unitOfWork.Customers.Query()
                 .Include(c => c.Vehicles)
                 .Include(c => c.Bookings)
                 .FirstOrDefaultAsync(c => c.Id == customerId);
@@ -85,22 +69,12 @@ namespace WebCarWash.Infrastructure.Services
                 };
             }
 
-            return new CustomerProfileDto
-            {
-                Id = customer.Id,
-                FullName = customer.FullName,
-                Phone = customer.Phone,
-                Email = customer.Email,
-                WalletBalance = customer.WalletBalance,
-                LoyaltyPoints = customer.LoyaltyPoints,
-                GateNotes = customer.GateNotes,
-                SavedAddresses = customer.SavedAddresses ?? new List<string>()
-            };
+            return _mapper.Map<CustomerProfileDto>(customer);
         }
 
         public async Task<CustomerProfileDto?> UpdateProfileAsync(Guid customerId, UpdateCustomerProfileDto dto)
         {
-            var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Id == customerId);
+            var customer = await _unitOfWork.Customers.GetByIdAsync(customerId);
             if (customer == null) return null;
 
             if (!string.IsNullOrWhiteSpace(dto.FullName)) customer.FullName = dto.FullName.Trim();
@@ -108,76 +82,55 @@ namespace WebCarWash.Infrastructure.Services
             if (!string.IsNullOrWhiteSpace(dto.Email)) customer.Email = dto.Email.Trim();
             if (dto.GateNotes != null) customer.GateNotes = dto.GateNotes.Trim();
 
-            await _context.SaveChangesAsync();
+            _unitOfWork.Customers.Update(customer);
+            await _unitOfWork.CompleteAsync();
             return await GetProfileAsync(customerId);
         }
 
         public async Task<CustomerProfileDto?> TopUpWalletAsync(Guid customerId, float amount)
         {
             if (amount <= 0) return null;
-            var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Id == customerId);
+            var customer = await _unitOfWork.Customers.GetByIdAsync(customerId);
             if (customer == null) return null;
 
             customer.WalletBalance += amount;
-            await _context.SaveChangesAsync();
+            _unitOfWork.Customers.Update(customer);
+            await _unitOfWork.CompleteAsync();
             return await GetProfileAsync(customerId);
         }
 
         public async Task<CustomerVehicleDto> AddVehicleAsync(Guid customerId, AddVehicleDto dto)
         {
-            var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Id == customerId);
+            var customer = await _unitOfWork.Customers.GetByIdAsync(customerId);
 
-            var vehicle = new Vehicle
-            {
-                CustomerId = customerId,
-                Make = dto.Make,
-                Model = dto.Model,
-                Year = dto.Year > 0 ? dto.Year : DateTime.UtcNow.Year,
-                Color = dto.Color,
-                LicensePlate = dto.LicensePlate,
-                SizeType = dto.SizeType,
-                PhotoUrl = dto.PhotoUrl
-            };
-
+            var vehicle = _mapper.Map<Vehicle>(dto);
+            vehicle.CustomerId = customerId;
+            vehicle.Year = dto.Year > 0 ? dto.Year : DateTime.UtcNow.Year;
             vehicle.GetSizeMultiplier();
 
             if (customer != null)
             {
                 customer.AddVehicle(vehicle);
-                _context.Vehicles.Add(vehicle);
-                await _context.SaveChangesAsync();
+                await _unitOfWork.Vehicles.AddAsync(vehicle);
+                await _unitOfWork.CompleteAsync();
             }
 
-            return new CustomerVehicleDto
-            {
-                Id = vehicle.Id,
-                Make = vehicle.Make,
-                Model = vehicle.Model,
-                Year = vehicle.Year,
-                Color = vehicle.Color,
-                LicensePlate = vehicle.LicensePlate,
-                SizeType = vehicle.SizeType.ToString(),
-                SizeMultiplier = vehicle.SizeMultiplier,
-                PhotoUrl = vehicle.PhotoUrl
-            };
+            return _mapper.Map<CustomerVehicleDto>(vehicle);
         }
 
         public async Task<bool> DeleteVehicleAsync(Guid customerId, Guid vehicleId)
         {
-            var vehicle = await _context.Vehicles.FirstOrDefaultAsync(v => v.Id == vehicleId && v.CustomerId == customerId);
+            var vehicle = await _unitOfWork.Vehicles.FirstOrDefaultAsync(v => v.Id == vehicleId && v.CustomerId == customerId);
             if (vehicle != null)
             {
-                var relatedBookings = await _context.Bookings
-                    .Where(b => b.VehicleId == vehicleId)
-                    .ToListAsync();
-
+                var relatedBookings = await _unitOfWork.Bookings.FindAsync(b => b.VehicleId == vehicleId);
                 if (relatedBookings.Any())
                 {
-                    _context.Bookings.RemoveRange(relatedBookings);
+                    _unitOfWork.Bookings.DeleteRange(relatedBookings);
                 }
 
-                _context.Vehicles.Remove(vehicle);
-                await _context.SaveChangesAsync();
+                _unitOfWork.Vehicles.Delete(vehicle);
+                await _unitOfWork.CompleteAsync();
                 return true;
             }
             return false;
@@ -185,40 +138,21 @@ namespace WebCarWash.Infrastructure.Services
 
         public async Task<IEnumerable<CustomerVehicleDto>> GetVehiclesAsync(Guid customerId)
         {
-            var vehicles = await _context.Vehicles
-                .Where(v => v.CustomerId == customerId)
-                .ToListAsync();
-
-            if (vehicles.Any())
-            {
-                return vehicles.Select(v => new CustomerVehicleDto
-                {
-                    Id = v.Id,
-                    Make = v.Make,
-                    Model = v.Model,
-                    Year = v.Year,
-                    Color = v.Color,
-                    LicensePlate = v.LicensePlate,
-                    SizeType = v.SizeType.ToString(),
-                    SizeMultiplier = v.SizeMultiplier,
-                    PhotoUrl = v.PhotoUrl
-                });
-            }
-
-            return new List<CustomerVehicleDto>();
+            var vehicles = await _unitOfWork.Vehicles.FindAsync(v => v.CustomerId == customerId);
+            return _mapper.Map<List<CustomerVehicleDto>>(vehicles);
         }
 
         public async Task<CustomerBookingDto> CreateBookingAsync(Guid customerId, CreateCustomerBookingDto dto)
         {
-            var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Id == customerId);
-            var package = await _context.ServicePackages.FirstOrDefaultAsync(p => p.Id == dto.ServicePackageId)
-                          ?? await _context.ServicePackages.FirstOrDefaultAsync();
+            var customer = await _unitOfWork.Customers.GetByIdAsync(customerId);
+            var package = await _unitOfWork.ServicePackages.FirstOrDefaultAsync(p => p.Id == dto.ServicePackageId)
+                          ?? await _unitOfWork.ServicePackages.FirstOrDefaultAsync(p => true);
 
-            var vehicle = await _context.Vehicles.FirstOrDefaultAsync(v => v.Id == dto.VehicleId)
-                          ?? await _context.Vehicles.FirstOrDefaultAsync(v => v.CustomerId == customerId);
+            var vehicle = await _unitOfWork.Vehicles.FirstOrDefaultAsync(v => v.Id == dto.VehicleId)
+                          ?? await _unitOfWork.Vehicles.FirstOrDefaultAsync(v => v.CustomerId == customerId);
 
-            var zone = await _context.ServiceZones.FirstOrDefaultAsync(z => z.Id == dto.ServiceZoneId)
-                       ?? await _context.ServiceZones.FirstOrDefaultAsync();
+            var zone = await _unitOfWork.ServiceZones.FirstOrDefaultAsync(z => z.Id == dto.ServiceZoneId)
+                       ?? await _unitOfWork.ServiceZones.FirstOrDefaultAsync(z => true);
 
             var basePrice = package?.BasePrice ?? 350f;
             var vehicleMult = vehicle?.GetSizeMultiplier() ?? 1.0f;
@@ -232,7 +166,7 @@ namespace WebCarWash.Infrastructure.Services
             if (dto.AddOnIds != null && dto.AddOnIds.Any())
             {
                 var distinctIds = dto.AddOnIds.Distinct().ToList();
-                var addOns = await _context.AddOns.Where(a => distinctIds.Contains(a.Id)).ToListAsync();
+                var addOns = await _unitOfWork.AddOns.FindAsync(a => distinctIds.Contains(a.Id));
                 foreach (var addon in addOns)
                 {
                     addOnsSubtotal += addon.Price;
@@ -256,7 +190,7 @@ namespace WebCarWash.Infrastructure.Services
             var rawTotal = ((basePrice * vehicleMult) + addOnsSubtotal + (distanceSurcharge * peakSurge)) * discountMultiplier;
             var totalPrice = (float)Math.Round(rawTotal, MidpointRounding.AwayFromZero);
             var bookingNumber = $"#BK-{Random.Shared.Next(1000, 9999)}";
-            while (await _context.Bookings.AnyAsync(b => b.BookingNumber == bookingNumber))
+            while (await _unitOfWork.Bookings.AnyAsync(b => b.BookingNumber == bookingNumber))
             {
                 bookingNumber = $"#BK-{Random.Shared.Next(1000, 9999)}";
             }
@@ -291,40 +225,22 @@ namespace WebCarWash.Infrastructure.Services
             if (customer != null)
             {
                 customer.CreateBooking(booking);
-                _context.Bookings.Add(booking);
-                await _context.SaveChangesAsync();
+                await _unitOfWork.Bookings.AddAsync(booking);
+                await _unitOfWork.CompleteAsync();
             }
 
-            return new CustomerBookingDto
-            {
-                Id = booking.Id,
-                BookingNumber = booking.BookingNumber,
-                Status = booking.Status.ToString(),
-                BookingType = booking.BookingType.ToString(),
-                ScheduledAt = booking.ScheduledAt,
-                Address = booking.Address,
-                ServiceName = package?.Name ?? "Premium Wash",
-                VehicleName = vehicle != null ? $"{vehicle.Make} {vehicle.Model}" : "Car",
-                LicensePlate = vehicle?.LicensePlate ?? "ABC 123",
-                TotalPrice = booking.TotalPrice,
-                BasePackagePrice = booking.BasePackagePrice,
-                VehicleMultiplier = booking.VehicleMultiplier,
-                AddOnsSubtotal = booking.AddOnsSubtotal,
-                DistanceSurcharge = booking.DistanceSurcharge,
-                PeakSurgeMultiplier = booking.PeakSurgeMultiplier,
-                UpsellTotal = booking.UpsellTotal,
-                DepositAmount = booking.DepositAmount,
-                RemainingBalance = booking.RemainingBalance,
-                AddOnNames = addOnNames,
-                CanCancel = true,
-                CancelSecondsRemaining = 0,
-                IsLockedIn = false
-            };
+            var bookingDto = _mapper.Map<CustomerBookingDto>(booking);
+            bookingDto.ServiceName = package?.Name ?? "Premium Wash";
+            bookingDto.VehicleName = vehicle != null ? $"{vehicle.Make} {vehicle.Model}" : "Car";
+            bookingDto.LicensePlate = vehicle?.LicensePlate ?? "ABC 123";
+            bookingDto.AddOnNames = addOnNames;
+            bookingDto.CanCancel = true;
+            return bookingDto;
         }
 
         public async Task<IEnumerable<CustomerBookingDto>> GetBookingsAsync(Guid customerId)
         {
-            var bookings = await _context.Bookings
+            var bookings = await _unitOfWork.Bookings.Query()
                 .Include(b => b.ServicePackage)
                 .Include(b => b.Vehicle)
                 .Include(b => b.Technician)
@@ -337,17 +253,12 @@ namespace WebCarWash.Infrastructure.Services
                 .OrderByDescending(b => b.ScheduledAt)
                 .ToListAsync();
 
-            if (bookings.Any())
-            {
-                return bookings.Select(b => MapBookingToDto(b));
-            }
-
-            return new List<CustomerBookingDto>();
+            return bookings.Select(MapBookingToDto);
         }
 
         public async Task<CustomerBookingDto?> GetBookingDetailsAsync(Guid customerId, Guid bookingId)
         {
-            var booking = await _context.Bookings
+            var booking = await _unitOfWork.Bookings.Query()
                 .Include(b => b.ServicePackage)
                 .Include(b => b.Vehicle)
                 .Include(b => b.Technician)
@@ -363,7 +274,7 @@ namespace WebCarWash.Infrastructure.Services
 
         public async Task<CancelBookingResultDto> CancelOrDeleteBookingAsync(Guid customerId, Guid bookingId)
         {
-            var booking = await _context.Bookings
+            var booking = await _unitOfWork.Bookings.Query()
                 .Include(b => b.JobOffers)
                 .Include(b => b.Payments)
                 .Include(b => b.BookingAddOns)
@@ -396,20 +307,16 @@ namespace WebCarWash.Infrastructure.Services
                 };
             }
 
-            // Before any technician accepts: delete completely so it does not appear to any technician
             if (booking.TechnicianId == null)
             {
-                var relatedNotifications = await _context.Notifications
-                    .Where(n => n.Description.Contains(booking.BookingNumber))
-                    .ToListAsync();
-
+                var relatedNotifications = await _unitOfWork.Notifications.FindAsync(n => n.Description.Contains(booking.BookingNumber));
                 if (relatedNotifications.Any())
                 {
-                    _context.Notifications.RemoveRange(relatedNotifications);
+                    _unitOfWork.Notifications.DeleteRange(relatedNotifications);
                 }
 
-                _context.Bookings.Remove(booking);
-                await _context.SaveChangesAsync();
+                _unitOfWork.Bookings.Delete(booking);
+                await _unitOfWork.CompleteAsync();
 
                 return new CancelBookingResultDto
                 {
@@ -420,7 +327,6 @@ namespace WebCarWash.Infrastructure.Services
                 };
             }
 
-            // Within 2-minute grace window after technician accepted: mark cancelled & notify technician
             var techId = booking.TechnicianId.Value;
             booking.Status = BookingStatus.CANCELLED;
             booking.CancelledBy = "CUSTOMER";
@@ -432,7 +338,7 @@ namespace WebCarWash.Infrastructure.Services
                 }
             }
 
-            _context.Notifications.Add(new Notification
+            await _unitOfWork.Notifications.AddAsync(new Notification
             {
                 UserId = techId,
                 Title = "Booking Cancelled by Customer",
@@ -442,7 +348,8 @@ namespace WebCarWash.Infrastructure.Services
                 CreatedAt = now
             });
 
-            await _context.SaveChangesAsync();
+            _unitOfWork.Bookings.Update(booking);
+            await _unitOfWork.CompleteAsync();
 
             return new CancelBookingResultDto
             {
@@ -455,8 +362,8 @@ namespace WebCarWash.Infrastructure.Services
 
         public async Task<CustomerPaymentResultDto> PayDepositAsync(Guid customerId, Guid bookingId, PayDepositRequestDto dto)
         {
-            var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Id == customerId);
-            var booking = await _context.Bookings
+            var customer = await _unitOfWork.Customers.GetByIdAsync(customerId);
+            var booking = await _unitOfWork.Bookings.Query()
                 .Include(b => b.ServicePackage)
                 .Include(b => b.Payments)
                 .FirstOrDefaultAsync(b => b.Id == bookingId);
@@ -485,7 +392,7 @@ namespace WebCarWash.Infrastructure.Services
                     }
 
                     payment = customer.PayDeposit(booking, dto.PaymentMethod);
-                    _context.Payments.Add(payment);
+                    await _unitOfWork.Payments.AddAsync(payment);
                 }
                 else
                 {
@@ -501,20 +408,19 @@ namespace WebCarWash.Infrastructure.Services
                     };
                 }
 
-                // Dispatch a JobOffer to an available technician if not already assigned/offered
                 if (booking.TechnicianId == null)
                 {
-                    var hasActiveOffer = await _context.JobOffers.AnyAsync(o =>
+                    var hasActiveOffer = await _unitOfWork.JobOffers.AnyAsync(o =>
                         o.BookingId == booking.Id &&
                         (o.Status == JobOfferStatus.OFFERED || o.Status == JobOfferStatus.ACCEPTED));
 
                     if (!hasActiveOffer)
                     {
-                        var tech = await _context.Technicians
+                        var tech = await _unitOfWork.Technicians.Query()
                             .Where(t => t.IsOnline && t.ServiceZoneId == booking.ServiceZoneId)
                             .FirstOrDefaultAsync()
-                            ?? await _context.Technicians.Where(t => t.IsOnline).FirstOrDefaultAsync()
-                            ?? await _context.Technicians.FirstOrDefaultAsync();
+                            ?? await _unitOfWork.Technicians.Query().Where(t => t.IsOnline).FirstOrDefaultAsync()
+                            ?? await _unitOfWork.Technicians.FirstOrDefaultAsync(t => true);
 
                         if (tech != null)
                         {
@@ -527,9 +433,9 @@ namespace WebCarWash.Infrastructure.Services
                                 OfferedAt = DateTime.UtcNow,
                                 ExpiresAt = DateTime.UtcNow.AddMinutes(30)
                             };
-                            _context.JobOffers.Add(jobOffer);
+                            await _unitOfWork.JobOffers.AddAsync(jobOffer);
 
-                            _context.Notifications.Add(new Notification
+                            await _unitOfWork.Notifications.AddAsync(new Notification
                             {
                                 UserId = tech.Id,
                                 Title = "New Booking Request",
@@ -542,7 +448,9 @@ namespace WebCarWash.Infrastructure.Services
                     }
                 }
 
-                await _context.SaveChangesAsync();
+                _unitOfWork.Customers.Update(customer);
+                _unitOfWork.Bookings.Update(booking);
+                await _unitOfWork.CompleteAsync();
 
                 return new CustomerPaymentResultDto
                 {
@@ -570,11 +478,11 @@ namespace WebCarWash.Infrastructure.Services
 
         public async Task<bool> ApproveUpsellAsync(Guid customerId, Guid upsellId, bool decision)
         {
-            var upsell = await _context.InspectionUpsells
+            var upsell = await _unitOfWork.InspectionUpsells.Query()
                 .Include(u => u.Booking)
                 .FirstOrDefaultAsync(u => u.Id == upsellId);
 
-            var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Id == customerId);
+            var customer = await _unitOfWork.Customers.GetByIdAsync(customerId);
 
             if (upsell != null)
             {
@@ -591,7 +499,8 @@ namespace WebCarWash.Infrastructure.Services
                 {
                     if (decision) upsell.Approve(); else upsell.Decline();
                 }
-                await _context.SaveChangesAsync();
+                _unitOfWork.InspectionUpsells.Update(upsell);
+                await _unitOfWork.CompleteAsync();
                 return true;
             }
 
@@ -600,8 +509,8 @@ namespace WebCarWash.Infrastructure.Services
 
         public async Task<CustomerReviewResultDto> SubmitReviewAsync(Guid customerId, Guid bookingId, SubmitCustomerReviewDto dto)
         {
-            var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Id == customerId);
-            var booking = await _context.Bookings
+            var customer = await _unitOfWork.Customers.GetByIdAsync(customerId);
+            var booking = await _unitOfWork.Bookings.Query()
                 .Include(b => b.Technician)
                 .Include(b => b.Review)
                 .FirstOrDefaultAsync(b => b.Id == bookingId);
@@ -630,8 +539,8 @@ namespace WebCarWash.Infrastructure.Services
                     dto.CommentText
                 );
 
-                _context.Reviews.Add(review);
-                await _context.SaveChangesAsync();
+                await _unitOfWork.Reviews.AddAsync(review);
+                await _unitOfWork.CompleteAsync();
 
                 return new CustomerReviewResultDto
                 {
@@ -656,7 +565,7 @@ namespace WebCarWash.Infrastructure.Services
 
         public async Task<IEnumerable<CustomerReviewItemDto>> GetReviewsAsync(Guid customerId)
         {
-            var reviews = await _context.Reviews
+            var reviews = await _unitOfWork.Reviews.Query()
                 .Include(r => r.Booking)
                     .ThenInclude(b => b.ServicePackage)
                 .Include(r => r.Booking)
@@ -689,8 +598,8 @@ namespace WebCarWash.Infrastructure.Services
 
         public async Task<CustomerDisputeResultDto> FileDisputeAsync(Guid customerId, Guid bookingId, FileCustomerDisputeDto dto)
         {
-            var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Id == customerId);
-            var booking = await _context.Bookings
+            var customer = await _unitOfWork.Customers.GetByIdAsync(customerId);
+            var booking = await _unitOfWork.Bookings.Query()
                 .Include(b => b.Dispute)
                 .FirstOrDefaultAsync(b => b.Id == bookingId);
 
@@ -709,8 +618,8 @@ namespace WebCarWash.Infrastructure.Services
                 }
 
                 var dispute = customer.FileDispute(booking, dto.Reason, dto.EvidenceUrls);
-                _context.Disputes.Add(dispute);
-                await _context.SaveChangesAsync();
+                await _unitOfWork.Disputes.AddAsync(dispute);
+                await _unitOfWork.CompleteAsync();
 
                 return new CustomerDisputeResultDto
                 {
@@ -734,7 +643,7 @@ namespace WebCarWash.Infrastructure.Services
 
         public async Task<bool> AddSavedAddressAsync(Guid customerId, string address)
         {
-            var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Id == customerId);
+            var customer = await _unitOfWork.Customers.GetByIdAsync(customerId);
             if (customer != null && !string.IsNullOrWhiteSpace(address))
             {
                 var trimmed = address.Trim();
@@ -743,8 +652,8 @@ namespace WebCarWash.Infrastructure.Services
                 {
                     var updated = new List<string>(customer.SavedAddresses) { trimmed };
                     customer.SavedAddresses = updated;
-                    _context.Entry(customer).Property(c => c.SavedAddresses).IsModified = true;
-                    await _context.SaveChangesAsync();
+                    _unitOfWork.Customers.Update(customer);
+                    await _unitOfWork.CompleteAsync();
                 }
                 return true;
             }
@@ -753,64 +662,45 @@ namespace WebCarWash.Infrastructure.Services
 
         public async Task<bool> DeleteSavedAddressAsync(Guid customerId, string address)
         {
-            var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Id == customerId);
+            var customer = await _unitOfWork.Customers.GetByIdAsync(customerId);
             if (customer != null && !string.IsNullOrWhiteSpace(address))
             {
                 var trimmed = address.Trim();
                 customer.SavedAddresses ??= new List<string>();
                 var updated = customer.SavedAddresses.Where(a => !string.Equals(a, trimmed, StringComparison.OrdinalIgnoreCase)).ToList();
                 customer.SavedAddresses = updated;
-                _context.Entry(customer).Property(c => c.SavedAddresses).IsModified = true;
-                await _context.SaveChangesAsync();
+                _unitOfWork.Customers.Update(customer);
+                await _unitOfWork.CompleteAsync();
                 return true;
             }
             return false;
         }
 
-        private static CustomerBookingDto MapBookingToDto(Booking b)
+        private CustomerBookingDto MapBookingToDto(Booking b)
         {
             var now = DateTime.UtcNow;
             var canCancel = b.CanCustomerCancel(now);
             var remainingSec = b.GetCancelSecondsRemaining(now);
             var deadline = b.AcceptedAt?.AddMinutes(Booking.CancellationGraceMinutes);
 
-            return new CustomerBookingDto
-            {
-                Id = b.Id,
-                BookingNumber = b.BookingNumber,
-                Status = b.Status.ToString(),
-                BookingType = b.BookingType.ToString(),
-                ScheduledAt = b.ScheduledAt,
-                Address = b.Address,
-                ServiceName = b.ServicePackage?.Name ?? "Car Wash",
-                VehicleName = b.Vehicle != null ? $"{b.Vehicle.Make} {b.Vehicle.Model}" : "Sedan",
-                LicensePlate = b.Vehicle?.LicensePlate ?? "",
-                TotalPrice = b.TotalPrice,
-                BasePackagePrice = b.BasePackagePrice > 0 ? b.BasePackagePrice : (b.ServicePackage?.BasePrice ?? b.TotalPrice),
-                VehicleMultiplier = b.VehicleMultiplier > 0 ? b.VehicleMultiplier : 1.0f,
-                AddOnsSubtotal = b.AddOnsSubtotal,
-                DistanceSurcharge = b.DistanceSurcharge,
-                PeakSurgeMultiplier = b.PeakSurgeMultiplier > 0 ? b.PeakSurgeMultiplier : 1.0f,
-                UpsellTotal = b.UpsellTotal,
-                DepositAmount = b.DepositAmount,
-                RemainingBalance = MathF.Max(0f, b.TotalPrice - b.DepositAmount),
-                AddOnNames = b.BookingAddOns?.Where(ba => ba.AddOn != null).Select(ba => ba.AddOn.Name).ToList() ?? new List<string>(),
-                TechnicianName = b.Technician?.FullName,
-                TechnicianPhone = b.Technician?.Phone,
-                TechnicianLatitude = b.Technician?.CurrentLatitude,
-                TechnicianLongitude = b.Technician?.CurrentLongitude,
-                HasPendingUpsell = b.InspectionUpsell != null && b.InspectionUpsell.Status == UpsellStatus.PENDING,
-                PendingUpsellPrice = b.InspectionUpsell?.AdditionalPrice,
-                PendingUpsellId = b.InspectionUpsell?.Id,
-                PendingUpsellReason = b.InspectionUpsell?.TechnicianNote,
-                HasReview = b.Review != null,
-                HasDispute = b.Dispute != null,
-                AcceptedAt = b.AcceptedAt,
-                CancelDeadlineUtc = deadline,
-                CanCancel = canCancel,
-                CancelSecondsRemaining = remainingSec,
-                IsLockedIn = !canCancel && b.Status != BookingStatus.CANCELLED && b.Status != BookingStatus.COMPLETED
-            };
+            var dto = _mapper.Map<CustomerBookingDto>(b);
+            dto.BasePackagePrice = b.BasePackagePrice > 0 ? b.BasePackagePrice : (b.ServicePackage?.BasePrice ?? b.TotalPrice);
+            dto.VehicleMultiplier = b.VehicleMultiplier > 0 ? b.VehicleMultiplier : 1.0f;
+            dto.PeakSurgeMultiplier = b.PeakSurgeMultiplier > 0 ? b.PeakSurgeMultiplier : 1.0f;
+            dto.RemainingBalance = MathF.Max(0f, b.TotalPrice - b.DepositAmount);
+            dto.AddOnNames = b.BookingAddOns?.Where(ba => ba.AddOn != null).Select(ba => ba.AddOn.Name).ToList() ?? new List<string>();
+            dto.HasPendingUpsell = b.InspectionUpsell != null && b.InspectionUpsell.Status == UpsellStatus.PENDING;
+            dto.PendingUpsellPrice = b.InspectionUpsell?.AdditionalPrice;
+            dto.PendingUpsellId = b.InspectionUpsell?.Id;
+            dto.PendingUpsellReason = b.InspectionUpsell?.TechnicianNote;
+            dto.HasReview = b.Review != null;
+            dto.HasDispute = b.Dispute != null;
+            dto.CancelDeadlineUtc = deadline;
+            dto.CanCancel = canCancel;
+            dto.CancelSecondsRemaining = remainingSec;
+            dto.IsLockedIn = !canCancel && b.Status != BookingStatus.CANCELLED && b.Status != BookingStatus.COMPLETED;
+
+            return dto;
         }
     }
 }

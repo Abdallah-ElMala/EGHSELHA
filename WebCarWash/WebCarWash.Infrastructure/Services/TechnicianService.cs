@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using WebCarWash.Application.DTOs.Technician;
 using WebCarWash.Application.Interfaces;
+using WebCarWash.Application.Interfaces.Repositories;
 using WebCarWash.Domain.Entities;
 using WebCarWash.Domain.Enums;
 using WebCarWash.Infrastructure.Data;
@@ -13,16 +15,18 @@ namespace WebCarWash.Infrastructure.Services
 {
     public class TechnicianService : ITechnicianService
     {
-        private readonly CarWashDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public TechnicianService(CarWashDbContext context)
+        public TechnicianService(IUnitOfWork unitOfWork, IMapper mapper)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
         public async Task<TechnicianDashboardDto?> GetDashboardAsync(Guid technicianId)
         {
-            var tech = await _context.Technicians
+            var tech = await _unitOfWork.Technicians.Query()
                 .Include(t => t.Bookings)
                     .ThenInclude(b => b.Customer)
                 .Include(t => t.Bookings)
@@ -93,7 +97,7 @@ namespace WebCarWash.Infrastructure.Services
 
         public async Task<IEnumerable<TechnicianJobDto>> GetJobsAsync(Guid technicianId, string? status = null, string? search = null)
         {
-            var tech = await _context.Technicians
+            var tech = await _unitOfWork.Technicians.Query()
                 .Include(t => t.Bookings)
                     .ThenInclude(b => b.Customer)
                 .Include(t => t.Bookings)
@@ -136,7 +140,7 @@ namespace WebCarWash.Infrastructure.Services
 
         public async Task<TechnicianJobDto?> GetJobDetailsAsync(Guid technicianId, string bookingIdOrNumber)
         {
-            var booking = await _context.Bookings
+            var booking = await _unitOfWork.Bookings.Query()
                 .Include(b => b.Customer)
                 .Include(b => b.Vehicle)
                 .Include(b => b.ServicePackage)
@@ -160,7 +164,7 @@ namespace WebCarWash.Infrastructure.Services
 
         public async Task<(bool Success, string? ErrorMessage)> UpdateJobStatusDetailedAsync(Guid technicianId, string bookingIdOrNumber, string newStatus)
         {
-            var booking = await _context.Bookings
+            var booking = await _unitOfWork.Bookings
                 .FirstOrDefaultAsync(b => b.BookingNumber == bookingIdOrNumber || b.Id.ToString() == bookingIdOrNumber);
 
             if (booking != null)
@@ -169,7 +173,7 @@ namespace WebCarWash.Infrastructure.Services
 
                 if (mappedStatus == BookingStatus.WASHING && booking.Status != BookingStatus.WASHING)
                 {
-                    var beforeCount = await _context.PhotoQAs.CountAsync(p => p.BookingId == booking.Id && p.PhotoType == PhotoType.BEFORE);
+                    var beforeCount = await _unitOfWork.PhotoQAs.Query().CountAsync(p => p.BookingId == booking.Id && p.PhotoType == PhotoType.BEFORE);
                     if (beforeCount < 6)
                     {
                         return (false, $"Capture and upload 6 Before photos before starting the wash (uploaded {beforeCount}/6).");
@@ -178,14 +182,14 @@ namespace WebCarWash.Infrastructure.Services
 
                 if (mappedStatus == BookingStatus.COMPLETED && booking.Status != BookingStatus.COMPLETED)
                 {
-                    var beforeCount = await _context.PhotoQAs.CountAsync(p => p.BookingId == booking.Id && p.PhotoType == PhotoType.BEFORE);
-                    var afterCount = await _context.PhotoQAs.CountAsync(p => p.BookingId == booking.Id && p.PhotoType == PhotoType.AFTER);
+                    var beforeCount = await _unitOfWork.PhotoQAs.Query().CountAsync(p => p.BookingId == booking.Id && p.PhotoType == PhotoType.BEFORE);
+                    var afterCount = await _unitOfWork.PhotoQAs.Query().CountAsync(p => p.BookingId == booking.Id && p.PhotoType == PhotoType.AFTER);
                     if (beforeCount < 6 || afterCount < 6)
                     {
                         return (false, $"Capture all 6 Before ({beforeCount}/6) and 6 After ({afterCount}/6) photos before completing the job.");
                     }
 
-                    var tech = await _context.Technicians.FirstOrDefaultAsync(t => t.Id == technicianId);
+                    var tech = await _unitOfWork.Technicians.FirstOrDefaultAsync(t => t.Id == technicianId);
                     if (tech != null)
                     {
                         booking.TechnicianId ??= tech.Id;
@@ -207,7 +211,7 @@ namespace WebCarWash.Infrastructure.Services
                     else if (mappedStatus == BookingStatus.CANCELLED)
                     {
                         booking.CancelledBy = "TECHNICIAN";
-                        _context.Notifications.Add(new Notification
+                        await _unitOfWork.Notifications.AddAsync(new Notification
                         {
                             UserId = booking.CustomerId,
                             Title = "Booking Cancelled by Technician",
@@ -218,7 +222,7 @@ namespace WebCarWash.Infrastructure.Services
                         });
                     }
                 }
-                await _context.SaveChangesAsync();
+                await _unitOfWork.CompleteAsync();
                 return (true, null);
             }
 
@@ -233,7 +237,7 @@ namespace WebCarWash.Infrastructure.Services
 
         public async Task<TechnicianEarningsDto?> GetEarningsAsync(Guid technicianId, string? range = "7d")
         {
-            var tech = await _context.Technicians
+            var tech = await _unitOfWork.Technicians.Query()
                 .Include(t => t.Payouts)
                 .Include(t => t.Bookings)
                     .ThenInclude(b => b.ServicePackage)
@@ -281,7 +285,7 @@ namespace WebCarWash.Infrastructure.Services
             if (MathF.Abs(tech.TotalBalance - availableBalance) > 0.01f)
             {
                 tech.TotalBalance = availableBalance;
-                await _context.SaveChangesAsync();
+                await _unitOfWork.CompleteAsync();
             }
 
             var avgPerJob = completedCount > 0
@@ -399,7 +403,7 @@ namespace WebCarWash.Infrastructure.Services
 
         public async Task<TechnicianProfileDto?> GetProfileAsync(Guid technicianId)
         {
-            var tech = await _context.Technicians.FirstOrDefaultAsync(t => t.Id == technicianId);
+            var tech = await _unitOfWork.Technicians.FirstOrDefaultAsync(t => t.Id == technicianId);
 
             if (tech == null)
             {
@@ -452,10 +456,10 @@ namespace WebCarWash.Infrastructure.Services
 
         private async Task<(float Rating, int ReviewCount, int JobsDone)> GetTechnicianMetricsAsync(Guid technicianId)
         {
-            var jobsDone = await _context.Bookings
+            var jobsDone = await _unitOfWork.Bookings.Query()
                 .CountAsync(b => b.TechnicianId == technicianId && b.Status == BookingStatus.COMPLETED);
 
-            var ratings = await _context.Reviews
+            var ratings = await _unitOfWork.Reviews.Query()
                 .Where(r => r.Booking != null && r.Booking.TechnicianId == technicianId)
                 .Select(r => r.AverageRating)
                 .ToListAsync();
@@ -468,7 +472,7 @@ namespace WebCarWash.Infrastructure.Services
 
         public async Task<bool> UpdateProfileAsync(Guid technicianId, TechnicianProfileDto dto)
         {
-            var tech = await _context.Technicians.FirstOrDefaultAsync(t => t.Id == technicianId);
+            var tech = await _unitOfWork.Technicians.FirstOrDefaultAsync(t => t.Id == technicianId);
             if (tech != null)
             {
                 tech.FullName = dto.Name;
@@ -490,20 +494,20 @@ namespace WebCarWash.Infrastructure.Services
                         .Select(x => x.Trim())
                         .Distinct(StringComparer.OrdinalIgnoreCase)
                         .ToList();
-                    _context.Entry(tech).Property(t => t.VerifiedEquipment).IsModified = true;
+                    _unitOfWork.Technicians.Update(tech);
                 }
                 if (!string.IsNullOrEmpty(dto.PhotoPreview))
                 {
                     tech.AvatarUrl = dto.PhotoPreview;
                 }
-                await _context.SaveChangesAsync();
+                await _unitOfWork.CompleteAsync();
             }
             return true;
         }
 
         public async Task<TechnicianSettingsDto?> GetSettingsAsync(Guid technicianId)
         {
-            var tech = await _context.Technicians.FirstOrDefaultAsync(t => t.Id == technicianId);
+            var tech = await _unitOfWork.Technicians.GetByIdAsync(technicianId);
 
             if (tech == null)
             {
@@ -518,54 +522,39 @@ namespace WebCarWash.Infrastructure.Services
                 };
             }
 
-            return new TechnicianSettingsDto
-            {
-                Available = tech.IsOnline,
-                WorkingDays = tech.WorkingDays,
-                WorkingHours = tech.WorkingHours,
-                Push = tech.PushNotificationsEnabled,
-                Sms = tech.SmsNotificationsEnabled,
-                Email = tech.EmailNotificationsEnabled
-            };
+            return _mapper.Map<TechnicianSettingsDto>(tech);
         }
 
         public async Task<bool> UpdateSettingsAsync(Guid technicianId, TechnicianSettingsDto dto)
         {
-            var tech = await _context.Technicians.FirstOrDefaultAsync(t => t.Id == technicianId);
+            var tech = await _unitOfWork.Technicians.GetByIdAsync(technicianId);
             if (tech != null)
             {
-                tech.IsOnline = dto.Available;
-                tech.WorkingDays = dto.WorkingDays;
-                tech.WorkingHours = dto.WorkingHours;
-                tech.PushNotificationsEnabled = dto.Push;
-                tech.SmsNotificationsEnabled = dto.Sms;
-                tech.EmailNotificationsEnabled = dto.Email;
-                await _context.SaveChangesAsync();
+                _mapper.Map(dto, tech);
+                _unitOfWork.Technicians.Update(tech);
+                await _unitOfWork.CompleteAsync();
+                return true;
             }
-            return true;
+            return false;
         }
 
         public async Task<IEnumerable<TechnicianNotificationDto>> GetNotificationsAsync(Guid technicianId)
         {
-            var notifications = await _context.Notifications
-                .Where(n => n.UserId == technicianId)
-                .OrderByDescending(n => n.CreatedAt)
-                .ToListAsync();
+            var notifications = await _unitOfWork.Notifications.FindAsync(n => n.UserId == technicianId);
+            var sorted = notifications.OrderByDescending(n => n.CreatedAt).ToList();
 
-            return notifications.Select(n => new TechnicianNotificationDto
+            var dtos = _mapper.Map<List<TechnicianNotificationDto>>(sorted);
+            for (int i = 0; i < dtos.Count; i++)
             {
-                Id = n.Id,
-                Title = n.Title,
-                Desc = n.Description,
-                Time = GetTimeAgo(n.CreatedAt),
-                IconType = n.Type,
-                IsUnread = !n.IsRead
-            });
+                dtos[i].Time = GetTimeAgo(sorted[i].CreatedAt);
+            }
+
+            return dtos;
         }
 
         public async Task<bool> MarkNotificationsAsReadAsync(Guid technicianId)
         {
-            var unread = await _context.Notifications
+            var unread = await _unitOfWork.Notifications.Query()
                 .Where(n => n.UserId == technicianId && !n.IsRead)
                 .ToListAsync();
 
@@ -574,17 +563,17 @@ namespace WebCarWash.Infrastructure.Services
                 n.IsRead = true;
             }
 
-            await _context.SaveChangesAsync();
+            await _unitOfWork.CompleteAsync();
             return true;
         }
 
         public async Task<bool> UpdateGPSLocationAsync(Guid technicianId, float lat, float lng)
         {
-            var tech = await _context.Technicians.FirstOrDefaultAsync(t => t.Id == technicianId);
+            var tech = await _unitOfWork.Technicians.FirstOrDefaultAsync(t => t.Id == technicianId);
             if (tech != null)
             {
                 tech.UpdateGPSLocation(lat, lng);
-                await _context.SaveChangesAsync();
+                await _unitOfWork.CompleteAsync();
                 return true;
             }
             return false;
@@ -592,11 +581,11 @@ namespace WebCarWash.Infrastructure.Services
 
         public async Task<bool> ToggleAvailabilityAsync(Guid technicianId, bool isOnline)
         {
-            var tech = await _context.Technicians.FirstOrDefaultAsync(t => t.Id == technicianId);
+            var tech = await _unitOfWork.Technicians.FirstOrDefaultAsync(t => t.Id == technicianId);
             if (tech != null)
             {
                 tech.ToggleAvailability(isOnline);
-                await _context.SaveChangesAsync();
+                await _unitOfWork.CompleteAsync();
                 return true;
             }
             return false;
@@ -604,14 +593,14 @@ namespace WebCarWash.Infrastructure.Services
 
         public async Task<bool> MarkArrivedAsync(Guid technicianId, string bookingIdOrNumber)
         {
-            var booking = await _context.Bookings
+            var booking = await _unitOfWork.Bookings
                 .FirstOrDefaultAsync(b => b.BookingNumber == bookingIdOrNumber || b.Id.ToString() == bookingIdOrNumber);
 
             if (booking != null)
             {
                 booking.Status = BookingStatus.ARRIVED;
                 booking.ArrivedAt ??= DateTime.UtcNow;
-                await _context.SaveChangesAsync();
+                await _unitOfWork.CompleteAsync();
                 return true;
             }
             return true;
@@ -619,7 +608,7 @@ namespace WebCarWash.Infrastructure.Services
 
         public async Task<PhotoQADto?> UploadQAPhotoAsync(Guid technicianId, string bookingIdOrNumber, UploadQAPhotoDto dto)
         {
-            var booking = await _context.Bookings
+            var booking = await _unitOfWork.Bookings
                 .FirstOrDefaultAsync(b => b.BookingNumber == bookingIdOrNumber || b.Id.ToString() == bookingIdOrNumber);
 
             var bookingId = booking?.Id ?? (Guid.TryParse(bookingIdOrNumber, out var parsedGuid) ? parsedGuid : Guid.NewGuid());
@@ -640,48 +629,26 @@ namespace WebCarWash.Infrastructure.Services
 
             if (booking != null)
             {
-                _context.PhotoQAs.Add(photo);
-                await _context.SaveChangesAsync();
+                await _unitOfWork.PhotoQAs.AddAsync(photo);
+                await _unitOfWork.CompleteAsync();
             }
 
-            return new PhotoQADto
-            {
-                Id = photo.Id,
-                BookingId = photo.BookingId,
-                PhotoType = photo.PhotoType.ToString(),
-                Category = photo.Category.ToString(),
-                ImageUrl = photo.ImageUrl,
-                Timestamp = photo.Timestamp,
-                GpsLatitude = photo.GpsLatitude,
-                GpsLongitude = photo.GpsLongitude,
-                IsVerified = photo.IsVerified
-            };
+            return _mapper.Map<PhotoQADto>(photo);
         }
 
         public async Task<IEnumerable<PhotoQADto>> GetQAPhotosAsync(Guid technicianId, string bookingIdOrNumber)
         {
-            var booking = await _context.Bookings
+            var booking = await _unitOfWork.Bookings
                 .FirstOrDefaultAsync(b => b.BookingNumber == bookingIdOrNumber || b.Id.ToString() == bookingIdOrNumber);
 
             if (booking != null)
             {
-                var photos = await _context.PhotoQAs
+                var photos = await _unitOfWork.PhotoQAs.Query()
                     .Where(p => p.BookingId == booking.Id)
                     .OrderBy(p => p.Timestamp)
                     .ToListAsync();
 
-                return photos.Select(p => new PhotoQADto
-                {
-                    Id = p.Id,
-                    BookingId = p.BookingId,
-                    PhotoType = p.PhotoType.ToString(),
-                    Category = p.Category.ToString(),
-                    ImageUrl = p.ImageUrl,
-                    Timestamp = p.Timestamp,
-                    GpsLatitude = p.GpsLatitude,
-                    GpsLongitude = p.GpsLongitude,
-                    IsVerified = p.IsVerified
-                });
+                return _mapper.Map<List<PhotoQADto>>(photos);
             }
 
             return Enumerable.Empty<PhotoQADto>();
@@ -689,7 +656,7 @@ namespace WebCarWash.Infrastructure.Services
 
         public async Task<InspectionUpsellDto?> ProposeUpsellAsync(Guid technicianId, string bookingIdOrNumber, ProposeUpsellDto dto)
         {
-            var booking = await _context.Bookings
+            var booking = await _unitOfWork.Bookings.Query()
                 .Include(b => b.InspectionUpsell)
                 .FirstOrDefaultAsync(b => b.BookingNumber == bookingIdOrNumber || b.Id.ToString() == bookingIdOrNumber);
 
@@ -707,7 +674,7 @@ namespace WebCarWash.Infrastructure.Services
                     upsell.Status = UpsellStatus.PENDING;
                     upsell.RequestedAt = DateTime.UtcNow;
                     upsell.RespondedAt = null;
-                    await _context.SaveChangesAsync();
+                    await _unitOfWork.CompleteAsync();
                 }
             }
             else
@@ -724,43 +691,23 @@ namespace WebCarWash.Infrastructure.Services
 
                 if (booking != null)
                 {
-                    _context.InspectionUpsells.Add(upsell);
-                    await _context.SaveChangesAsync();
+                    await _unitOfWork.InspectionUpsells.AddAsync(upsell);
+                    await _unitOfWork.CompleteAsync();
                 }
             }
 
-            return new InspectionUpsellDto
-            {
-                Id = upsell.Id,
-                BookingId = upsell.BookingId,
-                TechnicianNote = upsell.TechnicianNote,
-                AdditionalPrice = upsell.AdditionalPrice,
-                EvidencePhotoUrl = upsell.EvidencePhotoUrl,
-                Status = upsell.Status.ToString(),
-                RequestedAt = upsell.RequestedAt
-            };
+            return _mapper.Map<InspectionUpsellDto>(upsell);
         }
 
         public async Task<InspectionUpsellDto?> GetUpsellAsync(Guid technicianId, string bookingIdOrNumber)
         {
-            var booking = await _context.Bookings
+            var booking = await _unitOfWork.Bookings.Query()
                 .Include(b => b.InspectionUpsell)
                 .FirstOrDefaultAsync(b => b.BookingNumber == bookingIdOrNumber || b.Id.ToString() == bookingIdOrNumber);
 
             if (booking?.InspectionUpsell != null)
             {
-                var u = booking.InspectionUpsell;
-                return new InspectionUpsellDto
-                {
-                    Id = u.Id,
-                    BookingId = u.BookingId,
-                    TechnicianNote = u.TechnicianNote,
-                    AdditionalPrice = u.AdditionalPrice,
-                    EvidencePhotoUrl = u.EvidencePhotoUrl,
-                    Status = u.Status.ToString(),
-                    RequestedAt = u.RequestedAt,
-                    RespondedAt = u.RespondedAt
-                };
+                return _mapper.Map<InspectionUpsellDto>(booking.InspectionUpsell);
             }
 
             return null;
@@ -768,7 +715,7 @@ namespace WebCarWash.Infrastructure.Services
 
         public async Task<PayoutDto?> RequestPayoutAsync(Guid technicianId, RequestPayoutDto dto)
         {
-            var tech = await _context.Technicians
+            var tech = await _unitOfWork.Technicians.Query()
                 .Include(t => t.Payouts)
                 .Include(t => t.Bookings)
                     .ThenInclude(b => b.Review)
@@ -790,18 +737,10 @@ namespace WebCarWash.Infrastructure.Services
                 }
 
                 var payout = tech.RequestPayout(dto.PayoutMethod, dto.Amount, dto.AccountDetails);
-                _context.Payouts.Add(payout);
-                await _context.SaveChangesAsync();
+                await _unitOfWork.Payouts.AddAsync(payout);
+                await _unitOfWork.CompleteAsync();
 
-                return new PayoutDto
-                {
-                    Id = payout.Id,
-                    Amount = payout.Amount,
-                    PayoutMethod = payout.PayoutMethod,
-                    AccountDetails = payout.AccountDetails,
-                    Status = payout.Status,
-                    RequestedAt = payout.RequestedAt
-                };
+                return _mapper.Map<PayoutDto>(payout);
             }
 
             return new PayoutDto
@@ -817,26 +756,17 @@ namespace WebCarWash.Infrastructure.Services
 
         public async Task<IEnumerable<PayoutDto>> GetPayoutHistoryAsync(Guid technicianId)
         {
-            var payouts = await _context.Payouts
+            var payouts = await _unitOfWork.Payouts.Query()
                 .Where(p => p.TechnicianId == technicianId)
                 .OrderByDescending(p => p.RequestedAt)
                 .ToListAsync();
 
-            return payouts.Select(p => new PayoutDto
-            {
-                Id = p.Id,
-                Amount = p.Amount,
-                PayoutMethod = p.PayoutMethod,
-                AccountDetails = p.AccountDetails,
-                Status = p.Status,
-                RequestedAt = p.RequestedAt,
-                ProcessedAt = p.ProcessedAt
-            });
+            return _mapper.Map<List<PayoutDto>>(payouts);
         }
 
         public async Task<IEnumerable<JobOfferDto>> GetJobOffersAsync(Guid technicianId)
         {
-            var offers = await _context.JobOffers
+            var offers = await _unitOfWork.JobOffers.Query()
                 .Include(o => o.Booking)
                     .ThenInclude(b => b.Customer)
                 .Include(o => o.Booking)
@@ -894,12 +824,12 @@ namespace WebCarWash.Infrastructure.Services
 
         public async Task<JobOfferResponseDto> RespondToJobOfferAsync(Guid technicianId, Guid offerId, bool accept)
         {
-            var offer = await _context.JobOffers
+            var offer = await _unitOfWork.JobOffers.Query()
                 .Include(o => o.Booking)
                     .ThenInclude(b => b.ServicePackage)
                 .FirstOrDefaultAsync(o => o.Id == offerId);
 
-            var tech = await _context.Technicians.FirstOrDefaultAsync(t => t.Id == technicianId);
+            var tech = await _unitOfWork.Technicians.FirstOrDefaultAsync(t => t.Id == technicianId);
 
             if (offer == null || tech == null)
             {
@@ -928,7 +858,7 @@ namespace WebCarWash.Infrastructure.Services
                 offer.Booking.Status = BookingStatus.DISPATCHED;
                 offer.Booking.AcceptedAt = DateTime.UtcNow;
 
-                _context.Notifications.Add(new Notification
+                await _unitOfWork.Notifications.AddAsync(new Notification
                 {
                     UserId = tech.Id,
                     Title = "Job Accepted",
@@ -939,7 +869,7 @@ namespace WebCarWash.Infrastructure.Services
                 });
             }
 
-            await _context.SaveChangesAsync();
+            await _unitOfWork.CompleteAsync();
 
             return new JobOfferResponseDto
             {
