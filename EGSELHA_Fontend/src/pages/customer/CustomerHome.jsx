@@ -22,6 +22,7 @@ import {
   ShieldAlert
 } from 'lucide-react'
 import { useCustomer } from '../../context/CustomerContext'
+import { useAuth } from '../../context/AuthContext'
 import { customerApi } from '../../services/customerApi'
 
 const PACKAGES = [
@@ -67,6 +68,7 @@ const PACKAGES = [
 export default function CustomerHome() {
   const navigate = useNavigate()
   const { profile, vehicles, bookings, notify } = useCustomer()
+  const { user } = useAuth()
   const [packages, setPackages] = useState(PACKAGES)
 
   useEffect(() => {
@@ -90,7 +92,7 @@ export default function CustomerHome() {
       .catch(console.error)
   }, [])
 
-  const customerFirstName = profile?.fullName ? profile.fullName.split(' ')[0] : 'Ahmed'
+  const customerFirstName = (user?.fullName || profile?.fullName || 'User').split(' ')[0]
 
   // Quick Book Selector state inside Hero
   const [selectedVehicleId, setSelectedVehicleId] = useState(vehicles[0]?.id || '')

@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,6 +16,7 @@ namespace WebCarWash.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = "TECHNICIAN,Technician,ADMIN,Admin")]
     public class TechniciansController : ControllerBase
     {
         private readonly ITechnicianService _technicianService;
@@ -32,9 +35,25 @@ namespace WebCarWash.API.Controllers
             _env = env;
         }
 
-        private Guid GetCurrentTechnicianId([FromHeader(Name = "X-Technician-Id")] Guid? headerTechId)
+        private Guid GetEffectiveTechnicianId(Guid? requestedTechId = null)
         {
-            return headerTechId ?? DefaultDemoTechId;
+            if (User.IsInRole("Admin") && requestedTechId.HasValue && requestedTechId.Value != Guid.Empty)
+            {
+                return requestedTechId.Value;
+            }
+
+            var claim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("sub");
+            if (claim != null && Guid.TryParse(claim.Value, out var id))
+            {
+                return id;
+            }
+
+            return requestedTechId ?? DefaultDemoTechId;
+        }
+
+        private Guid GetCurrentTechnicianId(Guid? headerTechId)
+        {
+            return GetEffectiveTechnicianId(headerTechId);
         }
 
         /// <summary>

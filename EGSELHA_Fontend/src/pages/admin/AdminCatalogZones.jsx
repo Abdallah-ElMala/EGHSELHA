@@ -83,7 +83,23 @@ export default function AdminCatalogZones() {
 
   const handleCreateZone = async (e) => {
     e.preventDefault();
-    if (!newZoneName.trim()) return;
+    if (!newZoneName.trim() || newZoneName.trim().length < 3) {
+      notify('Zone name must be at least 3 characters.');
+      return;
+    }
+    if (newZoneFee < 0) {
+      notify('Distance surcharge cannot be negative.');
+      return;
+    }
+    if (newZoneSurge < 1.0) {
+      notify('Peak surge multiplier cannot be less than 1.0×.');
+      return;
+    }
+    if (newZoneMaxTechs < 1) {
+      notify('Max technicians must be at least 1.');
+      return;
+    }
+
     setSavingId('new-zone');
     try {
       await adminApi.createZone({

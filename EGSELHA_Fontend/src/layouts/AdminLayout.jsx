@@ -8,18 +8,19 @@ import {
   Tags,
   ShieldAlert,
   Wallet,
-  ArrowRightLeft,
   RefreshCw,
   CheckCircle2,
   X,
   Menu,
 } from 'lucide-react';
 import { useAdmin } from '../context/AdminContext';
+import { useAuth } from '../context/AuthContext';
 import BrandLogo from '../component/BrandLogo';
 
 export default function AdminLayout() {
   const navigate = useNavigate();
   const { dashboard, toastMessage, refreshAll } = useAdmin();
+  const { user, logout } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -124,42 +125,25 @@ export default function AdminLayout() {
 
         <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <button
-            onClick={() => navigate('/customer')}
+            onClick={async () => {
+              await logout();
+              navigate('/login');
+            }}
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: '10px',
               padding: '10px 12px',
               borderRadius: '10px',
-              background: 'rgba(8, 124, 240, 0.15)',
-              border: '1px solid rgba(8, 124, 240, 0.3)',
-              color: '#60b4ff',
+              background: 'rgba(239, 68, 68, 0.15)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              color: '#f87171',
               fontSize: '11px',
               fontWeight: 700,
               cursor: 'pointer',
             }}
           >
-            <ArrowRightLeft size={14} />
-            <span>Customer Portal</span>
-          </button>
-          <button
-            onClick={() => navigate('/technician')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              padding: '10px 12px',
-              borderRadius: '10px',
-              background: 'rgba(16, 185, 129, 0.14)',
-              border: '1px solid rgba(16, 185, 129, 0.3)',
-              color: '#6ee7b7',
-              fontSize: '11px',
-              fontWeight: 700,
-              cursor: 'pointer',
-            }}
-          >
-            <ArrowRightLeft size={14} />
-            <span>Technician Portal</span>
+            <span>تسجيل الخروج (Logout)</span>
           </button>
         </div>
       </aside>
@@ -202,12 +186,6 @@ export default function AdminLayout() {
             <button className="btn outline" onClick={handleRefresh} disabled={refreshing}>
               <RefreshCw size={14} />
               <span>{refreshing ? 'Refreshing...' : 'Sync Data'}</span>
-            </button>
-            <button className="btn outline" onClick={() => navigate('/customer')}>
-              Customer View
-            </button>
-            <button className="btn outline" onClick={() => navigate('/technician')}>
-              Tech View
             </button>
             <div
               style={{

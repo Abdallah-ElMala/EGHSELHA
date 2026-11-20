@@ -56,17 +56,23 @@ namespace WebCarWash.Infrastructure.Services
 
             if (customer == null)
             {
-                return new CustomerProfileDto
+                var user = await _unitOfWork.Users.GetByIdAsync(customerId);
+                if (user != null)
                 {
-                    Id = customerId,
-                    FullName = "Ahmed Khaled",
-                    Phone = "+20 100 999 1111",
-                    Email = "ahmed.khaled@example.com",
-                    WalletBalance = 650f,
-                    LoyaltyPoints = 250,
-                    GateNotes = "Gate 3, Villa 22. Please call upon arrival.",
-                    SavedAddresses = new List<string> { "Nasr City, Abbas El Akkad, Cairo", "Heliopolis, Korba, Cairo" }
-                };
+                    return new CustomerProfileDto
+                    {
+                        Id = user.Id,
+                        FullName = user.FullName,
+                        Phone = user.Phone,
+                        Email = user.Email,
+                        WalletBalance = (user is Customer c) ? c.WalletBalance : 0f,
+                        LoyaltyPoints = (user is Customer c2) ? c2.LoyaltyPoints : 0,
+                        GateNotes = (user is Customer c3) ? c3.GateNotes : string.Empty,
+                        SavedAddresses = (user is Customer c4 && c4.SavedAddresses != null) ? c4.SavedAddresses : new List<string>()
+                    };
+                }
+
+                return null;
             }
 
             return _mapper.Map<CustomerProfileDto>(customer);
@@ -75,7 +81,20 @@ namespace WebCarWash.Infrastructure.Services
         public async Task<CustomerProfileDto?> UpdateProfileAsync(Guid customerId, UpdateCustomerProfileDto dto)
         {
             var customer = await _unitOfWork.Customers.GetByIdAsync(customerId);
-            if (customer == null) return null;
+            if (customer == null)
+            {
+                var user = await _unitOfWork.Users.GetByIdAsync(customerId);
+                if (user != null)
+                {
+                    if (!string.IsNullOrWhiteSpace(dto.FullName)) user.FullName = dto.FullName.Trim();
+                    if (!string.IsNullOrWhiteSpace(dto.Phone)) user.Phone = dto.Phone.Trim();
+                    if (!string.IsNullOrWhiteSpace(dto.Email)) user.Email = dto.Email.Trim();
+                    _unitOfWork.Users.Update(user);
+                    await _unitOfWork.CompleteAsync();
+                    return await GetProfileAsync(customerId);
+                }
+                return null;
+            }
 
             if (!string.IsNullOrWhiteSpace(dto.FullName)) customer.FullName = dto.FullName.Trim();
             if (!string.IsNullOrWhiteSpace(dto.Phone)) customer.Phone = dto.Phone.Trim();
@@ -147,6 +166,22 @@ namespace WebCarWash.Infrastructure.Services
             var customer = await _unitOfWork.Customers.GetByIdAsync(customerId);
             var package = await _unitOfWork.ServicePackages.FirstOrDefaultAsync(p => p.Id == dto.ServicePackageId)
                           ?? await _unitOfWork.ServicePackages.FirstOrDefaultAsync(p => true);
+
+            if (package != null)
+            {
+                if (package.RequiresElectricity && !dto.HasElectricity)
+                {
+                    throw new InvalidOperationException($"Package '{package.Name}' requires on-site electricity access.");
+                }
+                if (package.RequiresWater && !dto.HasWaterAccess)
+                {
+                    throw new InvalidOperationException($"Package '{package.Name}' requires water access on-site.");
+                }
+                if (package.RequiresPrivateParking && dto.ParkingType == ParkingType.STREET)
+                {
+                    throw new InvalidOperationException($"Package '{package.Name}' requires private parking (driveway or garage).");
+                }
+            }
 
             var vehicle = await _unitOfWork.Vehicles.FirstOrDefaultAsync(v => v.Id == dto.VehicleId)
                           ?? await _unitOfWork.Vehicles.FirstOrDefaultAsync(v => v.CustomerId == customerId);

@@ -16,9 +16,11 @@ import {
 } from 'lucide-react'
 import PageTitle from '../../component/PageTitle'
 import Status from '../../component/Status'
+import FieldError from '../../component/FieldError'
 import { useTech } from '../../context/TechnicianContext'
 import { technicianApi } from '../../services/technicianApi'
 import { resolveAssetUrl } from '../../services/apiClient'
+import { extractApiErrors } from '../../utils/validation'
 
 const REQUIRED_QA_COUNT = 6
 
@@ -66,6 +68,8 @@ export default function JobDetails() {
   const [upsellReason, setUpsellReason] = useState('')
   const [upsellPrice, setUpsellPrice] = useState(150)
   const [activeUpsell, setActiveUpsell] = useState(null)
+  const [upsellErrors, setUpsellErrors] = useState({})
+  const [serverUpsellError, setServerUpsellError] = useState('')
   const [nowMs, setNowMs] = useState(() => Date.now())
 
   useEffect(() => {
@@ -276,11 +280,32 @@ export default function JobDetails() {
 
   const handleProposeUpsell = async (e) => {
     e.preventDefault()
-    if (!upsellReason || upsellPrice <= 0) return
+
+    const errors = {}
+    if (!upsellReason || !upsellReason.trim()) {
+      errors.reason = 'Please provide a reason for the extra cleaning proposal.'
+    } else if (upsellReason.trim().length < 5) {
+      errors.reason = 'Reason must be at least 5 characters.'
+    }
+
+    const price = Number(upsellPrice)
+    if (isNaN(price) || price < 10) {
+      errors.price = 'Additional fee must be at least 10 EGP.'
+    } else if (price > 5000) {
+      errors.price = 'Additional fee cannot exceed 5,000 EGP.'
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setUpsellErrors(errors)
+      return
+    }
+
+    setUpsellErrors({})
+    setServerUpsellError('')
 
     try {
       const result = await technicianApi.proposeUpsell(job.id, {
-        reason: upsellReason,
+        reason: upsellReason.trim(),
         additionalPrice: Number(upsellPrice),
         evidencePhotoUrl: ''
       })
@@ -289,7 +314,12 @@ export default function JobDetails() {
       notify(`Inspection Upsell of EGP ${upsellPrice} sent for customer approval!`)
     } catch (err) {
       console.error(err)
-      notify('Failed to submit upsell request.')
+      const { message, fieldErrors } = extractApiErrors(err)
+      if (Object.keys(fieldErrors).length > 0) {
+        setUpsellErrors(fieldErrors)
+      }
+      setServerUpsellError(message)
+      notify(message)
     }
   }
 
@@ -877,29 +907,53 @@ export default function JobDetails() {
               Request customer authorization for extra stain removal or unbooked heavy cleaning discovered during on-site inspection.
             </p>
 
-            <form onSubmit={handleProposeUpsell}>
+            <form onSubmit={handleProposeUpsell} noValidate>
+              {serverUpsellError && (
+                <div style={{ padding: '10px 14px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#991b1b', fontSize: '12px', marginBottom: '14px' }}>
+                  {serverUpsellError}
+                </div>
+              )}
               <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '6px' }}>Extra Cleaning Reason</label>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: '6px' }}>Extra Cleaning Reason *</label>
                 <input
-                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    borderRadius: '8px',
+                    border: upsellErrors.reason ? '1.5px solid #ef4444' : '1px solid #cbd5e1',
+                    background: upsellErrors.reason ? '#fffbfb' : '#fff'
+                  }}
                   placeholder="e.g. Heavy mud caked on undercarriage, pet hair extraction"
                   value={upsellReason}
-                  onChange={(e) => setUpsellReason(e.target.value)}
-                  required
+                  onChange={(e) => {
+                    setUpsellReason(e.target.value)
+                    if (upsellErrors.reason) setUpsellErrors({ ...upsellErrors, reason: '' })
+                  }}
                 />
+                <FieldError error={upsellErrors.reason} />
               </div>
 
               <div style={{ marginBottom: '18px' }}>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '6px' }}>Additional Fee (EGP)</label>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: '6px' }}>Additional Fee (EGP) *</label>
                 <input
                   type="number"
-                  min="50"
-                  step="50"
-                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                  min="10"
+                  max="5000"
+                  step="10"
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    borderRadius: '8px',
+                    border: upsellErrors.price ? '1.5px solid #ef4444' : '1px solid #cbd5e1',
+                    background: upsellErrors.price ? '#fffbfb' : '#fff'
+                  }}
                   value={upsellPrice}
-                  onChange={(e) => setUpsellPrice(e.target.value)}
-                  required
+                  onChange={(e) => {
+                    setUpsellPrice(e.target.value)
+                    if (upsellErrors.price) setUpsellErrors({ ...upsellErrors, price: '' })
+                  }}
                 />
+                <FieldError error={upsellErrors.price} />
               </div>
 
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>

@@ -2,8 +2,10 @@ import { useEffect, useState, useMemo, useCallback } from 'react'
 import { Wallet, CalendarDays, Clock3, TrendingUp, Download, ChevronRight, ArrowLeft, Search, CreditCard } from 'lucide-react'
 import PageTitle from '../../component/PageTitle'
 import Stat from '../../component/Stat'
+import FieldError from '../../component/FieldError'
 import { useTech } from '../../context/TechnicianContext'
 import { technicianApi } from '../../services/technicianApi'
+import { validatePayout, extractApiErrors } from '../../utils/validation'
 
 const RANGE_LABELS = {
   '7d': 'Last 7 days',
@@ -28,6 +30,8 @@ export default function Earnings() {
   const [payoutMethod, setPayoutMethod] = useState('Instapay')
   const [accountDetails, setAccountDetails] = useState('mostafa@instapay')
   const [submittingPayout, setSubmittingPayout] = useState(false)
+  const [payoutErrors, setPayoutErrors] = useState({})
+  const [serverPayoutError, setServerPayoutError] = useState('')
 
   const fetchEarnings = useCallback(async (selectedRange = chartRange) => {
     try {
@@ -71,21 +75,39 @@ export default function Earnings() {
 
   const handleRequestPayout = async (e) => {
     e.preventDefault()
-    if (payoutAmount <= 0) return
 
+    const { isValid, errors } = validatePayout({
+      amount: payoutAmount,
+      payoutMethod,
+      accountDetails,
+      availableBalance: earnings?.availableBalance
+    })
+
+    if (!isValid) {
+      setPayoutErrors(errors)
+      return
+    }
+
+    setPayoutErrors({})
+    setServerPayoutError('')
     setSubmittingPayout(true)
     try {
       await technicianApi.requestPayout({
         amount: Number(payoutAmount),
         payoutMethod,
-        accountDetails
+        accountDetails: accountDetails.trim()
       })
       notify(`Payout request of EGP ${payoutAmount} submitted via ${payoutMethod}!`)
       setPayoutModalOpen(false)
       fetchEarnings(chartRange)
     } catch (err) {
       console.error(err)
-      notify(err?.message || 'Failed to request payout.')
+      const { message, fieldErrors } = extractApiErrors(err)
+      if (Object.keys(fieldErrors).length > 0) {
+        setPayoutErrors(fieldErrors)
+      }
+      setServerPayoutError(message)
+      notify(message)
     } finally {
       setSubmittingPayout(false)
     }
@@ -415,23 +437,37 @@ export default function Earnings() {
               Withdraw your accumulated car wash earnings. Available balance: <b style={{ color: '#16a34a' }}>EGP {earnings?.availableBalance?.toLocaleString() ?? 0}</b>
             </p>
 
-            <form onSubmit={handleRequestPayout}>
+            <form onSubmit={handleRequestPayout} noValidate>
+              {serverPayoutError && (
+                <div style={{ padding: '10px 14px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#991b1b', fontSize: '12px', marginBottom: '14px' }}>
+                  {serverPayoutError}
+                </div>
+              )}
               <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '6px' }}>Withdrawal Amount (EGP)</label>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: '6px' }}>Withdrawal Amount (EGP) *</label>
                 <input
                   type="number"
                   min="50"
                   max={earnings?.availableBalance || undefined}
                   step="1"
-                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    borderRadius: '8px',
+                    border: payoutErrors.amount ? '1.5px solid #ef4444' : '1px solid #cbd5e1',
+                    background: payoutErrors.amount ? '#fffbfb' : '#fff'
+                  }}
                   value={payoutAmount}
-                  onChange={(e) => setPayoutAmount(e.target.value)}
-                  required
+                  onChange={(e) => {
+                    setPayoutAmount(e.target.value)
+                    if (payoutErrors.amount) setPayoutErrors({ ...payoutErrors, amount: '' })
+                  }}
                 />
+                <FieldError error={payoutErrors.amount} />
               </div>
 
               <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '6px' }}>Payout Method</label>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: '6px' }}>Payout Method *</label>
                 <select
                   style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
                   value={payoutMethod}
@@ -444,14 +480,23 @@ export default function Earnings() {
               </div>
 
               <div style={{ marginBottom: '18px' }}>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '6px' }}>Destination Details</label>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: '6px' }}>Destination Details *</label>
                 <input
-                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    borderRadius: '8px',
+                    border: payoutErrors.accountDetails ? '1.5px solid #ef4444' : '1px solid #cbd5e1',
+                    background: payoutErrors.accountDetails ? '#fffbfb' : '#fff'
+                  }}
                   placeholder="e.g. username@instapay or 010xxxxxxxx"
                   value={accountDetails}
-                  onChange={(e) => setAccountDetails(e.target.value)}
-                  required
+                  onChange={(e) => {
+                    setAccountDetails(e.target.value)
+                    if (payoutErrors.accountDetails) setPayoutErrors({ ...payoutErrors, accountDetails: '' })
+                  }}
                 />
+                <FieldError error={payoutErrors.accountDetails} />
               </div>
 
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>

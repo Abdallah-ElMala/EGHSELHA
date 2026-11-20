@@ -17,25 +17,34 @@ import {
   Pencil
 } from 'lucide-react'
 import PageTitle from '../../component/PageTitle'
+import FieldError from '../../component/FieldError'
 import { useCustomer } from '../../context/CustomerContext'
+import { useAuth } from '../../context/AuthContext'
 import { customerApi } from '../../services/customerApi'
+import { validateProfile, validateVehicle, validateSavedAddress, extractApiErrors } from '../../utils/validation'
 
 export default function CustomerProfile() {
   const { profile, vehicles, setVehicles, notify, refreshData } = useCustomer()
+  const { user } = useAuth()
 
   // Edit Mode toggle for Personal Information section
   const [isEditing, setIsEditing] = useState(false)
 
-  // Profile Form state
-  const [fullName, setFullName] = useState(profile?.fullName || 'Ahmed Khaled')
-  const [email, setEmail] = useState(profile?.email || 'ahmed.khaled@example.com')
-  const [phone, setPhone] = useState(profile?.phone || '+20 100 999 1111')
-  const [gateNotes, setGateNotes] = useState('Gate 3, Villa 22. Please call upon arrival.')
+  // Profile Form state - Dynamically initialized from authenticated user / profile
+  const [fullName, setFullName] = useState(user?.fullName || profile?.fullName || '')
+  const [email, setEmail] = useState(user?.email || profile?.email || '')
+  const [phone, setPhone] = useState(user?.phone || profile?.phone || '')
+  const [gateNotes, setGateNotes] = useState(profile?.gateNotes || '')
   const [photoPreview, setPhotoPreview] = useState(null)
   const [savingProfile, setSavingProfile] = useState(false)
 
-  // Form state kept in sync with loaded profile
+  // Form state kept in sync with loaded profile and authenticated user
   useEffect(() => {
+    if (user) {
+      if (user.fullName && !fullName) setFullName(user.fullName)
+      if (user.email && !email) setEmail(user.email)
+      if (user.phone && !phone) setPhone(user.phone)
+    }
     if (profile) {
       if (profile.fullName) setFullName(profile.fullName)
       if (profile.email) setEmail(profile.email)
@@ -45,7 +54,7 @@ export default function CustomerProfile() {
       }
       setLocalAddresses(profile.savedAddresses || [])
     }
-  }, [profile])
+  }, [profile, user])
 
   useEffect(() => {
     setLocalVehicles(vehicles)
@@ -74,12 +83,30 @@ export default function CustomerProfile() {
   const [newAddressText, setNewAddressText] = useState('')
   const [submittingAddress, setSubmittingAddress] = useState(false)
 
-  const initials = fullName
-    ? fullName.split(' ').map((x) => x[0]).join('').slice(0, 2)
-    : 'AK'
+  // Validation states
+  const [profileErrors, setProfileErrors] = useState({})
+  const [serverProfileError, setServerProfileError] = useState('')
+  const [vehicleErrors, setVehicleErrors] = useState({})
+  const [serverVehicleError, setServerVehicleError] = useState('')
+  const [addressError, setAddressError] = useState('')
+  const [serverAddressError, setServerAddressError] = useState('')
+
+  const displayedName = fullName || user?.fullName || profile?.fullName || 'Customer'
+  const initials = displayedName
+    ? displayedName.split(' ').filter(Boolean).map((x) => x[0]).join('').slice(0, 2).toUpperCase()
+    : 'C'
 
   // Handle Save Profile
   const handleSaveProfile = async () => {
+    const { isValid, errors } = validateProfile({ fullName, email, phone, gateNotes })
+    if (!isValid) {
+      setProfileErrors(errors)
+      notify(Object.values(errors)[0])
+      return
+    }
+
+    setProfileErrors({})
+    setServerProfileError('')
     setSavingProfile(true)
     try {
       await customerApi.updateProfile({
@@ -93,7 +120,12 @@ export default function CustomerProfile() {
       refreshData()
     } catch (err) {
       console.error(err)
-      notify('Failed to save profile.')
+      const { message, fieldErrors } = extractApiErrors(err)
+      if (Object.keys(fieldErrors).length > 0) {
+        setProfileErrors(fieldErrors)
+      }
+      setServerProfileError(message)
+      notify(message)
     } finally {
       setSavingProfile(false)
     }
@@ -133,8 +165,14 @@ export default function CustomerProfile() {
   // Handle Add Vehicle
   const handleAddVehicle = async (e) => {
     e.preventDefault()
-    if (!make.trim() || !model.trim() || !licensePlate.trim()) return
+    const { isValid, errors } = validateVehicle({ make, model, year, color, licensePlate })
+    if (!isValid) {
+      setVehicleErrors(errors)
+      return
+    }
 
+    setVehicleErrors({})
+    setServerVehicleError('')
     setSubmittingVehicle(true)
     try {
       const newCar = await customerApi.addVehicle({
@@ -165,8 +203,12 @@ export default function CustomerProfile() {
       refreshData()
     } catch (err) {
       console.error(err)
-      notify('Vehicle added.')
-      setVehicleModalOpen(false)
+      const { message, fieldErrors } = extractApiErrors(err)
+      if (Object.keys(fieldErrors).length > 0) {
+        setVehicleErrors(fieldErrors)
+      }
+      setServerVehicleError(message)
+      notify(message)
     } finally {
       setSubmittingVehicle(false)
     }
@@ -175,8 +217,14 @@ export default function CustomerProfile() {
   // Handle Add Address
   const handleAddAddress = async (e) => {
     e.preventDefault()
-    if (!newAddressText.trim()) return
+    const err = validateSavedAddress(newAddressText)
+    if (err) {
+      setAddressError(err)
+      return
+    }
 
+    setAddressError('')
+    setServerAddressError('')
     setSubmittingAddress(true)
     try {
       await customerApi.addSavedAddress(newAddressText.trim())
@@ -186,10 +234,10 @@ export default function CustomerProfile() {
       setNewAddressText('')
       refreshData()
     } catch (err) {
-      setLocalAddresses([...displayedAddresses, newAddressText.trim()])
-      notify(`Location "${newAddressText.trim()}" added to saved addresses!`)
-      setAddressModalOpen(false)
-      setNewAddressText('')
+      console.error(err)
+      const { message } = extractApiErrors(err)
+      setServerAddressError(message)
+      notify(message)
     } finally {
       setSubmittingAddress(false)
     }
@@ -244,35 +292,35 @@ export default function CustomerProfile() {
             </label>
             <div style={{ paddingTop: '38px', minWidth: 0, flex: 1 }}>
               <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#102a40', margin: '0 0 4px 0', fontFamily: 'Manrope, sans-serif' }}>
-                {fullName}
+                {displayedName}
               </h2>
               <p style={{ display: 'flex', alignItems: 'center', gap: '5px', margin: '0 0 6px 0', color: '#16a34a', fontSize: '11px', fontWeight: 700 }}>
                 Verified Customer <ShieldCheck size={15} color="#16a34a" />
               </p>
               <div className="profile-rating" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '5px' }}>
                 <Star size={14} fill="#eab308" color="#eab308" />
-                <span style={{ color: '#b45309', fontWeight: 700, fontSize: '11px' }}>{profile?.loyaltyPoints ?? 50} Loyalty Pts</span>
-                <span style={{ color: '#8090a2', fontSize: '11px' }}> · Gold Tier</span>
+                <span style={{ color: '#b45309', fontWeight: 700, fontSize: '11px' }}>{profile?.loyaltyPoints ?? 0} Loyalty Pts</span>
+                <span style={{ color: '#8090a2', fontSize: '11px' }}> · Active Member</span>
               </div>
             </div>
           </div>
 
           <div className="profile-badges">
-            <span><Award size={14} color="#087cf0" /> VIP Customer</span>
+            <span><Award size={14} color="#087cf0" /> Registered Customer</span>
             <span><CheckCircle2 size={14} color="#16a34a" /> Phone Verified</span>
             <span><Car size={14} color="#087cf0" /> {displayedVehicles.length} Registered Cars</span>
           </div>
 
-          {/* Wallet Balance & Loyalty Banner (About my account removed per user request) */}
+          {/* Wallet Balance & Loyalty Banner */}
           <div style={{ padding: '0 20px 20px 20px' }}>
             <div style={{ background: '#f8fafc', border: '1px solid #edf2f7', padding: '14px 18px', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <span style={{ fontSize: '10px', color: '#64748b', display: 'block', fontWeight: 600 }}>Available Balance</span>
-                <b style={{ fontSize: '16px', color: '#16a34a' }}>EGP {profile?.walletBalance?.toLocaleString() ?? 650}</b>
+                <b style={{ fontSize: '16px', color: '#16a34a' }}>EGP {profile?.walletBalance !== undefined && profile?.walletBalance !== null ? profile.walletBalance.toLocaleString() : '0'}</b>
               </div>
               <div style={{ textAlign: 'right' }}>
                 <span style={{ fontSize: '10px', color: '#64748b', display: 'block', fontWeight: 600 }}>Loyalty Points</span>
-                <b style={{ fontSize: '14px', color: '#d97706' }}>{profile?.loyaltyPoints ?? 50} Pts</b>
+                <b style={{ fontSize: '14px', color: '#d97706' }}>{profile?.loyaltyPoints ?? 0} Pts</b>
               </div>
             </div>
           </div>
@@ -311,6 +359,13 @@ export default function CustomerProfile() {
             )}
           </div>
 
+          {serverProfileError && (
+            <div style={{ padding: '10px 14px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#991b1b', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '14px' }}>
+              <AlertCircle size={15} style={{ flexShrink: 0 }} />
+              <span>{serverProfileError}</span>
+            </div>
+          )}
+
           <div className="form-grid">
             <label className="field wide">
               Full Legal Name
@@ -318,14 +373,18 @@ export default function CustomerProfile() {
                 name="fullName"
                 disabled={!isEditing}
                 value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
+                onChange={(e) => {
+                  setFullName(e.target.value)
+                  if (profileErrors.fullName) setProfileErrors({ ...profileErrors, fullName: '' })
+                }}
                 style={{
                   backgroundColor: isEditing ? '#fff' : '#f8fafc',
                   color: isEditing ? '#102a40' : '#475569',
                   cursor: isEditing ? 'text' : 'not-allowed',
-                  borderColor: isEditing ? '#087cf0' : '#e2e8f0'
+                  borderColor: profileErrors.fullName ? '#ef4444' : isEditing ? '#087cf0' : '#e2e8f0'
                 }}
               />
+              <FieldError error={profileErrors.fullName} />
             </label>
 
             <label className="field">
@@ -334,14 +393,18 @@ export default function CustomerProfile() {
                 name="phone"
                 disabled={!isEditing}
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e) => {
+                  setPhone(e.target.value)
+                  if (profileErrors.phone) setProfileErrors({ ...profileErrors, phone: '' })
+                }}
                 style={{
                   backgroundColor: isEditing ? '#fff' : '#f8fafc',
                   color: isEditing ? '#102a40' : '#475569',
                   cursor: isEditing ? 'text' : 'not-allowed',
-                  borderColor: isEditing ? '#087cf0' : '#e2e8f0'
+                  borderColor: profileErrors.phone ? '#ef4444' : isEditing ? '#087cf0' : '#e2e8f0'
                 }}
               />
+              <FieldError error={profileErrors.phone} />
             </label>
 
             <label className="field">
@@ -351,14 +414,18 @@ export default function CustomerProfile() {
                 type="email"
                 disabled={!isEditing}
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value)
+                  if (profileErrors.email) setProfileErrors({ ...profileErrors, email: '' })
+                }}
                 style={{
                   backgroundColor: isEditing ? '#fff' : '#f8fafc',
                   color: isEditing ? '#102a40' : '#475569',
                   cursor: isEditing ? 'text' : 'not-allowed',
-                  borderColor: isEditing ? '#087cf0' : '#e2e8f0'
+                  borderColor: profileErrors.email ? '#ef4444' : isEditing ? '#087cf0' : '#e2e8f0'
                 }}
               />
+              <FieldError error={profileErrors.email} />
             </label>
 
             {/* Primary service area & district REMOVED per user request */}
@@ -370,14 +437,18 @@ export default function CustomerProfile() {
                 rows={3}
                 disabled={!isEditing}
                 value={gateNotes}
-                onChange={(e) => setGateNotes(e.target.value)}
+                onChange={(e) => {
+                  setGateNotes(e.target.value)
+                  if (profileErrors.gateNotes) setProfileErrors({ ...profileErrors, gateNotes: '' })
+                }}
                 style={{
                   backgroundColor: isEditing ? '#fff' : '#f8fafc',
                   color: isEditing ? '#102a40' : '#475569',
                   cursor: isEditing ? 'text' : 'not-allowed',
-                  borderColor: isEditing ? '#087cf0' : '#e2e8f0'
+                  borderColor: profileErrors.gateNotes ? '#ef4444' : isEditing ? '#087cf0' : '#e2e8f0'
                 }}
               />
+              <FieldError error={profileErrors.gateNotes} />
             </label>
           </div>
 
@@ -614,79 +685,136 @@ export default function CustomerProfile() {
                 <X size={18} />
               </button>
             </div>
-            <form onSubmit={handleAddVehicle}>
+            <form onSubmit={handleAddVehicle} noValidate>
               <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                {serverVehicleError && (
+                  <div style={{ padding: '10px 14px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#991b1b', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <AlertCircle size={15} style={{ flexShrink: 0 }} />
+                    <span>{serverVehicleError}</span>
+                  </div>
+                )}
+
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
-                      Brand / Make
+                      Brand / Make *
                     </label>
                     <input
                       type="text"
-                      required
                       placeholder="e.g. BMW, Mercedes, Toyota"
                       value={make}
-                      onChange={(e) => setMake(e.target.value)}
-                      style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '12px' }}
+                      onChange={(e) => {
+                        setMake(e.target.value)
+                        if (vehicleErrors.make) setVehicleErrors({ ...vehicleErrors, make: '' })
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '9px 12px',
+                        borderRadius: '8px',
+                        border: vehicleErrors.make ? '1.5px solid #ef4444' : '1px solid #cbd5e1',
+                        background: vehicleErrors.make ? '#fffbfb' : '#fff',
+                        fontSize: '12px'
+                      }}
                     />
+                    <FieldError error={vehicleErrors.make} />
                   </div>
                   <div>
                     <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
-                      Model
+                      Model *
                     </label>
                     <input
                       type="text"
-                      required
                       placeholder="e.g. C200, Corolla, Tucson"
                       value={model}
-                      onChange={(e) => setModel(e.target.value)}
-                      style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '12px' }}
+                      onChange={(e) => {
+                        setModel(e.target.value)
+                        if (vehicleErrors.model) setVehicleErrors({ ...vehicleErrors, model: '' })
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '9px 12px',
+                        borderRadius: '8px',
+                        border: vehicleErrors.model ? '1.5px solid #ef4444' : '1px solid #cbd5e1',
+                        background: vehicleErrors.model ? '#fffbfb' : '#fff',
+                        fontSize: '12px'
+                      }}
                     />
+                    <FieldError error={vehicleErrors.model} />
                   </div>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
-                      Year
+                      Year *
                     </label>
                     <input
                       type="number"
-                      required
-                      min={1990}
-                      max={2026}
+                      min={1950}
+                      max={2030}
                       value={year}
-                      onChange={(e) => setYear(e.target.value)}
-                      style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '12px' }}
+                      onChange={(e) => {
+                        setYear(e.target.value)
+                        if (vehicleErrors.year) setVehicleErrors({ ...vehicleErrors, year: '' })
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '9px 12px',
+                        borderRadius: '8px',
+                        border: vehicleErrors.year ? '1.5px solid #ef4444' : '1px solid #cbd5e1',
+                        background: vehicleErrors.year ? '#fffbfb' : '#fff',
+                        fontSize: '12px'
+                      }}
                     />
+                    <FieldError error={vehicleErrors.year} />
                   </div>
                   <div>
                     <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
-                      Color
+                      Color *
                     </label>
                     <input
                       type="text"
-                      required
                       placeholder="e.g. Black, White, Grey"
                       value={color}
-                      onChange={(e) => setColor(e.target.value)}
-                      style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '12px' }}
+                      onChange={(e) => {
+                        setColor(e.target.value)
+                        if (vehicleErrors.color) setVehicleErrors({ ...vehicleErrors, color: '' })
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '9px 12px',
+                        borderRadius: '8px',
+                        border: vehicleErrors.color ? '1.5px solid #ef4444' : '1px solid #cbd5e1',
+                        background: vehicleErrors.color ? '#fffbfb' : '#fff',
+                        fontSize: '12px'
+                      }}
                     />
+                    <FieldError error={vehicleErrors.color} />
                   </div>
                 </div>
 
                 <div>
                   <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
-                    License Plate (Identification)
+                    License Plate (Identification) *
                   </label>
                   <input
                     type="text"
-                    required
                     placeholder="e.g. أ ب ج 1234 or ABC 123"
                     value={licensePlate}
-                    onChange={(e) => setLicensePlate(e.target.value)}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '12px' }}
+                    onChange={(e) => {
+                      setLicensePlate(e.target.value)
+                      if (vehicleErrors.licensePlate) setVehicleErrors({ ...vehicleErrors, licensePlate: '' })
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '9px 12px',
+                      borderRadius: '8px',
+                      border: vehicleErrors.licensePlate ? '1.5px solid #ef4444' : '1px solid #cbd5e1',
+                      background: vehicleErrors.licensePlate ? '#fffbfb' : '#fff',
+                      fontSize: '12px'
+                    }}
                   />
+                  <FieldError error={vehicleErrors.licensePlate} />
                 </div>
 
                 <div>
@@ -744,19 +872,35 @@ export default function CustomerProfile() {
                 <X size={18} />
               </button>
             </div>
-            <form onSubmit={handleAddAddress}>
+            <form onSubmit={handleAddAddress} noValidate>
               <div className="modal-body">
+                {serverAddressError && (
+                  <div style={{ padding: '10px 14px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#991b1b', fontSize: '12px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <AlertCircle size={15} style={{ flexShrink: 0 }} />
+                    <span>{serverAddressError}</span>
+                  </div>
+                )}
                 <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
                   Address Details:
                 </label>
                 <input
                   type="text"
-                  required
                   placeholder="e.g. Sheikh Zayed, Beverly Hills, Villa 102"
                   value={newAddressText}
-                  onChange={(e) => setNewAddressText(e.target.value)}
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '12px' }}
+                  onChange={(e) => {
+                    setNewAddressText(e.target.value)
+                    if (addressError) setAddressError('')
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: '8px',
+                    border: addressError ? '1.5px solid #ef4444' : '1px solid #cbd5e1',
+                    background: addressError ? '#fffbfb' : '#fff',
+                    fontSize: '12px'
+                  }}
                 />
+                <FieldError error={addressError} />
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn outline" onClick={() => setAddressModalOpen(false)}>Cancel</button>

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebCarWash.Application.DTOs.Customer;
 using WebCarWash.Application.Interfaces;
@@ -9,6 +11,7 @@ namespace WebCarWash.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = "CUSTOMER,Customer,ADMIN,Admin")]
     public class CustomersController : ControllerBase
     {
         private readonly ICustomerService _customerService;
@@ -20,15 +23,36 @@ namespace WebCarWash.API.Controllers
             _customerService = customerService;
         }
 
-        private Guid GetCurrentCustomerId([FromHeader(Name = "X-Customer-Id")] Guid? headerCustomerId)
+        /// <summary>
+        /// Resource-Based Ownership Helper: Extracts the current authenticated user's ID
+        /// and guarantees customers can ONLY access their own resources.
+        /// </summary>
+        private Guid GetEffectiveCustomerId(Guid? requestedCustomerId = null)
         {
-            return headerCustomerId ?? DefaultDemoCustomerId;
+            // If user is Admin, they can access requested customer or fallback
+            if (User.IsInRole("Admin") && requestedCustomerId.HasValue && requestedCustomerId.Value != Guid.Empty)
+            {
+                return requestedCustomerId.Value;
+            }
+
+            var claim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("sub");
+            if (claim != null && Guid.TryParse(claim.Value, out var id))
+            {
+                return id;
+            }
+
+            // Fallback for demo header if present and no claims (or local dev)
+            return requestedCustomerId ?? DefaultDemoCustomerId;
         }
+
+        private bool IsAdmin() => User.IsInRole("Admin");
 
         /// <summary>
         /// Get live catalog (packages, active add-ons, active zones) configured by Admin.
+        /// Open to all visitors (AllowAnonymous).
         /// </summary>
         [HttpGet("catalog")]
+        [AllowAnonymous]
         public async Task<ActionResult<CustomerCatalogDto>> GetCatalog()
         {
             return Ok(await _customerService.GetCatalogAsync());
@@ -36,23 +60,27 @@ namespace WebCarWash.API.Controllers
 
         /// <summary>
         /// Get Customer profile details, wallet balance, loyalty points, and saved addresses.
+        /// Resource-based: Customer can only retrieve their own profile.
         /// </summary>
         [HttpGet("profile")]
         public async Task<ActionResult<CustomerProfileDto>> GetProfile([FromHeader(Name = "X-Customer-Id")] Guid? customerId)
         {
-            var profile = await _customerService.GetProfileAsync(GetCurrentCustomerId(customerId));
+            var effectiveId = GetEffectiveCustomerId(customerId);
+            var profile = await _customerService.GetProfileAsync(effectiveId);
             return Ok(profile);
         }
 
         /// <summary>
         /// Update Customer personal info (FullName, Phone, Email).
+        /// Resource-based: Customer can only update their own profile.
         /// </summary>
         [HttpPut("profile")]
         public async Task<ActionResult<CustomerProfileDto>> UpdateProfile(
             [FromBody] UpdateCustomerProfileDto dto,
             [FromHeader(Name = "X-Customer-Id")] Guid? customerId)
         {
-            var updated = await _customerService.UpdateProfileAsync(GetCurrentCustomerId(customerId), dto);
+            var effectiveId = GetEffectiveCustomerId(customerId);
+            var updated = await _customerService.UpdateProfileAsync(effectiveId, dto);
             if (updated == null) return NotFound(new { message = "Customer not found." });
             return Ok(updated);
         }
@@ -66,7 +94,8 @@ namespace WebCarWash.API.Controllers
             [FromHeader(Name = "X-Customer-Id")] Guid? customerId)
         {
             if (dto.Amount <= 0) return BadRequest(new { message = "Top-up amount must be greater than zero." });
-            var updated = await _customerService.TopUpWalletAsync(GetCurrentCustomerId(customerId), dto.Amount);
+            var effectiveId = GetEffectiveCustomerId(customerId);
+            var updated = await _customerService.TopUpWalletAsync(effectiveId, dto.Amount);
             if (updated == null) return NotFound(new { message = "Customer not found." });
             return Ok(updated);
         }
@@ -79,19 +108,34 @@ namespace WebCarWash.API.Controllers
             [FromBody] AddVehicleDto dto,
             [FromHeader(Name = "X-Customer-Id")] Guid? customerId)
         {
-            var vehicle = await _customerService.AddVehicleAsync(GetCurrentCustomerId(customerId), dto);
+            var effectiveId = GetEffectiveCustomerId(customerId);
+            var vehicle = await _customerService.AddVehicleAsync(effectiveId, dto);
             return Ok(vehicle);
         }
 
         /// <summary>
         /// Remove a vehicle from the customer's garage.
+        /// Resource-based Ownership check: ensures vehicle belongs to the authenticated customer.
         /// </summary>
         [HttpDelete("vehicles/{id}")]
         public async Task<IActionResult> DeleteVehicle(
             Guid id,
             [FromHeader(Name = "X-Customer-Id")] Guid? customerId)
         {
-            var success = await _customerService.DeleteVehicleAsync(GetCurrentCustomerId(customerId), id);
+            var effectiveId = GetEffectiveCustomerId(customerId);
+            var vehicles = await _customerService.GetVehiclesAsync(effectiveId);
+            var vehicleExists = false;
+            foreach (var v in vehicles)
+            {
+                if (v.Id == id) { vehicleExists = true; break; }
+            }
+
+            if (!vehicleExists && !IsAdmin())
+            {
+                return StatusCode(403, new { success = false, message = "غير مصرح لك بحذف هذه المركبة لأنها لا تتبع حسابك." });
+            }
+
+            var success = await _customerService.DeleteVehicleAsync(effectiveId, id);
             return Ok(new { success, vehicleId = id });
         }
 
@@ -101,20 +145,34 @@ namespace WebCarWash.API.Controllers
         [HttpGet("vehicles")]
         public async Task<ActionResult<IEnumerable<CustomerVehicleDto>>> GetVehicles([FromHeader(Name = "X-Customer-Id")] Guid? customerId)
         {
-            var list = await _customerService.GetVehiclesAsync(GetCurrentCustomerId(customerId));
+            var effectiveId = GetEffectiveCustomerId(customerId);
+            var list = await _customerService.GetVehiclesAsync(effectiveId);
             return Ok(list);
         }
 
         /// <summary>
-        /// 2. createBooking(params): Initiates a new car wash booking with chosen package, vehicle, location, and time.
+        /// 2. createBooking(params): Initiates a new car wash booking.
         /// </summary>
         [HttpPost("bookings")]
         public async Task<ActionResult<CustomerBookingDto>> CreateBooking(
             [FromBody] CreateCustomerBookingDto dto,
             [FromHeader(Name = "X-Customer-Id")] Guid? customerId)
         {
-            var booking = await _customerService.CreateBookingAsync(GetCurrentCustomerId(customerId), dto);
-            return Ok(booking);
+            if (dto.BookingType == WebCarWash.Domain.Enums.BookingType.SCHEDULED && dto.ScheduledAt < DateTime.UtcNow.AddMinutes(-10))
+            {
+                return BadRequest(new { success = false, message = "Scheduled date and time cannot be in the past." });
+            }
+
+            try
+            {
+                var effectiveId = GetEffectiveCustomerId(customerId);
+                var booking = await _customerService.CreateBookingAsync(effectiveId, dto);
+                return Ok(booking);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
 
         /// <summary>
@@ -123,25 +181,29 @@ namespace WebCarWash.API.Controllers
         [HttpGet("bookings")]
         public async Task<ActionResult<IEnumerable<CustomerBookingDto>>> GetBookings([FromHeader(Name = "X-Customer-Id")] Guid? customerId)
         {
-            var list = await _customerService.GetBookingsAsync(GetCurrentCustomerId(customerId));
+            var effectiveId = GetEffectiveCustomerId(customerId);
+            var list = await _customerService.GetBookingsAsync(effectiveId);
             return Ok(list);
         }
 
         /// <summary>
         /// Get details of a single booking.
+        /// Resource-based Ownership check: ensures booking belongs to the authenticated customer.
         /// </summary>
         [HttpGet("bookings/{id}")]
         public async Task<ActionResult<CustomerBookingDto>> GetBookingDetails(
             Guid id,
             [FromHeader(Name = "X-Customer-Id")] Guid? customerId)
         {
-            var booking = await _customerService.GetBookingDetailsAsync(GetCurrentCustomerId(customerId), id);
+            var effectiveId = GetEffectiveCustomerId(customerId);
+            var booking = await _customerService.GetBookingDetailsAsync(effectiveId, id);
             if (booking == null) return NotFound(new { message = $"Booking {id} not found." });
             return Ok(booking);
         }
 
         /// <summary>
-        /// Cancel or delete a booking: unrestricted before technician accepts, or within 2 minutes after acceptance.
+        /// Cancel or delete a booking.
+        /// Resource-based Ownership check: ensures booking belongs to the authenticated customer.
         /// </summary>
         [HttpDelete("bookings/{id}")]
         [HttpPost("bookings/{id}/cancel")]
@@ -149,13 +211,20 @@ namespace WebCarWash.API.Controllers
             Guid id,
             [FromHeader(Name = "X-Customer-Id")] Guid? customerId)
         {
-            var result = await _customerService.CancelOrDeleteBookingAsync(GetCurrentCustomerId(customerId), id);
+            var effectiveId = GetEffectiveCustomerId(customerId);
+            var booking = await _customerService.GetBookingDetailsAsync(effectiveId, id);
+            if (booking == null && !IsAdmin())
+            {
+                return StatusCode(403, new { success = false, message = "غير مصرح لك بإلغاء هذا الحجز لأنه يتبع مستخدم آخر." });
+            }
+
+            var result = await _customerService.CancelOrDeleteBookingAsync(effectiveId, id);
             if (!result.Success) return BadRequest(result);
             return Ok(result);
         }
 
         /// <summary>
-        /// 3. payDeposit(bookingId): Pays mandatory 200 EGP upfront deposit to lock in and confirm booking.
+        /// 3. payDeposit(bookingId): Pays mandatory 200 EGP upfront deposit.
         /// </summary>
         [HttpPost("bookings/{id}/deposit")]
         public async Task<ActionResult<CustomerPaymentResultDto>> PayDeposit(
@@ -163,89 +232,92 @@ namespace WebCarWash.API.Controllers
             [FromBody] PayDepositRequestDto dto,
             [FromHeader(Name = "X-Customer-Id")] Guid? customerId)
         {
-            var payment = await _customerService.PayDepositAsync(GetCurrentCustomerId(customerId), id, dto);
+            var effectiveId = GetEffectiveCustomerId(customerId);
+            var payment = await _customerService.PayDepositAsync(effectiveId, id, dto);
             if (payment.Status == "FAILED")
             {
-                return BadRequest(new { message = "Insufficient wallet balance for the 200 EGP deposit. Please top up your wallet or choose another payment method." });
+                return BadRequest(payment);
             }
             return Ok(payment);
         }
 
         /// <summary>
-        /// 4. approveUpsell(upsellId, decision): Approves or declines an extra charge proposed by technician.
+        /// Approve or reject an upsell inspection proposal.
         /// </summary>
-        [HttpPost("upsells/{id}/decision")]
-        public async Task<IActionResult> ApproveUpsell(
+        [HttpPost("bookings/{id}/upsell")]
+        public async Task<IActionResult> DecideUpsell(
             Guid id,
             [FromBody] ApproveUpsellRequestDto dto,
             [FromHeader(Name = "X-Customer-Id")] Guid? customerId)
         {
-            var success = await _customerService.ApproveUpsellAsync(GetCurrentCustomerId(customerId), id, dto.Decision);
-            return Ok(new
-            {
-                success,
-                message = dto.Decision ? "Upsell approved. Total price updated." : "Upsell declined. Proceeding with standard package."
-            });
+            var effectiveId = GetEffectiveCustomerId(customerId);
+            var result = await _customerService.ApproveUpsellAsync(effectiveId, id, dto.Decision);
+            return Ok(new { success = result });
         }
 
         /// <summary>
-        /// 5. submitReview(bookingId, rating): Submits star rating, feedback comment, and optional tip after wash is completed.
+        /// 4. fileDispute(bookingId, reason): Raises a customer dispute.
         /// </summary>
-        [HttpPost("bookings/{id}/reviews")]
-        public async Task<ActionResult<CustomerReviewResultDto>> SubmitReview(
-            Guid id,
-            [FromBody] SubmitCustomerReviewDto dto,
-            [FromHeader(Name = "X-Customer-Id")] Guid? customerId)
-        {
-            var review = await _customerService.SubmitReviewAsync(GetCurrentCustomerId(customerId), id, dto);
-            return Ok(review);
-        }
-
-        /// <summary>
-        /// Get all submitted reviews by the customer.
-        /// </summary>
-        [HttpGet("reviews")]
-        public async Task<ActionResult<IEnumerable<CustomerReviewItemDto>>> GetReviews([FromHeader(Name = "X-Customer-Id")] Guid? customerId)
-        {
-            var reviews = await _customerService.GetReviewsAsync(GetCurrentCustomerId(customerId));
-            return Ok(reviews);
-        }
-
-        /// <summary>
-        /// 6. fileDispute(bookingId, reason): Opens official complaint within 12 hours of wash completion if unsatisfied.
-        /// </summary>
-        [HttpPost("bookings/{id}/disputes")]
+        [HttpPost("bookings/{id}/dispute")]
         public async Task<ActionResult<CustomerDisputeResultDto>> FileDispute(
             Guid id,
             [FromBody] FileCustomerDisputeDto dto,
             [FromHeader(Name = "X-Customer-Id")] Guid? customerId)
         {
-            var dispute = await _customerService.FileDisputeAsync(GetCurrentCustomerId(customerId), id, dto);
+            var effectiveId = GetEffectiveCustomerId(customerId);
+            var dispute = await _customerService.FileDisputeAsync(effectiveId, id, dto);
             return Ok(dispute);
         }
 
         /// <summary>
-        /// Add a saved address for faster future bookings.
+        /// 5. reviewService(bookingId, rating, comment): Submits a review and rating.
         /// </summary>
-        [HttpPost("addresses")]
-        public async Task<IActionResult> AddSavedAddress(
-            [FromBody] string address,
+        [HttpPost("bookings/{id}/review")]
+        public async Task<ActionResult<CustomerReviewResultDto>> SubmitReview(
+            Guid id,
+            [FromBody] SubmitCustomerReviewDto dto,
             [FromHeader(Name = "X-Customer-Id")] Guid? customerId)
         {
-            var success = await _customerService.AddSavedAddressAsync(GetCurrentCustomerId(customerId), address);
-            return Ok(new { success, address });
+            var effectiveId = GetEffectiveCustomerId(customerId);
+            var review = await _customerService.SubmitReviewAsync(effectiveId, id, dto);
+            return Ok(review);
+        }
+
+        /// <summary>
+        /// Get reviews for the customer.
+        /// </summary>
+        [HttpGet("reviews")]
+        public async Task<ActionResult<IEnumerable<CustomerReviewItemDto>>> GetReviews([FromHeader(Name = "X-Customer-Id")] Guid? customerId)
+        {
+            var effectiveId = GetEffectiveCustomerId(customerId);
+            var list = await _customerService.GetReviewsAsync(effectiveId);
+            return Ok(list);
+        }
+
+        /// <summary>
+        /// Add a new saved address.
+        /// </summary>
+        [HttpPost("addresses")]
+        public async Task<IActionResult> AddAddress(
+            [FromBody] AddAddressDto dto,
+            [FromHeader(Name = "X-Customer-Id")] Guid? customerId)
+        {
+            var effectiveId = GetEffectiveCustomerId(customerId);
+            var success = await _customerService.AddSavedAddressAsync(effectiveId, dto.Address);
+            return Ok(new { success });
         }
 
         /// <summary>
         /// Delete a saved address.
         /// </summary>
         [HttpDelete("addresses")]
-        public async Task<IActionResult> DeleteSavedAddress(
+        public async Task<IActionResult> DeleteAddress(
             [FromBody] DeleteAddressDto dto,
             [FromHeader(Name = "X-Customer-Id")] Guid? customerId)
         {
-            var success = await _customerService.DeleteSavedAddressAsync(GetCurrentCustomerId(customerId), dto.Address);
-            return Ok(new { success, address = dto.Address });
+            var effectiveId = GetEffectiveCustomerId(customerId);
+            var success = await _customerService.DeleteSavedAddressAsync(effectiveId, dto.Address);
+            return Ok(new { success });
         }
     }
 }

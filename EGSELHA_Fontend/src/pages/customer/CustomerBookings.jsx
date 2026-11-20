@@ -19,8 +19,11 @@ import {
   AlertCircle
 } from 'lucide-react'
 import PageTitle from '../../component/PageTitle'
+import FieldError from '../../component/FieldError'
 import { useCustomer } from '../../context/CustomerContext'
+import { useAuth } from '../../context/AuthContext'
 import { customerApi } from '../../services/customerApi'
+import { validateDispute, extractApiErrors } from '../../utils/validation'
 
 export default function CustomerBookings() {
   const navigate = useNavigate()
@@ -29,6 +32,7 @@ export default function CustomerBookings() {
   const payBookingId = searchParams.get('payBookingId')
 
   const { bookings, profile, notify, refreshData } = useCustomer()
+  const { user } = useAuth()
 
   const [activeTab, setActiveTab] = useState(initialFilter) // 'all', 'active', 'completed', 'disputed'
 
@@ -96,6 +100,8 @@ export default function CustomerBookings() {
   const [disputeModal, setDisputeModal] = useState(null)
   const [disputeReason, setDisputeReason] = useState('')
   const [filingDispute, setFilingDispute] = useState(false)
+  const [disputeError, setDisputeError] = useState('')
+  const [serverDisputeError, setServerDisputeError] = useState('')
 
   // Invoice / Receipt Modal (17. Invoice specifications)
   const [invoiceModal, setInvoiceModal] = useState(null)
@@ -176,12 +182,20 @@ export default function CustomerBookings() {
   // Handle File Dispute (Behavior 6)
   const handleFileDispute = async (e) => {
     e.preventDefault()
-    if (!disputeModal || !disputeReason.trim()) return
+    if (!disputeModal) return
 
+    const { isValid, errors } = validateDispute({ reason: disputeReason })
+    if (!isValid) {
+      setDisputeError(errors.reason)
+      return
+    }
+
+    setDisputeError('')
+    setServerDisputeError('')
     setFilingDispute(true)
     try {
       await customerApi.fileDispute(disputeModal.id, {
-        reason: disputeReason,
+        reason: disputeReason.trim(),
         evidenceUrls: []
       })
       notify(`Dispute case opened. Admin will investigate against PhotoQA within 12 hours.`)
@@ -190,7 +204,9 @@ export default function CustomerBookings() {
       refreshData()
     } catch (err) {
       console.error(err)
-      notify('Failed to file dispute.')
+      const { message } = extractApiErrors(err)
+      setServerDisputeError(message)
+      notify(message)
     } finally {
       setFilingDispute(false)
     }
@@ -724,8 +740,14 @@ export default function CustomerBookings() {
                 <X size={18} />
               </button>
             </div>
-            <form onSubmit={handleFileDispute}>
+            <form onSubmit={handleFileDispute} noValidate>
               <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                {serverDisputeError && (
+                  <div style={{ padding: '10px 14px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#991b1b', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <AlertCircle size={15} style={{ flexShrink: 0 }} />
+                    <span>{serverDisputeError}</span>
+                  </div>
+                )}
                 <div style={{ padding: '12px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '10px' }}>
                   <b style={{ fontSize: '12px', color: '#991b1b', display: 'block' }}>12-Hour Investigation Window</b>
                   <p style={{ margin: '3px 0 0', fontSize: '10px', color: '#b91c1c' }}>
@@ -735,16 +757,26 @@ export default function CustomerBookings() {
 
                 <div>
                   <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
-                    Reason for Complaint:
+                    Reason for Complaint: *
                   </label>
                   <textarea
                     rows={4}
-                    required
                     placeholder="Describe what was unsatisfactory (e.g. rims not cleaned, carpet still stained)..."
                     value={disputeReason}
-                    onChange={(e) => setDisputeReason(e.target.value)}
-                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '12px' }}
+                    onChange={(e) => {
+                      setDisputeReason(e.target.value)
+                      if (disputeError) setDisputeError('')
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '8px',
+                      border: disputeError ? '1.5px solid #ef4444' : '1px solid #cbd5e1',
+                      background: disputeError ? '#fffbfb' : '#fff',
+                      fontSize: '12px'
+                    }}
                   />
+                  <FieldError error={disputeError} />
                 </div>
               </div>
               <div className="modal-footer">
@@ -775,8 +807,8 @@ export default function CustomerBookings() {
               <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
                 <div>
                   <span style={{ fontSize: '10px', color: '#64748b' }}>Customer</span>
-                  <b style={{ display: 'block', fontSize: '12px', color: '#102a40' }}>{profile?.fullName || 'Ahmed Khaled'}</b>
-                  <small style={{ fontSize: '10px', color: '#64748b' }}>{profile?.phone || '+20 100 999 1111'}</small>
+                  <b style={{ display: 'block', fontSize: '12px', color: '#102a40' }}>{user?.fullName || profile?.fullName || 'Customer'}</b>
+                  <small style={{ fontSize: '10px', color: '#64748b' }}>{user?.phone || profile?.phone || ''}</small>
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   <span style={{ fontSize: '10px', color: '#64748b' }}>Invoice Date</span>

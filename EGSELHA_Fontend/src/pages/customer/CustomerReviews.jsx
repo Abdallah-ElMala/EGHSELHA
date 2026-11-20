@@ -14,8 +14,10 @@ import {
   Gift
 } from 'lucide-react'
 import PageTitle from '../../component/PageTitle'
+import FieldError from '../../component/FieldError'
 import { useCustomer } from '../../context/CustomerContext'
 import { customerApi } from '../../services/customerApi'
+import { extractApiErrors } from '../../utils/validation'
 
 export default function CustomerReviews() {
   const navigate = useNavigate()
@@ -33,6 +35,8 @@ export default function CustomerReviews() {
   const [tipAmount, setTipAmount] = useState(20)
   const [commentText, setCommentText] = useState('')
   const [submittingReview, setSubmittingReview] = useState(false)
+  const [reviewError, setReviewError] = useState('')
+  const [serverReviewError, setServerReviewError] = useState('')
 
   // Initial demo reviews + local reviews
   const [submittedReviews, setSubmittedReviews] = useState([])
@@ -110,6 +114,13 @@ export default function CustomerReviews() {
     e.preventDefault()
     if (!selectedBooking) return
 
+    if (tipAmount < 0 || tipAmount > 5000) {
+      setReviewError('Tip amount must be between 0 and 5,000 EGP.')
+      return
+    }
+
+    setReviewError('')
+    setServerReviewError('')
     setSubmittingReview(true)
     try {
       if (selectedBooking.id && !selectedBooking.id.startsWith('b')) {
@@ -148,8 +159,9 @@ export default function CustomerReviews() {
       refreshData()
     } catch (err) {
       console.error(err)
-      notify('Review submitted successfully! +50 Points awarded.')
-      setReviewModalOpen(false)
+      const { message } = extractApiErrors(err)
+      setServerReviewError(message)
+      notify(message)
     } finally {
       setSubmittingReview(false)
     }
@@ -330,8 +342,18 @@ export default function CustomerReviews() {
                 <X size={18} />
               </button>
             </div>
-            <form onSubmit={handleSubmitReview}>
+            <form onSubmit={handleSubmitReview} noValidate>
               <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {serverReviewError && (
+                  <div style={{ padding: '10px 14px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#991b1b', fontSize: '12px' }}>
+                    {serverReviewError}
+                  </div>
+                )}
+                {reviewError && (
+                  <div style={{ padding: '10px 14px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#991b1b', fontSize: '12px' }}>
+                    {reviewError}
+                  </div>
+                )}
                 {/* Live Average Rating Display */}
                 <div style={{ textAlign: 'center', padding: '14px', background: '#fffbeb', borderRadius: '12px', border: '1px solid #fde68a' }}>
                   <span style={{ fontSize: '11px', color: '#b45309', fontWeight: 600 }}>Calculated Overall Rating (calculateAverage)</span>

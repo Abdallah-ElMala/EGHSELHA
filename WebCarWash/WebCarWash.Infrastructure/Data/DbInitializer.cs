@@ -61,6 +61,19 @@ namespace WebCarWash.Infrastructure.Data
                 IF COL_LENGTH('Technicians', 'VehiclePlate') IS NULL
                 BEGIN
                     ALTER TABLE [Technicians] ADD [VehiclePlate] nvarchar(50) NULL;
+                END
+                IF COL_LENGTH('Users', 'RefreshToken') IS NULL
+                BEGIN
+                    ALTER TABLE [Users] ADD [RefreshToken] nvarchar(500) NULL;
+                    ALTER TABLE [Users] ADD [RefreshTokenExpiryTime] datetime2 NULL;
+                    ALTER TABLE [Users] ADD [IsEmailConfirmed] bit NOT NULL DEFAULT 0;
+                    ALTER TABLE [Users] ADD [EmailConfirmationToken] nvarchar(500) NULL;
+                    ALTER TABLE [Users] ADD [PasswordResetToken] nvarchar(500) NULL;
+                    ALTER TABLE [Users] ADD [PasswordResetExpiry] datetime2 NULL;
+                    ALTER TABLE [Users] ADD [TwoFactorEnabled] bit NOT NULL DEFAULT 0;
+                    ALTER TABLE [Users] ADD [TwoFactorCode] nvarchar(50) NULL;
+                    ALTER TABLE [Users] ADD [TwoFactorExpiry] datetime2 NULL;
+                    ALTER TABLE [Users] ADD [GoogleSubjectId] nvarchar(150) NULL;
                 END");
 
             await context.Database.ExecuteSqlRawAsync(@"

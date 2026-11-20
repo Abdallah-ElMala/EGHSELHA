@@ -1,8 +1,10 @@
 import { useState } from 'react'
-import { Car, Plus, ShieldCheck, CheckCircle2, MapPin, Trash2, Camera, X } from 'lucide-react'
+import { Car, Plus, ShieldCheck, CheckCircle2, MapPin, Trash2, Camera, X, AlertCircle } from 'lucide-react'
 import PageTitle from '../../component/PageTitle'
+import FieldError from '../../component/FieldError'
 import { useCustomer } from '../../context/CustomerContext'
 import { customerApi } from '../../services/customerApi'
+import { validateVehicle, validateSavedAddress, extractApiErrors } from '../../utils/validation'
 
 export default function CustomerVehicles() {
   const { vehicles, profile, notify, refreshData } = useCustomer()
@@ -17,18 +19,58 @@ export default function CustomerVehicles() {
   const [sizeType, setSizeType] = useState(0) // 0: SEDAN, 1: SUV, 2: TRUCK_VAN
   const [photoUrl, setPhotoUrl] = useState('')
   const [submittingVehicle, setSubmittingVehicle] = useState(false)
+  const [vehicleErrors, setVehicleErrors] = useState({})
+  const [serverVehicleError, setServerVehicleError] = useState('')
 
   // Add Saved Address Modal
   const [addressModalOpen, setAddressModalOpen] = useState(false)
   const [newAddressText, setNewAddressText] = useState('')
   const [submittingAddress, setSubmittingAddress] = useState(false)
+  const [addressError, setAddressError] = useState('')
+  const [serverAddressError, setServerAddressError] = useState('')
+
+  const handleOpenVehicleModal = () => {
+    setVehicleErrors({})
+    setServerVehicleError('')
+    setMake('')
+    setModel('')
+    setYear(2023)
+    setColor('Black')
+    setLicensePlate('')
+    setPhotoUrl('')
+    setSizeType(0)
+    setVehicleModalOpen(true)
+  }
+
+  const handleOpenAddressModal = () => {
+    setAddressError('')
+    setServerAddressError('')
+    setNewAddressText('')
+    setAddressModalOpen(true)
+  }
 
   // Handle Add Vehicle (Behavior 1: addVehicle)
   const handleAddVehicle = async (e) => {
     e.preventDefault()
-    if (!make.trim() || !model.trim() || !licensePlate.trim()) return
+
+    // Client-side validation
+    const { isValid, errors } = validateVehicle({
+      make,
+      model,
+      year,
+      color,
+      licensePlate
+    })
+
+    if (!isValid) {
+      setVehicleErrors(errors)
+      return
+    }
 
     setSubmittingVehicle(true)
+    setVehicleErrors({})
+    setServerVehicleError('')
+
     try {
       await customerApi.addVehicle({
         make: make.trim(),
@@ -41,14 +83,15 @@ export default function CustomerVehicles() {
       })
       notify(`Vehicle ${make} ${model} registered successfully!`)
       setVehicleModalOpen(false)
-      setMake('')
-      setModel('')
-      setLicensePlate('')
-      setPhotoUrl('')
       refreshData()
     } catch (err) {
-      console.error(err)
-      notify('Failed to add vehicle.')
+      console.error('Add vehicle error:', err)
+      const { message, fieldErrors } = extractApiErrors(err)
+      if (Object.keys(fieldErrors).length > 0) {
+        setVehicleErrors(fieldErrors)
+      }
+      setServerVehicleError(message)
+      notify(message)
     } finally {
       setSubmittingVehicle(false)
     }
@@ -57,9 +100,18 @@ export default function CustomerVehicles() {
   // Handle Add Address (Attribute: savedAddresses)
   const handleAddAddress = async (e) => {
     e.preventDefault()
-    if (!newAddressText.trim()) return
+
+    // Client-side validation
+    const errorMsg = validateSavedAddress(newAddressText)
+    if (errorMsg) {
+      setAddressError(errorMsg)
+      return
+    }
 
     setSubmittingAddress(true)
+    setAddressError('')
+    setServerAddressError('')
+
     try {
       await customerApi.addSavedAddress(newAddressText.trim())
       notify(`Address "${newAddressText.trim()}" added to your saved locations!`)
@@ -67,8 +119,10 @@ export default function CustomerVehicles() {
       setNewAddressText('')
       refreshData()
     } catch (err) {
-      console.error(err)
-      notify('Failed to save address.')
+      console.error('Add address error:', err)
+      const { message } = extractApiErrors(err)
+      setServerAddressError(message)
+      notify(message)
     } finally {
       setSubmittingAddress(false)
     }
@@ -98,155 +152,223 @@ export default function CustomerVehicles() {
     }
   }
 
-  const getMultiplierInfo = (type) => {
-    const s = String(type).toUpperCase()
-    if (s === 'SUV' || type === 1) return { label: 'SUV', factor: '1.25× base price', bg: '#e0f2fe', text: '#0369a1' }
-    if (s === 'TRUCK_VAN' || type === 2) return { label: 'Truck / Van', factor: '1.50× base price', bg: '#fef3c7', text: '#b45309' }
-    return { label: 'Sedan', factor: '1.0× base price', bg: '#f0fdf4', text: '#16a34a' }
+  const getSizeBadge = (sizeType) => {
+    switch (sizeType) {
+      case 0:
+        return { label: 'Sedan (1.0× Multiplier)', color: '#087cf0', bg: '#eaf4ff' }
+      case 1:
+        return { label: 'SUV (1.25× Multiplier)', color: '#d97706', bg: '#fef3c7' }
+      case 2:
+        return { label: 'Truck / Van (1.5× Multiplier)', color: '#7c3aed', bg: '#ede9fe' }
+      default:
+        return { label: 'Sedan (1.0×)', color: '#087cf0', bg: '#eaf4ff' }
+    }
   }
 
-  const savedAddresses = profile?.savedAddresses || []
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
       <PageTitle
-        eyebrow="3. CUSTOMER / GARAGE & ADDRESSES"
-        title="Vehicles & Saved Locations"
-        desc="Manage your vehicles (size category directly controls pricing multipliers) and saved locations for instant 1-click booking."
-        action={
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button className="btn outline" onClick={() => setAddressModalOpen(true)}>
-              <MapPin size={15} /> Add Saved Address
-            </button>
-            <button className="btn primary" onClick={() => setVehicleModalOpen(true)}>
-              <Plus size={15} /> Register New Vehicle
-            </button>
-          </div>
-        }
+        eyebrow="2. CUSTOMER / GARAGE & ADDRESSES"
+        title="Vehicle Garage & Locations"
+        desc="Register and manage vehicles under your customer profile. Vehicle size directly dictates wash tier multipliers (Sedan 1.0×, SUV 1.25×, Truck 1.50×)."
       />
 
-      {/* SECTION 1: Registered Vehicles (5. Vehicle) */}
-      <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-          <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#102a40' }}>
-            Registered Vehicles ({vehicles.length})
-          </h3>
+      {/* Top Action Bar */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <span style={{ fontSize: '13px', fontWeight: 700, color: '#1e293b' }}>
+            Registered Vehicles: <span style={{ color: '#087cf0' }}>{vehicles.length}</span>
+          </span>
+          <span style={{ color: '#cbd5e1' }}>•</span>
+          <span style={{ fontSize: '13px', fontWeight: 700, color: '#1e293b' }}>
+            Saved Addresses: <span style={{ color: '#087cf0' }}>{profile?.savedAddresses?.length || 0}</span>
+          </span>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '18px' }}>
-          {vehicles.map((v) => {
-            const mult = getMultiplierInfo(v.sizeType)
-            return (
-              <div
-                className="panel"
-                key={v.id}
-                style={{
-                  borderRadius: '16px',
-                  padding: '20px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '14px',
-                  border: '1px solid #edf2f7',
-                  boxShadow: '0 2px 10px rgba(0,0,0,0.02)'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                  <div
-                    style={{
-                      width: '50px',
-                      height: '50px',
-                      borderRadius: '12px',
-                      background: '#07172c',
-                      color: '#60b4ff',
-                      display: 'grid',
-                      placeItems: 'center',
-                      flexShrink: 0
-                    }}
-                  >
-                    <Car size={26} />
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <b style={{ fontSize: '15px', color: '#102a40', display: 'block' }}>{v.make} {v.model}</b>
-                    <span style={{ fontSize: '12px', color: '#64748b' }}>
-                      {v.year} · Color: {v.color}
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => handleDeleteVehicle(v.id, `${v.make} ${v.model}`)}
-                    title="Delete vehicle from garage"
-                    style={{
-                      background: '#fff1f2',
-                      border: '1px solid #fecdd3',
-                      color: '#e11d48',
-                      cursor: 'pointer',
-                      borderRadius: '8px',
-                      padding: '8px',
-                      display: 'grid',
-                      placeItems: 'center',
-                      transition: 'all 0.2s ease'
-                    }}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-
-                <div style={{ background: '#f8fafc', padding: '12px 14px', borderRadius: '10px', border: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-                    <span style={{ color: '#64748b' }}>License Plate:</span>
-                    <b style={{ color: '#102a40', letterSpacing: '1px' }}>{v.licensePlate}</b>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', alignItems: 'center' }}>
-                    <span style={{ color: '#64748b' }}>Vehicle Size Multiplier:</span>
-                    <span style={{ fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: mult.bg, color: mult.text }}>
-                      {mult.label} ({mult.factor})
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )
-          })}
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button className="btn outline" onClick={handleOpenAddressModal}>
+            <MapPin size={15} /> Add Location
+          </button>
+          <button className="btn primary" onClick={handleOpenVehicleModal}>
+            <Plus size={16} /> Register New Car
+          </button>
         </div>
       </div>
 
-      {/* SECTION 2: Saved Locations (Attribute savedAddresses from 3. Customer) */}
-      <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '24px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-          <div>
-            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#102a40' }}>
-              Saved Addresses & Parking Spots
-            </h3>
-            <small style={{ color: '#64748b', fontSize: '11px' }}>
-              Fast 1-click address fill for your upcoming washes
-            </small>
+      {/* SECTION 1: Registered Vehicles Grid (5. Vehicle specifications) */}
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+          <Car size={18} style={{ color: '#087cf0' }} />
+          <h2 style={{ fontSize: '16px', fontWeight: 800, color: '#102a40', margin: 0 }}>
+            Registered Garage Vehicles
+          </h2>
+        </div>
+
+        {vehicles.length === 0 ? (
+          <div className="panel" style={{ padding: '40px', textAlign: 'center', borderRadius: '16px' }}>
+            <Car size={42} style={{ color: '#cbd5e1', margin: '0 auto 12px' }} />
+            <h3 style={{ margin: '0 0 6px', color: '#1e293b' }}>No vehicles registered yet</h3>
+            <p style={{ margin: '0 0 16px', fontSize: '12px', color: '#64748b' }}>
+              Add your primary vehicle to enable 1-click on-demand car washes.
+            </p>
+            <button className="btn primary" onClick={handleOpenVehicleModal}>
+              <Plus size={16} /> Register Your First Car
+            </button>
           </div>
-          <button className="btn outline" style={{ fontSize: '11px', padding: '6px 12px' }} onClick={() => setAddressModalOpen(true)}>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '18px' }}>
+            {vehicles.map((v) => {
+              const badge = getSizeBadge(v.sizeType)
+              return (
+                <div
+                  key={v.id}
+                  className="panel"
+                  style={{
+                    borderRadius: '16px',
+                    padding: '20px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
+                    border: '1px solid #e2e8f0',
+                    position: 'relative'
+                  }}
+                >
+                  <div>
+                    {/* Header: Photo or Placeholder & Delete */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
+                      <div
+                        style={{
+                          width: '52px',
+                          height: '52px',
+                          borderRadius: '12px',
+                          background: '#f1f5f9',
+                          display: 'grid',
+                          placeItems: 'center',
+                          color: '#087cf0',
+                          overflow: 'hidden'
+                        }}
+                      >
+                        {v.photoUrl ? (
+                          <img src={v.photoUrl} alt={v.model} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                          <Car size={26} />
+                        )}
+                      </div>
+
+                      <button
+                        onClick={() => handleDeleteVehicle(v.id, `${v.make} ${v.model}`)}
+                        title="Delete vehicle"
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#94a3b8',
+                          cursor: 'pointer',
+                          padding: '6px',
+                          borderRadius: '6px',
+                          display: 'grid',
+                          placeItems: 'center',
+                          transition: 'color 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
+                        onMouseLeave={(e) => (e.currentTarget.style.color = '#94a3b8')}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+
+                    {/* Car Name & Year */}
+                    <div style={{ marginBottom: '12px' }}>
+                      <h3 style={{ margin: '0 0 3px', fontSize: '16px', fontWeight: 800, color: '#102a40' }}>
+                        {v.make} {v.model}
+                      </h3>
+                      <div style={{ display: 'flex', gap: '8px', fontSize: '11px', color: '#64748b' }}>
+                        <span>Year: <b>{v.year}</b></span>
+                        <span>•</span>
+                        <span>Color: <b>{v.color}</b></span>
+                      </div>
+                    </div>
+
+                    {/* License Plate Banner */}
+                    <div
+                      style={{
+                        background: '#f8fafc',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '8px',
+                        padding: '8px 12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginBottom: '14px'
+                      }}
+                    >
+                      <span style={{ fontSize: '10px', color: '#64748b', fontWeight: 600 }}>PLATE NUMBER</span>
+                      <b style={{ fontSize: '13px', letterSpacing: '1px', color: '#1e293b' }}>
+                        {v.licensePlate}
+                      </b>
+                    </div>
+                  </div>
+
+                  {/* Size Multiplier Badge */}
+                  <div
+                    style={{
+                      background: badge.bg,
+                      color: badge.color,
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      padding: '7px 12px',
+                      borderRadius: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between'
+                    }}
+                  >
+                    <span>{badge.label}</span>
+                    <ShieldCheck size={14} />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* SECTION 2: Saved Locations (Attribute savedAddresses) */}
+      <div className="panel" style={{ borderRadius: '16px', padding: '22px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <div>
+            <h3 style={{ margin: '0 0 4px', fontSize: '15px', fontWeight: 800, color: '#102a40' }}>
+              Saved Parking Addresses (savedAddresses)
+            </h3>
+            <p style={{ margin: 0, fontSize: '11px', color: '#64748b' }}>
+              Locations stored on your account profile for instant wash dispatch.
+            </p>
+          </div>
+          <button className="btn outline" onClick={handleOpenAddressModal}>
             <Plus size={14} /> Add Address
           </button>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '14px' }}>
-          {savedAddresses.map((addr, idx) => (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '12px' }}>
+          {(profile?.savedAddresses || ['Nasr City, Abbas El Akkad, Cairo', 'Heliopolis, Korba, Cairo']).map((addr, idx) => (
             <div
               key={idx}
               style={{
-                background: '#fff',
-                borderRadius: '12px',
-                padding: '16px',
-                border: '1px solid #edf2f7',
                 display: 'flex',
-                alignItems: 'flex-start',
-                gap: '12px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '12px 14px',
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: '10px',
+                gap: '10px'
               }}
             >
-              <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#eff6ff', color: '#087cf0', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-                <MapPin size={18} />
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <b style={{ fontSize: '12px', color: '#102a40', display: 'block' }}>
-                  {idx === 0 ? 'Home' : idx === 1 ? 'Work' : `Saved Location #${idx + 1}`}
-                </b>
-                <p style={{ margin: '3px 0 0', fontSize: '11px', color: '#64748b', wordBreak: 'break-word' }}>{addr}</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+                <MapPin size={16} style={{ color: '#087cf0', flexShrink: 0 }} />
+                <span style={{ fontSize: '12px', color: '#1e293b', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {addr}
+                </span>
               </div>
               <button
                 onClick={() => handleDeleteAddress(addr)}
@@ -285,79 +407,136 @@ export default function CustomerVehicles() {
                 <X size={18} />
               </button>
             </div>
-            <form onSubmit={handleAddVehicle}>
+            <form onSubmit={handleAddVehicle} noValidate>
               <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                {serverVehicleError && (
+                  <div style={{ padding: '10px 14px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#991b1b', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <AlertCircle size={15} style={{ flexShrink: 0 }} />
+                    <span>{serverVehicleError}</span>
+                  </div>
+                )}
+
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
-                      Brand / Make
+                      Brand / Make *
                     </label>
                     <input
                       type="text"
-                      required
                       placeholder="e.g. BMW, Toyota"
                       value={make}
-                      onChange={(e) => setMake(e.target.value)}
-                      style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '12px' }}
+                      onChange={(e) => {
+                        setMake(e.target.value)
+                        if (vehicleErrors.make) setVehicleErrors({ ...vehicleErrors, make: '' })
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '9px 12px',
+                        borderRadius: '8px',
+                        border: vehicleErrors.make ? '1.5px solid #ef4444' : '1px solid #cbd5e1',
+                        background: vehicleErrors.make ? '#fffbfb' : '#fff',
+                        fontSize: '12px'
+                      }}
                     />
+                    <FieldError error={vehicleErrors.make} />
                   </div>
                   <div>
                     <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
-                      Model
+                      Model *
                     </label>
                     <input
                       type="text"
-                      required
                       placeholder="e.g. 320i, Corolla"
                       value={model}
-                      onChange={(e) => setModel(e.target.value)}
-                      style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '12px' }}
+                      onChange={(e) => {
+                        setModel(e.target.value)
+                        if (vehicleErrors.model) setVehicleErrors({ ...vehicleErrors, model: '' })
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '9px 12px',
+                        borderRadius: '8px',
+                        border: vehicleErrors.model ? '1.5px solid #ef4444' : '1px solid #cbd5e1',
+                        background: vehicleErrors.model ? '#fffbfb' : '#fff',
+                        fontSize: '12px'
+                      }}
                     />
+                    <FieldError error={vehicleErrors.model} />
                   </div>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
-                      Year
+                      Year *
                     </label>
                     <input
                       type="number"
-                      required
-                      min={1990}
-                      max={2026}
+                      min={1950}
+                      max={2030}
                       value={year}
-                      onChange={(e) => setYear(e.target.value)}
-                      style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '12px' }}
+                      onChange={(e) => {
+                        setYear(e.target.value)
+                        if (vehicleErrors.year) setVehicleErrors({ ...vehicleErrors, year: '' })
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '9px 12px',
+                        borderRadius: '8px',
+                        border: vehicleErrors.year ? '1.5px solid #ef4444' : '1px solid #cbd5e1',
+                        background: vehicleErrors.year ? '#fffbfb' : '#fff',
+                        fontSize: '12px'
+                      }}
                     />
+                    <FieldError error={vehicleErrors.year} />
                   </div>
                   <div>
                     <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
-                      Color
+                      Color *
                     </label>
                     <input
                       type="text"
-                      required
                       placeholder="e.g. White, Black, Gray"
                       value={color}
-                      onChange={(e) => setColor(e.target.value)}
-                      style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '12px' }}
+                      onChange={(e) => {
+                        setColor(e.target.value)
+                        if (vehicleErrors.color) setVehicleErrors({ ...vehicleErrors, color: '' })
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '9px 12px',
+                        borderRadius: '8px',
+                        border: vehicleErrors.color ? '1.5px solid #ef4444' : '1px solid #cbd5e1',
+                        background: vehicleErrors.color ? '#fffbfb' : '#fff',
+                        fontSize: '12px'
+                      }}
                     />
+                    <FieldError error={vehicleErrors.color} />
                   </div>
                 </div>
 
                 <div>
                   <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
-                    License Plate (Identification)
+                    License Plate (Identification) *
                   </label>
                   <input
                     type="text"
-                    required
                     placeholder="e.g. أ ب ج 1234 or ABC 1234"
                     value={licensePlate}
-                    onChange={(e) => setLicensePlate(e.target.value)}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '12px' }}
+                    onChange={(e) => {
+                      setLicensePlate(e.target.value)
+                      if (vehicleErrors.licensePlate) setVehicleErrors({ ...vehicleErrors, licensePlate: '' })
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '9px 12px',
+                      borderRadius: '8px',
+                      border: vehicleErrors.licensePlate ? '1.5px solid #ef4444' : '1px solid #cbd5e1',
+                      background: vehicleErrors.licensePlate ? '#fffbfb' : '#fff',
+                      fontSize: '12px'
+                    }}
                   />
+                  <FieldError error={vehicleErrors.licensePlate} />
                 </div>
 
                 {/* Size Category (2. VehicleSize Enum) */}
@@ -416,19 +595,35 @@ export default function CustomerVehicles() {
                 <X size={18} />
               </button>
             </div>
-            <form onSubmit={handleAddAddress}>
+            <form onSubmit={handleAddAddress} noValidate>
               <div className="modal-body">
+                {serverAddressError && (
+                  <div style={{ padding: '10px 14px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#991b1b', fontSize: '12px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <AlertCircle size={15} style={{ flexShrink: 0 }} />
+                    <span>{serverAddressError}</span>
+                  </div>
+                )}
                 <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
-                  Address Details:
+                  Address Details *
                 </label>
                 <input
                   type="text"
-                  required
                   placeholder="e.g. Sheikh Zayed, Beverly Hills, Villa 102"
                   value={newAddressText}
-                  onChange={(e) => setNewAddressText(e.target.value)}
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '12px' }}
+                  onChange={(e) => {
+                    setNewAddressText(e.target.value)
+                    if (addressError) setAddressError('')
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: '8px',
+                    border: addressError ? '1.5px solid #ef4444' : '1px solid #cbd5e1',
+                    background: addressError ? '#fffbfb' : '#fff',
+                    fontSize: '12px'
+                  }}
                 />
+                <FieldError error={addressError} />
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn outline" onClick={() => setAddressModalOpen(false)}>Cancel</button>

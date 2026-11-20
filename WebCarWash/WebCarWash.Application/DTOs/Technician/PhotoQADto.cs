@@ -1,13 +1,20 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 using WebCarWash.Domain.Enums;
 
 namespace WebCarWash.Application.DTOs.Technician
 {
     public class UploadQAPhotoDto
     {
+        [EnumDataType(typeof(PhotoType), ErrorMessage = "Invalid photo type (must be BEFORE or AFTER).")]
         public PhotoType PhotoType { get; set; } // BEFORE or AFTER
+
+        [EnumDataType(typeof(PhotoCategory), ErrorMessage = "Invalid photo category.")]
         public PhotoCategory Category { get; set; } // FRONT, BACK, INTERIOR, REAR_SEATS, TRUNK
+
+        [Required(ErrorMessage = "Photo URL or file path is required.")]
         public string ImageUrl { get; set; } = string.Empty;
+
         public float GpsLatitude { get; set; }
         public float GpsLongitude { get; set; }
     }

@@ -17,8 +17,10 @@ import {
   Tag
 } from 'lucide-react'
 import PageTitle from '../../component/PageTitle'
+import FieldError from '../../component/FieldError'
 import { useCustomer } from '../../context/CustomerContext'
 import { customerApi } from '../../services/customerApi'
+import { validateBooking, extractApiErrors } from '../../utils/validation'
 
 // 6. ServicePackage specifications from Document
 const PACKAGES = [
@@ -171,6 +173,8 @@ export default function CustomerBookWash() {
   const [saveNewAddress, setSaveNewAddress] = useState(false)
 
   const [submitting, setSubmitting] = useState(false)
+  const [bookingErrors, setBookingErrors] = useState({})
+  const [serverBookingError, setServerBookingError] = useState('')
 
   const selectedVehicle = vehicles.find((v) => v.id === selectedVehicleId) || vehicles[0]
   const selectedPackage = packages.find((p) => p.id === selectedPackageId.toLowerCase()) || packages[1] || packages[0]
@@ -224,19 +228,33 @@ export default function CustomerBookWash() {
 
   const handleCreateBooking = async (e) => {
     e.preventDefault()
-    if (!selectedVehicle) {
-      notify('Please register and select a vehicle first.')
-      navigate('/customer/vehicles')
-      return
-    }
+    setServerBookingError('')
 
     const finalAddress = useCustomAddress ? customAddress : selectedSavedAddress
-    if (!finalAddress.trim()) {
-      notify('Please enter or select a valid wash address.')
+
+    // Client-side validation
+    const { isValid, errors } = validateBooking({
+      selectedVehicle,
+      selectedPackage,
+      address: finalAddress,
+      bookingType,
+      scheduledDate,
+      scheduledTime,
+      hasElectricity,
+      hasWater,
+      parkingType
+    })
+
+    if (!isValid) {
+      setBookingErrors(errors)
+      const firstMsg = Object.values(errors)[0]
+      notify(firstMsg)
       return
     }
 
+    setBookingErrors({})
     setSubmitting(true)
+
     try {
       if (useCustomAddress && saveNewAddress && customAddress.trim()) {
         await customerApi.addSavedAddress(customAddress.trim())
@@ -246,7 +264,7 @@ export default function CustomerBookWash() {
         vehicleId: selectedVehicle.id,
         servicePackageId: selectedPackage.id,
         serviceZoneId: selectedZone?.id || 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
-        address: finalAddress,
+        address: finalAddress.trim(),
         parkingType: Number(parkingType),
         hasElectricity,
         hasWaterAccess: hasWater,
@@ -262,8 +280,13 @@ export default function CustomerBookWash() {
       await refreshData()
       navigate(`/customer/bookings?payBookingId=${encodeURIComponent(booking.id)}`)
     } catch (err) {
-      console.error(err)
-      notify('Failed to create booking.')
+      console.error('Create booking error:', err)
+      const { message, fieldErrors } = extractApiErrors(err)
+      if (Object.keys(fieldErrors).length > 0) {
+        setBookingErrors(fieldErrors)
+      }
+      setServerBookingError(message)
+      notify(message)
     } finally {
       setSubmitting(false)
     }
@@ -276,6 +299,13 @@ export default function CustomerBookWash() {
         title="Book a Mobile Car Wash"
         desc="Select your vehicle, wash tier, and on-site utilities. Mandatory 200 EGP upfront deposit locks in your certified technician."
       />
+
+      {serverBookingError && (
+        <div style={{ padding: '12px 16px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '10px', color: '#991b1b', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <AlertCircle size={18} style={{ flexShrink: 0 }} />
+          <span>{serverBookingError}</span>
+        </div>
+      )}
 
       <form onSubmit={handleCreateBooking}>
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.8fr) minmax(320px, 1fr)', gap: '24px', alignItems: 'start' }}>
@@ -342,6 +372,7 @@ export default function CustomerBookWash() {
                   })}
                 </div>
               )}
+              <FieldError error={bookingErrors.vehicle} />
             </div>
 
             {/* 2. Wash Package Selection */}
@@ -485,9 +516,13 @@ export default function CustomerBookWash() {
                     </label>
                     <input
                       type="date"
+                      min={new Date().toISOString().split('T')[0]}
                       value={scheduledDate}
-                      onChange={(e) => setScheduledDate(e.target.value)}
-                      style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '12px' }}
+                      onChange={(e) => {
+                        setScheduledDate(e.target.value)
+                        if (bookingErrors.schedule) setBookingErrors({ ...bookingErrors, schedule: '' })
+                      }}
+                      style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: bookingErrors.schedule ? '1.5px solid #ef4444' : '1px solid #cbd5e1', fontSize: '12px' }}
                     />
                   </div>
                   <div>
@@ -507,6 +542,7 @@ export default function CustomerBookWash() {
                   </div>
                 </div>
               )}
+              <FieldError error={bookingErrors.schedule} />
             </div>
 
             {/* 5. Location & On-Site Utilities */}
@@ -555,8 +591,11 @@ export default function CustomerBookWash() {
                       type="text"
                       placeholder="e.g. Villa 42, District 1, New Cairo"
                       value={customAddress}
-                      onChange={(e) => setCustomAddress(e.target.value)}
-                      style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '12px', marginBottom: '6px' }}
+                      onChange={(e) => {
+                        setCustomAddress(e.target.value)
+                        if (bookingErrors.address) setBookingErrors({ ...bookingErrors, address: '' })
+                      }}
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: bookingErrors.address ? '1.5px solid #ef4444' : '1px solid #cbd5e1', fontSize: '12px', marginBottom: '6px' }}
                     />
                     <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: '#64748b' }}>
                       <input
@@ -568,6 +607,7 @@ export default function CustomerBookWash() {
                     </label>
                   </div>
                 )}
+                <FieldError error={bookingErrors.address} />
               </div>
 
               {/* Service Zone Selector */}
@@ -682,6 +722,7 @@ export default function CustomerBookWash() {
                   </small>
                 </div>
               )}
+              <FieldError error={bookingErrors.utilities} />
             </div>
           </div>
 

@@ -22,6 +22,11 @@ namespace WebCarWash.Infrastructure.ConfigrationClass
             builder.HasIndex(u => u.Email).IsUnique();
             builder.Property(u => u.PasswordHash).IsRequired().HasMaxLength(500);
             builder.Property(u => u.Role).HasConversion<string>().HasMaxLength(30).IsRequired();
+            builder.Property(u => u.RefreshToken).HasMaxLength(500);
+            builder.Property(u => u.EmailConfirmationToken).HasMaxLength(500);
+            builder.Property(u => u.PasswordResetToken).HasMaxLength(500);
+            builder.Property(u => u.TwoFactorCode).HasMaxLength(50);
+            builder.Property(u => u.GoogleSubjectId).HasMaxLength(150);
         }
     }
 }

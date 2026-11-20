@@ -7,24 +7,25 @@ import {
   Star,
   User,
   LogOut,
-  ArrowRightLeft,
   X,
   Menu,
   CheckCircle2
 } from 'lucide-react'
 import { useCustomer } from '../context/CustomerContext'
+import { useAuth } from '../context/AuthContext'
 import { customerApi } from '../services/customerApi'
 import BrandLogo from '../component/BrandLogo'
 
 export default function CustomerLayout() {
   const navigate = useNavigate()
   const { profile, toastMessage, notify, refreshData } = useCustomer()
+  const { user, role, logout, hasRole } = useAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [showWalletModal, setShowWalletModal] = useState(false)
   const [toppingUp, setToppingUp] = useState(false)
 
-  const customerName = profile?.fullName || 'Ahmed Raouf'
-  const initials = customerName.split(' ').map((x) => x[0]).join('').slice(0, 2)
+  const customerName = user?.fullName || profile?.fullName || 'Customer'
+  const initials = customerName.split(' ').filter(Boolean).map((x) => x[0]).join('').slice(0, 2).toUpperCase()
 
   const navItems = [
     { label: 'Home', to: '/customer', icon: Home, end: true },
@@ -137,77 +138,31 @@ export default function CustomerLayout() {
           })}
         </nav>
 
-        {/* Sidebar Bottom (Switch to Tech & Logout) */}
+        {/* Sidebar Bottom (Logout) */}
         <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          <button
-            onClick={() => navigate('/technician')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              padding: '10px 12px',
-              borderRadius: '10px',
-              background: 'rgba(8, 124, 240, 0.15)',
-              border: '1px solid rgba(8, 124, 240, 0.3)',
-              color: '#60b4ff',
-              fontSize: '11px',
-              fontWeight: 700,
-              cursor: 'pointer',
-              transition: 'all 0.2s'
-            }}
-          >
-            <ArrowRightLeft size={14} />
-            <span>Switch to Tech Portal</span>
-          </button>
 
           <button
-            onClick={() => navigate('/admin')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              padding: '10px 12px',
-              borderRadius: '10px',
-              background: 'rgba(139, 92, 246, 0.16)',
-              border: '1px solid rgba(139, 92, 246, 0.35)',
-              color: '#c4b5fd',
-              fontSize: '11px',
-              fontWeight: 700,
-              cursor: 'pointer',
-              transition: 'all 0.2s'
+            onClick={async () => {
+              await logout()
+              navigate('/login')
             }}
-          >
-            <ArrowRightLeft size={14} />
-            <span>Admin Control Portal</span>
-          </button>
-
-          <button
-            onClick={() => notify('Demo mode active')}
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: '12px',
               padding: '12px 14px',
               borderRadius: '10px',
-              color: '#8da8be',
-              background: 'transparent',
-              border: 'none',
+              color: '#f87171',
+              background: 'rgba(239, 68, 68, 0.08)',
+              border: '1px solid rgba(239, 68, 68, 0.2)',
               cursor: 'pointer',
               fontWeight: 600,
               fontSize: '13px',
               transition: 'all 0.2s'
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = '#ff6b6b'
-              e.currentTarget.style.backgroundColor = 'rgba(255, 107, 107, 0.1)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = '#8da8be'
-              e.currentTarget.style.backgroundColor = 'transparent'
-            }}
           >
-            <LogOut size={18} />
-            <span>Logout</span>
+            <LogOut size={16} />
+            <span>تسجيل الخروج (Logout)</span>
           </button>
         </div>
       </aside>
@@ -243,25 +198,6 @@ export default function CustomerLayout() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <button
-              onClick={() => navigate('/technician')}
-              className="btn outline"
-              style={{ fontSize: '11px', padding: '7px 12px', borderColor: '#087cf0', color: '#087cf0' }}
-              title="Open Technician Portal"
-            >
-              <ArrowRightLeft size={14} />
-              <span>Technician Portal</span>
-            </button>
-            <button
-              onClick={() => navigate('/admin')}
-              className="btn outline"
-              style={{ fontSize: '11px', padding: '7px 12px', borderColor: '#7c3aed', color: '#7c3aed' }}
-              title="Open Admin Portal"
-            >
-              <ArrowRightLeft size={14} />
-              <span>Admin Portal</span>
-            </button>
-
             {/* Quick Wallet pill */}
             <div
               onClick={() => setShowWalletModal(true)}

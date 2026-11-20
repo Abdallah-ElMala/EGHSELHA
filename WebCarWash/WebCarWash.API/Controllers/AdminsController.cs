@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebCarWash.Application.DTOs.Admin;
 using WebCarWash.Application.Interfaces;
@@ -9,6 +10,7 @@ namespace WebCarWash.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = "ADMIN,Admin")]
     public class AdminsController : ControllerBase
     {
         private readonly IAdminService _adminService;

@@ -27,6 +27,36 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
     });
 
+// Configure standardized model validation error response
+builder.Services.Configure<Microsoft.AspNetCore.Mvc.ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var errors = context.ModelState
+            .Where(e => e.Value?.Errors.Count > 0)
+            .ToDictionary(
+                kvp =>
+                {
+                    var key = kvp.Key;
+                    if (string.IsNullOrEmpty(key)) return key;
+                    if (key.Contains('.')) key = key.Substring(key.LastIndexOf('.') + 1);
+                    return char.ToLowerInvariant(key[0]) + key.Substring(1);
+                },
+                kvp => kvp.Value!.Errors.Select(err => err.ErrorMessage).ToArray()
+            );
+
+        var firstErrorMessage = errors.Values.FirstOrDefault()?.FirstOrDefault() 
+            ?? "One or more validation errors occurred.";
+
+        return new Microsoft.AspNetCore.Mvc.BadRequestObjectResult(new
+        {
+            success = false,
+            message = firstErrorMessage,
+            errors
+        });
+    };
+});
+
 // Enable CORS for configured Front-End origins
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
     ?? new[] { "http://localhost:5173", "https://localhost:5173", "http://localhost:4173" };
@@ -68,7 +98,14 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("CustomerOnly", policy => policy.RequireRole("Customer"));
+    options.AddPolicy("TechnicianOnly", policy => policy.RequireRole("Technician"));
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("CustomerOrAdmin", policy => policy.RequireRole("Customer", "Admin"));
+    options.AddPolicy("TechnicianOrAdmin", policy => policy.RequireRole("Technician", "Admin"));
+});
 
 // Register the database context
 builder.Services.AddDbContext<CarWashDbContext>(options =>
@@ -84,6 +121,7 @@ builder.Services.AddAutoMapper(typeof(WebCarWash.Application.Common.Mappings.Aut
 
 // Register Application & Infrastructure Services
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITechnicianService, TechnicianService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();

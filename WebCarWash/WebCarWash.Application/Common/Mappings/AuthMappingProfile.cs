@@ -11,7 +11,9 @@ namespace WebCarWash.Application.Common.Mappings
         {
             // User -> AuthUserDto
             CreateMap<User, AuthUserDto>()
-                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role.ToString()));
+                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role.ToString()))
+                .ForMember(dest => dest.TwoFactorEnabled, opt => opt.MapFrom(src => src.TwoFactorEnabled))
+                .ForMember(dest => dest.IsEmailConfirmed, opt => opt.MapFrom(src => src.IsEmailConfirmed));
 
             // RegisterCustomerDto -> Customer
             CreateMap<RegisterCustomerDto, Customer>()

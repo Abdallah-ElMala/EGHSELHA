@@ -2,6 +2,11 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { TechnicianProvider } from '../context/TechnicianContext'
 import { CustomerProvider } from '../context/CustomerContext'
 import { AdminProvider } from '../context/AdminContext'
+import ProtectedRoute from './ProtectedRoute'
+
+// Auth Pages
+import Login from '../pages/auth/Login'
+import Register from '../pages/auth/Register'
 
 // Technician Layout & Pages
 import TechnicianLayout from '../layouts/TechnicianLayout'
@@ -36,16 +41,19 @@ import AdminPayouts from '../pages/admin/AdminPayouts'
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* Default landing page opens Customer Portal */}
-      <Route path="/" element={<Navigate to="/customer" replace />} />
+      {/* Public Authentication Routes */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
 
-      {/* Customer Portal */}
+      {/* Customer Portal (Protected: Customer or Admin) */}
       <Route
         path="/customer"
         element={
-          <CustomerProvider>
-            <CustomerLayout />
-          </CustomerProvider>
+          <ProtectedRoute allowedRoles={['Customer', 'Admin']}>
+            <CustomerProvider>
+              <CustomerLayout />
+            </CustomerProvider>
+          </ProtectedRoute>
         }
       >
         <Route index element={<CustomerHome />} />
@@ -57,13 +65,15 @@ export default function AppRoutes() {
         <Route path="bookings" element={<CustomerBookings />} />
       </Route>
 
-      {/* Technician Portal */}
+      {/* Technician Portal (Protected: Technician or Admin) */}
       <Route
         path="/technician"
         element={
-          <TechnicianProvider>
-            <TechnicianLayout />
-          </TechnicianProvider>
+          <ProtectedRoute allowedRoles={['Technician', 'Admin']}>
+            <TechnicianProvider>
+              <TechnicianLayout />
+            </TechnicianProvider>
+          </ProtectedRoute>
         }
       >
         <Route index element={<Dashboard />} />
@@ -75,13 +85,15 @@ export default function AppRoutes() {
         <Route path="notifications" element={<Notifications />} />
       </Route>
 
-      {/* Admin Portal */}
+      {/* Admin Portal (Protected: Admin Only) */}
       <Route
         path="/admin"
         element={
-          <AdminProvider>
-            <AdminLayout />
-          </AdminProvider>
+          <ProtectedRoute allowedRoles={['Admin']}>
+            <AdminProvider>
+              <AdminLayout />
+            </AdminProvider>
+          </ProtectedRoute>
         }
       >
         <Route index element={<AdminDashboard />} />
@@ -93,6 +105,8 @@ export default function AppRoutes() {
         <Route path="payouts" element={<AdminPayouts />} />
       </Route>
 
+      {/* Default landing page opens Customer Portal (which guards to /login if unauthenticated) */}
+      <Route path="/" element={<Navigate to="/customer" replace />} />
       <Route path="*" element={<Navigate to="/customer" replace />} />
     </Routes>
   )

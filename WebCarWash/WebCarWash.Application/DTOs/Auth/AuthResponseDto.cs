@@ -8,6 +8,9 @@ namespace WebCarWash.Application.DTOs.Auth
         public string Message { get; set; } = string.Empty;
         public string Token { get; set; } = string.Empty;
         public DateTime ExpiresAt { get; set; }
+        public string? RefreshToken { get; set; }
+        public DateTime? RefreshTokenExpiresAt { get; set; }
+        public bool RequiresTwoFactor { get; set; }
         public AuthUserDto? User { get; set; }
     }
 }
