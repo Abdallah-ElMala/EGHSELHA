@@ -24,6 +24,7 @@ import { useCustomer } from '../../context/CustomerContext'
 import { useAuth } from '../../context/AuthContext'
 import { customerApi } from '../../services/customerApi'
 import { validateDispute, extractApiErrors } from '../../utils/validation'
+import PaymentModal from '../../component/PaymentModal'
 
 export default function CustomerBookings() {
   const navigate = useNavigate()
@@ -525,69 +526,20 @@ export default function CustomerBookings() {
         )}
       </div>
 
-      {/* 1. PAY DEPOSIT MODAL (Behavior 3: payDeposit) */}
-      {payDepositModal && (
-        <div className="modal-overlay" onClick={() => setPayDepositModal(null)}>
-          <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '440px' }}>
-            <div className="modal-header">
-              <div>
-                <h3>Pay Upfront Deposit</h3>
-                <p>Booking {payDepositModal.bookingNumber} · Mandatory 200 EGP</p>
-              </div>
-              <button onClick={() => setPayDepositModal(null)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-                <X size={18} />
-              </button>
-            </div>
-            <form onSubmit={handlePayDeposit}>
-              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div style={{ textAlign: 'center', padding: '16px', background: '#f0f7ff', borderRadius: '12px' }}>
-                  <span style={{ fontSize: '11px', color: '#0369a1' }}>Mandatory Booking Deposit</span>
-                  <h1 style={{ margin: '4px 0', fontSize: '32px', color: '#087cf0', fontWeight: 800 }}>EGP 200.00</h1>
-                  <small style={{ fontSize: '10px', color: '#64748b' }}>Locks in your appointment & certified technician</small>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '8px' }}>
-                    Select Payment Method (11. PaymentMethod)
-                  </label>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                    {[
-                      { id: 1, label: 'Credit Card (Visa/Mastercard)' },
-                      { id: 2, label: 'Vodafone Cash Wallet' },
-                      { id: 3, label: 'Instapay Transfer' },
-                      { id: 4, label: 'Cash Upon Arrival' },
-                      { id: 5, label: `Wallet Balance (EGP ${profile?.walletBalance ?? 0})` }
-                    ].map((m) => (
-                      <div
-                        key={m.id}
-                        onClick={() => setPayMethod(m.id)}
-                        style={{
-                          border: `1.5px solid ${payMethod === m.id ? '#087cf0' : '#e2e8f0'}`,
-                          background: payMethod === m.id ? '#f0f7ff' : '#fff',
-                          borderRadius: '10px',
-                          padding: '12px 10px',
-                          fontSize: '11px',
-                          fontWeight: 600,
-                          cursor: 'pointer',
-                          textAlign: 'center'
-                        }}
-                      >
-                        {m.label}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn outline" onClick={() => setPayDepositModal(null)}>Cancel</button>
-                <button type="submit" className="btn primary" disabled={payingDeposit}>
-                  {payingDeposit ? 'Processing...' : 'Confirm Payment (200 EGP)'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* 1. PAY DEPOSIT MODAL WITH VISA & MULTI-PAYMENT INTEGRATION */}
+      <PaymentModal
+        isOpen={!!payDepositModal}
+        onClose={() => setPayDepositModal(null)}
+        mode="deposit"
+        booking={payDepositModal}
+        currentBalance={profile?.walletBalance ?? 0}
+        onSuccess={async () => {
+          await refreshData()
+          setPayDepositModal(null)
+          setSearchParams({})
+        }}
+        notify={notify}
+      />
 
       {/* 2. SUBMIT REVIEW MODAL (Behavior 5: submitReview / 14. Review) */}
       {reviewModal && (

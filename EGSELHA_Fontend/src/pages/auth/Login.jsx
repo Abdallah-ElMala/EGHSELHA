@@ -304,7 +304,7 @@ export default function Login() {
 
           {/* Top Brand Bar */}
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '28px' }}>
+            <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '28px' }}>
               <BrandLogo size={46} variant="blue" />
               <div>
                 <b style={{ display: 'block', fontSize: '20px', letterSpacing: '0.5px', fontFamily: 'Manrope, sans-serif', color: '#fff' }}>
@@ -314,7 +314,7 @@ export default function Login() {
                   DOORSTEP MOBILE CAR WASH
                 </small>
               </div>
-            </div>
+            </Link>
 
             <div
               style={{
@@ -446,6 +446,21 @@ export default function Login() {
         >
           {/* Header Title */}
           <div style={{ marginBottom: '24px' }}>
+            <Link
+              to="/"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                color: '#087cf0',
+                fontSize: '12px',
+                fontWeight: 600,
+                textDecoration: 'none',
+                marginBottom: '14px'
+              }}
+            >
+              ← العودة إلى الصفحة الرئيسية (Home)
+            </Link>
             <h2
               style={{
                 font: '800 24px Manrope, sans-serif',

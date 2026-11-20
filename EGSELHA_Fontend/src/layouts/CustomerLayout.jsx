@@ -15,6 +15,7 @@ import { useCustomer } from '../context/CustomerContext'
 import { useAuth } from '../context/AuthContext'
 import { customerApi } from '../services/customerApi'
 import BrandLogo from '../component/BrandLogo'
+import PaymentModal from '../component/PaymentModal'
 
 export default function CustomerLayout() {
   const navigate = useNavigate()
@@ -22,7 +23,7 @@ export default function CustomerLayout() {
   const { user, role, logout, hasRole } = useAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [showWalletModal, setShowWalletModal] = useState(false)
-  const [toppingUp, setToppingUp] = useState(false)
+  const [showTopUpPaymentModal, setShowTopUpPaymentModal] = useState(false)
 
   const customerName = user?.fullName || profile?.fullName || 'Customer'
   const initials = customerName.split(' ').filter(Boolean).map((x) => x[0]).join('').slice(0, 2).toUpperCase()
@@ -310,27 +311,45 @@ export default function CustomerLayout() {
 
               <button
                 className="btn primary full"
-                disabled={toppingUp}
-                onClick={async () => {
-                  setToppingUp(true)
-                  try {
-                    await customerApi.topUpWallet(500)
-                    await refreshData()
-                    notify('Wallet topped up (+EGP 500 saved to your account)!')
-                    setShowWalletModal(false)
-                  } catch (err) {
-                    notify(err?.message || 'Failed to top up wallet.')
-                  } finally {
-                    setToppingUp(false)
-                  }
+                onClick={() => {
+                  setShowWalletModal(false)
+                  setShowTopUpPaymentModal(true)
+                }}
+                style={{
+                  padding: '13px',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  borderRadius: '12px',
+                  background: 'linear-gradient(135deg, #0ea5e9, #0284c7)',
+                  color: '#fff',
+                  border: 'none',
+                  boxShadow: '0 4px 15px rgba(14, 165, 233, 0.35)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px'
                 }}
               >
-                {toppingUp ? 'Processing...' : 'Top-up Wallet +EGP 500'}
+                <CreditCard size={16} />
+                <span>شحن المحفظة بالفيزا / الدفع الإلكتروني</span>
               </button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Modern Payment / Visa Modal for Wallet Topup */}
+      <PaymentModal
+        isOpen={showTopUpPaymentModal}
+        onClose={() => setShowTopUpPaymentModal(false)}
+        mode="topup"
+        currentBalance={profile?.walletBalance ?? 0}
+        onSuccess={async () => {
+          await refreshData()
+        }}
+        notify={notify}
+      />
 
       {/* Global Toast */}
       {toastMessage && (

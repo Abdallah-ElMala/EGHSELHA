@@ -4,7 +4,8 @@ import { CustomerProvider } from '../context/CustomerContext'
 import { AdminProvider } from '../context/AdminContext'
 import ProtectedRoute from './ProtectedRoute'
 
-// Auth Pages
+// Public Landing & Auth Pages
+import LandingHome from '../pages/LandingHome'
 import Login from '../pages/auth/Login'
 import Register from '../pages/auth/Register'
 
@@ -105,9 +106,9 @@ export default function AppRoutes() {
         <Route path="payouts" element={<AdminPayouts />} />
       </Route>
 
-      {/* Default landing page opens Customer Portal (which guards to /login if unauthenticated) */}
-      <Route path="/" element={<Navigate to="/customer" replace />} />
-      <Route path="*" element={<Navigate to="/customer" replace />} />
+      {/* Public Landing Page */}
+      <Route path="/" element={<LandingHome />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }
