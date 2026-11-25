@@ -9,17 +9,13 @@ import {
   LogIn,
   KeyRound,
   Mail,
-  Shield,
-  Sparkles,
+  ArrowLeft,
   ArrowRight,
   CheckCircle2,
   AlertCircle,
-  Droplets,
-  Clock,
   User,
   Wrench,
   ShieldCheck,
-  ChevronRight,
   X
 } from 'lucide-react';
 
@@ -54,8 +50,8 @@ export default function Login() {
       email: 'ahmed.khaled@example.com',
       pass: 'demo123',
       icon: User,
-      color: '#087cf0',
-      bg: '#eaf4ff'
+      color: '#141415',
+      bg: '#f4f4f5'
     },
     {
       role: 'Technician',
@@ -261,108 +257,70 @@ export default function Login() {
     <div
       style={{
         minHeight: '100vh',
-        background: '#f4f7fb',
+        background: '#0f0f10',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         padding: '24px 16px',
         fontFamily: "'DM Sans', 'Manrope', -apple-system, sans-serif"
       }}
-      dir="rtl"
+      dir="ltr"
     >
-      {/* Outer Card Container with Modern Split View */}
+      {/* Outer Card Container — Dark Obsidian Split View */}
       <div
         style={{
           width: '100%',
-          maxWidth: '1080px',
-          background: '#ffffff',
-          borderRadius: '24px',
-          boxShadow: '0 20px 50px rgba(7, 27, 45, 0.08)',
-          border: '1px solid #e9eef4',
+          maxWidth: '1040px',
+          background: '#19191b',
+          borderRadius: '16px',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
           overflow: 'hidden',
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
           minHeight: '640px'
         }}
       >
-        {/* Left Side: Brand Showcase & Features (Navy Gradient matching EGHSELHA wireframe) */}
+        {/* Left Side: Obsidian Brand Showcase */}
         <div
           style={{
-            background: 'linear-gradient(165deg, #07172c 0%, #0c2942 55%, #051425 100%)',
-            color: '#fff',
-            padding: '48px 40px',
+            background: '#141415',
+            color: '#f4f4f5',
+            padding: '44px 40px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            position: 'relative',
-            overflow: 'hidden'
+            borderRight: '1px solid rgba(255, 255, 255, 0.08)'
           }}
         >
-          {/* Subtle Background Glow */}
-          <div
-            style={{
-              position: 'absolute',
-              top: '-10%',
-              left: '-10%',
-              width: '320px',
-              height: '320px',
-              background: 'radial-gradient(circle, rgba(8, 124, 240, 0.25) 0%, transparent 70%)',
-              pointerEvents: 'none',
-              filter: 'blur(40px)'
-            }}
-          />
-
-          {/* Top Brand Bar */}
           <div>
-            <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '28px' }}>
-              <BrandLogo size={46} variant="blue" />
+            <Link to="/" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '12px', marginBottom: '40px' }}>
+              <BrandLogo size={40} />
               <div>
-                <b style={{ display: 'block', fontSize: '20px', letterSpacing: '0.5px', fontFamily: 'Manrope, sans-serif', color: '#fff' }}>
+                <b style={{ display: 'block', fontSize: '17px', fontWeight: 600, letterSpacing: '0.06em', fontFamily: 'Manrope, sans-serif', color: '#f4f4f5' }}>
                   EGHSELHA
                 </b>
-                <small style={{ display: 'block', fontSize: '11px', color: '#60b4ff', fontWeight: 600, letterSpacing: '0.8px', marginTop: '2px' }}>
-                  DOORSTEP MOBILE CAR WASH
+                <small style={{ display: 'block', fontSize: '11px', color: '#85858b', marginTop: '2px' }}>
+                  Mobile auto detailing
                 </small>
               </div>
             </Link>
 
-            <div
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                background: 'rgba(8, 124, 240, 0.16)',
-                border: '1px solid rgba(8, 124, 240, 0.35)',
-                borderRadius: '30px',
-                padding: '6px 14px',
-                fontSize: '11px',
-                fontWeight: 700,
-                color: '#60b4ff',
-                marginBottom: '20px'
-              }}
-            >
-              <Sparkles size={14} />
-              <span>Mobile Car Detailing Anywhere Across Cairo</span>
-            </div>
-
             <h1
               style={{
-                font: '800 28px Manrope, sans-serif',
-                color: '#ffffff',
-                lineHeight: 1.35,
-                margin: '0 0 14px 0',
-                letterSpacing: '-0.5px'
+                font: '500 32px/1.18 Manrope, sans-serif',
+                color: '#f4f4f5',
+                margin: '0 0 16px 0',
+                letterSpacing: '-0.02em'
               }}
             >
-              Showroom Shine at Your Doorstep with Premium Quality
+              On-demand car care at your doorstep
             </h1>
 
-            <p style={{ fontSize: '13px', lineHeight: 1.7, color: '#9fb4c7', margin: 0, maxWidth: '440px' }}>
-              Sign in to manage bookings, track assigned technicians live on GPS, and access your garage and wallet with confidence.
+            <p style={{ fontSize: '14px', lineHeight: 1.65, color: '#a1a1a6', margin: 0, maxWidth: '400px' }}>
+              Sign in to manage bookings, track assigned technicians live on the map, and access your saved vehicles and wallet.
             </p>
           </div>
 
-          {/* Bottom Brand Meta */}
           <div
             style={{
               display: 'flex',
@@ -370,26 +328,25 @@ export default function Login() {
               justifyContent: 'space-between',
               paddingTop: '20px',
               borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-              fontSize: '11px',
-              color: '#6e859b'
+              fontSize: '12px',
+              color: '#737378'
             }}
           >
-            <span>© 2026 EGHSELHA Platform</span>
-            <span>Cairo · New Cairo · Sheikh Zayed · Maadi</span>
+            <span>© 2026 EGHSELHA</span>
+            <span>On-demand mobile detailing</span>
           </div>
         </div>
 
-        {/* Right Side: Interactive Login Form Panel */}
+        {/* Right Side: Dark Obsidian Login Form Panel */}
         <div
           style={{
             padding: '44px 40px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
-            background: '#ffffff'
+            background: '#19191b'
           }}
         >
-          {/* Header Title */}
           <div style={{ marginBottom: '24px' }}>
             <Link
               to="/"
@@ -397,51 +354,44 @@ export default function Login() {
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                color: '#087cf0',
+                color: '#a1a1a6',
                 fontSize: '12px',
-                fontWeight: 600,
+                fontWeight: 500,
                 textDecoration: 'none',
-                marginBottom: '14px'
+                marginBottom: '16px'
               }}
             >
-              ← Back to Home
+              <ArrowLeft size={14} strokeWidth={1.6} />
+              <span>Back to home</span>
             </Link>
             <h2
               style={{
-                font: '800 24px Manrope, sans-serif',
-                color: '#102a40',
+                font: '500 24px/1.2 Manrope, sans-serif',
+                color: '#f4f4f5',
                 margin: '0 0 6px 0',
-                letterSpacing: '-0.4px'
+                letterSpacing: '-0.02em'
               }}
             >
-              Sign In to Your Account
+              Sign in
             </h2>
-            <p style={{ fontSize: '12px', color: '#8493a2', margin: 0 }}>
+            <p style={{ fontSize: '13px', color: '#85858b', margin: 0 }}>
               Enter your email and password to continue
             </p>
           </div>
 
-          {/* Quick Demo Accounts Pills (Figma / EGHSELHA Interactive Style) */}
+          {/* Quick Demo Accounts */}
           <div
             style={{
-              background: '#f8fafc',
-              border: '1px solid #edf2f7',
-              borderRadius: '16px',
-              padding: '14px',
-              marginBottom: '22px'
+              background: '#141415',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              borderRadius: '12px',
+              padding: '12px',
+              marginBottom: '20px'
             }}
           >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: '10px'
-              }}
-            >
-              <span style={{ fontSize: '11px', fontWeight: 700, color: '#475569', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Sparkles size={14} color="#087cf0" />
-                Quick Demo Accounts (1-Click):
+            <div style={{ marginBottom: '10px' }}>
+              <span style={{ fontSize: '12px', fontWeight: 500, color: '#a1a1a6' }}>
+                Demo accounts
               </span>
             </div>
 
@@ -454,29 +404,28 @@ export default function Login() {
                     type="button"
                     onClick={() => handleDemoFill(acc)}
                     style={{
-                      border: '1px solid #e2e8f0',
-                      background: '#ffffff',
-                      borderRadius: '12px',
+                      border: '1px solid rgba(255, 255, 255, 0.08)',
+                      background: '#232325',
+                      borderRadius: '8px',
                       padding: '8px 10px',
                       cursor: 'pointer',
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
                       gap: '4px',
-                      transition: 'all 0.2s ease',
-                      boxShadow: '0 2px 6px rgba(0, 0, 0, 0.02)'
+                      transition: 'border-color 150ms cubic-bezier(0.22, 1, 0.36, 1), background-color 150ms cubic-bezier(0.22, 1, 0.36, 1)'
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = acc.color;
-                      e.currentTarget.style.background = acc.bg;
+                      e.currentTarget.style.borderColor = 'rgba(212, 155, 75, 0.5)';
+                      e.currentTarget.style.background = '#2a2a2e';
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = '#e2e8f0';
-                      e.currentTarget.style.background = '#ffffff';
+                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                      e.currentTarget.style.background = '#232325';
                     }}
                   >
-                    <Icon size={16} color={acc.color} />
-                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#1e293b' }}>
+                    <Icon size={15} strokeWidth={1.6} color="#d49b4b" />
+                    <span style={{ fontSize: '12px', fontWeight: 500, color: '#ededed' }}>
                       {acc.badge}
                     </span>
                   </button>
@@ -490,21 +439,21 @@ export default function Login() {
             <div
               style={{
                 padding: '12px 14px',
-                borderRadius: '12px',
-                marginBottom: '18px',
+                borderRadius: '8px',
+                marginBottom: '16px',
                 fontSize: '12px',
                 display: 'flex',
                 alignItems: 'flex-start',
                 gap: '10px',
-                background: globalMessage.type === 'error' ? '#fef2f2' : '#eff6ff',
-                border: `1px solid ${globalMessage.type === 'error' ? '#fecaca' : '#bfdbfe'}`,
-                color: globalMessage.type === 'error' ? '#b91c1c' : '#1d4ed8'
+                background: globalMessage.type === 'error' ? 'rgba(229, 72, 77, 0.12)' : 'rgba(212, 155, 75, 0.12)',
+                border: `1px solid ${globalMessage.type === 'error' ? 'rgba(229, 72, 77, 0.3)' : 'rgba(212, 155, 75, 0.3)'}`,
+                color: globalMessage.type === 'error' ? '#fca5a5' : '#e5b56c'
               }}
             >
               {globalMessage.type === 'error' ? (
-                <AlertCircle size={17} style={{ flexShrink: 0, marginTop: '1px' }} />
+                <AlertCircle size={16} style={{ flexShrink: 0, marginTop: '1px' }} />
               ) : (
-                <CheckCircle2 size={17} style={{ flexShrink: 0, marginTop: '1px' }} />
+                <CheckCircle2 size={16} style={{ flexShrink: 0, marginTop: '1px' }} />
               )}
               <span>{globalMessage.text}</span>
             </div>
@@ -515,37 +464,36 @@ export default function Login() {
             <form onSubmit={handleVerify2FA} style={{ display: 'grid', gap: '16px' }}>
               <div
                 style={{
-                  background: '#f0fdf4',
-                  border: '1px solid #bbf7d0',
-                  borderRadius: '14px',
+                  background: '#141415',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  borderRadius: '12px',
                   padding: '16px',
                   textAlign: 'center'
                 }}
               >
                 <div
                   style={{
-                    width: '44px',
-                    height: '44px',
-                    borderRadius: '50%',
-                    background: '#dcfce7',
-                    color: '#16a34a',
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '10px',
+                    background: '#232325',
+                    color: '#d49b4b',
                     display: 'grid',
                     placeItems: 'center',
                     margin: '0 auto 10px auto'
                   }}
                 >
-                  <ShieldCheck size={24} />
+                  <ShieldCheck size={20} strokeWidth={1.6} />
                 </div>
-                <b style={{ fontSize: '14px', color: '#166534', display: 'block' }}>Two-Factor Authentication (2FA)</b>
-                <small style={{ fontSize: '11px', color: '#15803d', display: 'block', marginTop: '4px' }}>
-                  Enter the 6-digit verification code sent to: <br />
-                  <span style={{ fontWeight: 700, fontFamily: 'monospace' }}>{twoFactorEmail}</span>
+                <b style={{ fontSize: '14px', color: '#f4f4f5', display: 'block', fontWeight: 600 }}>Two-factor verification</b>
+                <small style={{ fontSize: '12px', color: '#a1a1a6', display: 'block', marginTop: '4px' }}>
+                  Enter the 6-digit code sent to <span style={{ color: '#ededed', fontFamily: 'monospace' }}>{twoFactorEmail}</span>
                 </small>
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
-                  Verification Code (6 Digits)
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, color: '#a1a1a6', marginBottom: '6px' }}>
+                  Verification code
                 </label>
                 <input
                   type="text"
@@ -559,13 +507,14 @@ export default function Login() {
                     padding: '12px',
                     textAlign: 'center',
                     letterSpacing: '8px',
-                    fontSize: '22px',
+                    fontSize: '20px',
                     fontFamily: 'monospace',
-                    fontWeight: 800,
-                    borderRadius: '12px',
-                    border: errors.twoFactorCode ? '1.5px solid #ef4444' : '1px solid #cbd5e1',
+                    fontWeight: 600,
+                    borderRadius: '8px',
+                    border: errors.twoFactorCode ? '1px solid #e5484d' : '1px solid rgba(255, 255, 255, 0.12)',
                     outline: 'none',
-                    background: '#f8fafc',
+                    background: '#232325',
+                    color: '#f4f4f5',
                     boxSizing: 'border-box'
                   }}
                 />
@@ -575,20 +524,20 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={loading}
-                className="btn primary"
                 style={{
                   width: '100%',
-                  padding: '13px',
+                  minHeight: '42px',
+                  padding: '10px 16px',
                   fontSize: '13px',
-                  fontWeight: 700,
-                  borderRadius: '12px',
-                  background: '#087cf0',
-                  color: '#fff',
-                  boxShadow: '0 6px 18px rgba(8, 124, 240, 0.35)',
+                  fontWeight: 600,
+                  borderRadius: '8px',
+                  background: '#f4f4f5',
+                  border: '1px solid #f4f4f5',
+                  color: '#141415',
                   cursor: 'pointer'
                 }}
               >
-                {loading ? 'Verifying...' : 'Confirm Code & Log In'}
+                {loading ? 'Verifying…' : 'Confirm code & sign in'}
               </button>
 
               <button
@@ -597,14 +546,13 @@ export default function Login() {
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: '#64748b',
-                  fontSize: '11px',
+                  color: '#a1a1a6',
+                  fontSize: '12px',
                   cursor: 'pointer',
-                  textAlign: 'center',
-                  marginTop: '4px'
+                  textAlign: 'center'
                 }}
               >
-                ← Back to standard login
+                Back to sign in
               </button>
             </form>
           ) : (
@@ -615,14 +563,14 @@ export default function Login() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: '6px',
-                    fontSize: '11px',
-                    fontWeight: 700,
-                    color: '#475569',
+                    fontSize: '12px',
+                    fontWeight: 500,
+                    color: '#a1a1a6',
                     marginBottom: '6px'
                   }}
                 >
-                  <Mail size={14} color="#64748b" />
-                  Email Address
+                  <Mail size={14} strokeWidth={1.6} color="#85858b" />
+                  Email address
                 </label>
                 <input
                   type="email"
@@ -632,21 +580,21 @@ export default function Login() {
                   dir="ltr"
                   style={{
                     width: '100%',
-                    padding: '12px 14px',
+                    padding: '10px 14px',
                     fontSize: '13px',
-                    borderRadius: '12px',
-                    border: errors.email ? '1.5px solid #ef4444' : '1px solid #cbd5e1',
-                    background: errors.email ? '#fffbfb' : '#ffffff',
+                    borderRadius: '8px',
+                    border: errors.email ? '1px solid #e5484d' : '1px solid rgba(255, 255, 255, 0.12)',
+                    background: '#232325',
                     outline: 'none',
-                    color: '#1e293b',
+                    color: '#f4f4f5',
                     boxSizing: 'border-box',
-                    transition: 'border-color 0.2s ease'
+                    transition: 'border-color 150ms cubic-bezier(0.22, 1, 0.36, 1)'
                   }}
                   onFocus={(e) => {
-                    if (!errors.email) e.target.style.borderColor = '#087cf0';
+                    if (!errors.email) e.target.style.borderColor = '#d49b4b';
                   }}
                   onBlur={(e) => {
-                    if (!errors.email) e.target.style.borderColor = '#cbd5e1';
+                    if (!errors.email) e.target.style.borderColor = 'rgba(255, 255, 255, 0.12)';
                   }}
                 />
                 <FieldError error={errors.email} />
@@ -659,12 +607,12 @@ export default function Login() {
                       display: 'flex',
                       alignItems: 'center',
                       gap: '6px',
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      color: '#475569'
+                      fontSize: '12px',
+                      fontWeight: 500,
+                      color: '#a1a1a6'
                     }}
                   >
-                    <KeyRound size={14} color="#64748b" />
+                    <KeyRound size={14} strokeWidth={1.6} color="#85858b" />
                     Password
                   </label>
                   <button
@@ -676,14 +624,14 @@ export default function Login() {
                     style={{
                       background: 'none',
                       border: 'none',
-                      color: '#087cf0',
-                      fontSize: '11px',
-                      fontWeight: 700,
+                      color: '#d49b4b',
+                      fontSize: '12px',
+                      fontWeight: 500,
                       cursor: 'pointer',
                       padding: 0
                     }}
                   >
-                    Forgot Password?
+                    Forgot password?
                   </button>
                 </div>
                 <input
@@ -694,21 +642,21 @@ export default function Login() {
                   dir="ltr"
                   style={{
                     width: '100%',
-                    padding: '12px 14px',
+                    padding: '10px 14px',
                     fontSize: '13px',
-                    borderRadius: '12px',
-                    border: errors.password ? '1.5px solid #ef4444' : '1px solid #cbd5e1',
-                    background: errors.password ? '#fffbfb' : '#ffffff',
+                    borderRadius: '8px',
+                    border: errors.password ? '1px solid #e5484d' : '1px solid rgba(255, 255, 255, 0.12)',
+                    background: '#232325',
                     outline: 'none',
-                    color: '#1e293b',
+                    color: '#f4f4f5',
                     boxSizing: 'border-box',
-                    transition: 'border-color 0.2s ease'
+                    transition: 'border-color 150ms cubic-bezier(0.22, 1, 0.36, 1)'
                   }}
                   onFocus={(e) => {
-                    if (!errors.password) e.target.style.borderColor = '#087cf0';
+                    if (!errors.password) e.target.style.borderColor = '#d49b4b';
                   }}
                   onBlur={(e) => {
-                    if (!errors.password) e.target.style.borderColor = '#cbd5e1';
+                    if (!errors.password) e.target.style.borderColor = 'rgba(255, 255, 255, 0.12)';
                   }}
                 />
                 <FieldError error={errors.password} />
@@ -717,30 +665,32 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={loading}
-                className="btn primary"
                 style={{
                   width: '100%',
-                  padding: '13px',
+                  minHeight: '42px',
+                  padding: '10px 16px',
                   fontSize: '13px',
-                  fontWeight: 700,
-                  borderRadius: '12px',
-                  background: '#087cf0',
-                  color: '#ffffff',
-                  boxShadow: '0 6px 18px rgba(8, 124, 240, 0.32)',
-                  cursor: 'pointer',
+                  fontWeight: 600,
+                  borderRadius: '8px',
+                  background: '#f4f4f5',
+                  border: '1px solid #f4f4f5',
+                  color: '#141415',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  opacity: loading ? 0.6 : 1,
                   marginTop: '4px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '8px'
+                  gap: '8px',
+                  transition: 'background-color 150ms cubic-bezier(0.22, 1, 0.36, 1)'
                 }}
               >
                 {loading ? (
-                  <div style={{ width: '18px', height: '18px', border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                  <div style={{ width: '16px', height: '16px', border: '2px solid #141415', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
                 ) : (
                   <>
-                    <LogIn size={16} />
-                    <span>Sign In</span>
+                    <LogIn size={15} strokeWidth={1.8} />
+                    <span>Sign in</span>
                   </>
                 )}
               </button>
@@ -750,20 +700,20 @@ export default function Login() {
           {/* Footer Register Link */}
           <div
             style={{
-              marginTop: '28px',
-              paddingTop: '20px',
-              borderTop: '1px solid #f1f5f9',
+              marginTop: '24px',
+              paddingTop: '18px',
+              borderTop: '1px solid rgba(255, 255, 255, 0.08)',
               textAlign: 'center',
-              fontSize: '12px',
-              color: '#64748b'
+              fontSize: '13px',
+              color: '#85858b'
             }}
           >
             Don't have an account yet?{' '}
             <Link
               to="/register"
               style={{
-                color: '#087cf0',
-                fontWeight: 800,
+                color: '#d49b4b',
+                fontWeight: 600,
                 textDecoration: 'none',
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -771,7 +721,7 @@ export default function Login() {
               }}
             >
               <span>Create an account</span>
-              <ArrowRight size={14} />
+              <ArrowRight size={14} strokeWidth={1.6} />
             </Link>
           </div>
         </div>
@@ -809,7 +759,7 @@ export default function Login() {
                     fontSize: '11px',
                     background: forgotMessage.type === 'error' ? '#fef2f2' : '#eff6ff',
                     border: `1px solid ${forgotMessage.type === 'error' ? '#fecaca' : '#bfdbfe'}`,
-                    color: forgotMessage.type === 'error' ? '#b91c1c' : '#1d4ed8'
+                    color: forgotMessage.type === 'error' ? '#b91c1c' : '#141415'
                   }}
                 >
                   {forgotMessage.text}
@@ -852,7 +802,7 @@ export default function Login() {
                       type="submit"
                       disabled={loading}
                       className="btn primary"
-                      style={{ background: '#087cf0' }}
+                      style={{ background: '#141415' }}
                     >
                       {loading ? 'Sending...' : 'Send Reset Code'}
                     </button>
@@ -938,7 +888,7 @@ export default function Login() {
                       type="submit"
                       disabled={loading}
                       className="btn primary"
-                      style={{ background: '#087cf0' }}
+                      style={{ background: '#141415' }}
                     >
                       {loading ? 'Saving...' : 'Save New Password'}
                     </button>

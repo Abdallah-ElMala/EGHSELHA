@@ -174,7 +174,7 @@ export default function Earnings() {
 
           <div style={{ display: 'flex', justifyContent: 'space-between', padding: '16px 0 10px', color: 'var(--muted)', fontSize: 11 }}>
             <span>Showing <b>{filteredTransactions.length}</b> transactions</span>
-            <span>Total sum: <b style={{ color: '#1687f8' }}>EGP {totalFilteredAmount.toLocaleString()}</b></span>
+            <span>Total sum: <b style={{ color: '#141415' }}>EGP {totalFilteredAmount.toLocaleString()}</b></span>
           </div>
 
           <div className="table-wrap">
@@ -272,7 +272,7 @@ export default function Earnings() {
             <h2>Income overview</h2>
             <p>
               {RANGE_LABELS[chartRange]} · Period total:{' '}
-              <b style={{ color: '#087cf0' }}>EGP {(earnings?.chartTotal ?? 0).toLocaleString()}</b>
+              <b style={{ color: '#141415' }}>EGP {(earnings?.chartTotal ?? 0).toLocaleString()}</b>
             </p>
           </div>
           <select
@@ -306,7 +306,7 @@ export default function Earnings() {
               style={{ gap: '4px' }}
             >
               {w.amount > 0 && (
-                <span style={{ fontSize: '10px', fontWeight: 700, color: '#087cf0', whiteSpace: 'nowrap' }}>
+                <span style={{ fontSize: '10px', fontWeight: 700, color: '#141415', whiteSpace: 'nowrap' }}>
                   EGP {Math.round(w.amount).toLocaleString()}
                 </span>
               )}

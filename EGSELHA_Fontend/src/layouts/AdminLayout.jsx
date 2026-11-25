@@ -21,7 +21,7 @@ import BrandLogo from '../component/BrandLogo';
 export default function AdminLayout() {
   const navigate = useNavigate();
   const { dashboard, toastMessage, refreshAll } = useAdmin();
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -30,10 +30,10 @@ export default function AdminLayout() {
 
   const navItems = [
     { label: 'Overview', to: '/admin', icon: LayoutDashboard, end: true },
-    { label: 'All Bookings', to: '/admin/bookings', icon: CalendarCheck },
+    { label: 'Bookings', to: '/admin/bookings', icon: CalendarCheck },
     { label: 'Technicians', to: '/admin/technicians', icon: Wrench },
     { label: 'Customers', to: '/admin/customers', icon: Users },
-    { label: 'Pricing & Zones', to: '/admin/catalog', icon: Tags },
+    { label: 'Pricing & zones', to: '/admin/catalog', icon: Tags },
     { label: 'Disputes & QA', to: '/admin/disputes', icon: ShieldAlert, badge: openDisputesCount },
     { label: 'Payouts', to: '/admin/payouts', icon: Wallet, badge: pendingPayoutsCount },
   ];
@@ -45,41 +45,41 @@ export default function AdminLayout() {
   };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#f4f7fb' }}>
-      {/* Dark Navy Admin Sidebar */}
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#fafafa' }}>
+      {/* Obsidian Admin Sidebar */}
       <aside
         style={{
-          background: 'linear-gradient(180deg, #061325 0%, #0b2038 100%)',
-          color: '#d9e8f5',
+          background: '#0f0f10',
+          color: '#ededed',
           display: 'flex',
           flexDirection: 'column',
-          padding: '24px 16px',
-          boxShadow: '4px 0 20px rgba(0, 0, 0, 0.1)',
+          padding: '20px 16px',
+          borderRight: '1px solid rgba(255, 255, 255, 0.08)',
         }}
         className={`portal-sidebar admin ${mobileOpen ? 'mobile-open' : ''}`}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '0 8px 28px 8px' }}>
-          <BrandLogo size={40} variant="purple" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '4px 8px 28px 8px' }}>
+          <BrandLogo size={36} />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <b style={{ display: 'block', color: '#fff', fontSize: '15px', letterSpacing: '0.5px', fontFamily: 'Manrope, sans-serif' }}>
+            <b style={{ display: 'block', color: '#f4f4f5', fontSize: '15px', fontWeight: 600, letterSpacing: '0.06em', fontFamily: 'Manrope, sans-serif' }}>
               EGHSELHA
             </b>
-            <small style={{ display: 'block', fontSize: '9px', color: '#60b4ff', letterSpacing: '0.9px', marginTop: '2px', textTransform: 'uppercase', fontWeight: 700 }}>
-              ADMIN CONTROL
+            <small style={{ display: 'block', fontSize: '11px', color: '#d49b4b', marginTop: '2px', fontWeight: 500 }}>
+              Operations console
             </small>
           </div>
           {mobileOpen && (
-            <button onClick={() => setMobileOpen(false)} style={{ background: 'none', border: 'none', color: '#9fb4c7', cursor: 'pointer' }}>
-              <X size={20} />
+            <button onClick={() => setMobileOpen(false)} style={{ background: 'none', border: 'none', color: '#a1a1a6', cursor: 'pointer' }} aria-label="Close menu">
+              <X size={18} strokeWidth={1.6} />
             </button>
           )}
         </div>
 
-        <div style={{ fontSize: '10px', letterSpacing: '1.4px', color: '#68849c', fontWeight: 700, padding: '0 12px 10px' }}>
-          OPERATIONS
+        <div style={{ fontSize: '11px', color: '#737378', fontWeight: 500, padding: '0 12px 8px' }}>
+          Operations
         </div>
 
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
           {navItems.map((item) => {
             const Icon = item.icon;
             return (
@@ -91,33 +91,39 @@ export default function AdminLayout() {
                 style={({ isActive }) => ({
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '12px',
-                  padding: '11px 14px',
-                  borderRadius: '10px',
-                  color: isActive ? '#fff' : '#94a9be',
-                  backgroundColor: isActive ? '#087cf0' : 'transparent',
+                  gap: '10px',
+                  padding: '9px 12px',
+                  minHeight: '36px',
+                  borderRadius: '8px',
+                  color: isActive ? '#f4f4f5' : '#a1a1a6',
+                  backgroundColor: isActive ? '#1e1e21' : 'transparent',
+                  border: isActive ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid transparent',
                   textDecoration: 'none',
-                  fontWeight: 600,
+                  fontWeight: isActive ? 500 : 400,
                   fontSize: '13px',
-                  transition: 'all 0.2s ease',
-                  boxShadow: isActive ? '0 6px 16px rgba(8, 124, 240, 0.35)' : 'none',
+                  transition: 'background-color 150ms cubic-bezier(0.22, 1, 0.36, 1), color 150ms cubic-bezier(0.22, 1, 0.36, 1)',
                 })}
               >
-                <Icon size={18} />
-                <span style={{ flex: 1 }}>{item.label}</span>
-                {item.badge > 0 && (
-                  <span
-                    style={{
-                      fontSize: '10px',
-                      fontWeight: 800,
-                      padding: '2px 7px',
-                      borderRadius: '20px',
-                      background: '#ef4444',
-                      color: '#fff',
-                    }}
-                  >
-                    {item.badge}
-                  </span>
+                {({ isActive }) => (
+                  <>
+                    <Icon size={17} strokeWidth={1.6} color={isActive ? '#d49b4b' : 'currentColor'} />
+                    <span style={{ flex: 1 }}>{item.label}</span>
+                    {item.badge > 0 && (
+                      <span
+                        style={{
+                          fontSize: '11px',
+                          fontWeight: 500,
+                          padding: '1px 7px',
+                          borderRadius: '6px',
+                          background: 'rgba(212, 155, 75, 0.16)',
+                          color: '#e5b56c',
+                          fontVariantNumeric: 'tabular-nums',
+                        }}
+                      >
+                        {item.badge}
+                      </span>
+                    )}
+                  </>
                 )}
               </NavLink>
             );
@@ -132,8 +138,8 @@ export default function AdminLayout() {
               navigate('/login');
             }}
           >
-            <LogOut size={16} />
-            <span>Logout</span>
+            <LogOut size={16} strokeWidth={1.6} />
+            <span>Sign out</span>
           </button>
         </div>
       </aside>
@@ -142,9 +148,9 @@ export default function AdminLayout() {
       <div className="portal-main admin">
         <header
           style={{
-            height: '70px',
-            backgroundColor: '#fff',
-            borderBottom: '1px solid #e9eef4',
+            height: '64px',
+            backgroundColor: '#ffffff',
+            borderBottom: '1px solid rgba(23, 23, 23, 0.08)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -160,50 +166,50 @@ export default function AdminLayout() {
               onClick={() => setMobileOpen(true)}
               aria-label="Open menu"
             >
-              <Menu size={20} />
+              <Menu size={18} strokeWidth={1.6} />
             </button>
             <div>
-              <h2 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#0f2438', fontFamily: 'Manrope, sans-serif' }}>
-                EGHSELHA Operations & Dispatch Center
+              <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 600, color: '#171717', fontFamily: 'Manrope, sans-serif' }}>
+                Operations & dispatch
               </h2>
-              <small style={{ fontSize: '11px', color: '#64748b' }}>
-                Real-time platform monitoring, pricing, technicians, disputes & payouts
+              <small style={{ fontSize: '12px', color: '#737373' }}>
+                Bookings, technicians, pricing, disputes and payouts
               </small>
             </div>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <button className="btn outline" onClick={handleRefresh} disabled={refreshing}>
-              <RefreshCw size={14} />
-              <span>{refreshing ? 'Refreshing...' : 'Sync Data'}</span>
+            <button className="btn outline sm" onClick={handleRefresh} disabled={refreshing}>
+              <RefreshCw size={14} strokeWidth={1.6} />
+              <span>{refreshing ? 'Syncing…' : 'Sync'}</span>
             </button>
             <div
               style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '50%',
-                background: 'linear-gradient(135deg, #0f172a, #2563eb)',
-                color: '#fff',
-                fontWeight: 800,
+                width: '34px',
+                height: '34px',
+                borderRadius: '8px',
+                background: '#141415',
+                color: '#f4f4f5',
+                fontWeight: 600,
                 fontSize: '12px',
                 display: 'grid',
                 placeItems: 'center',
               }}
-              title="Admin Operations"
+              title="Admin operations"
             >
               AD
             </div>
           </div>
         </header>
 
-        <main style={{ padding: '28px 32px', flex: 1, maxWidth: '1500px', width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
+        <main style={{ padding: '24px 32px', flex: 1, maxWidth: '1500px', width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
           <Outlet />
         </main>
       </div>
 
       {toastMessage && (
         <div className="toast">
-          <CheckCircle2 size={16} />
+          <CheckCircle2 size={16} strokeWidth={1.6} />
           <span>{toastMessage}</span>
         </div>
       )}

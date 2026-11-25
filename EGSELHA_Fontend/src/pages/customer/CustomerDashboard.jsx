@@ -173,7 +173,7 @@ export default function CustomerDashboard() {
               borderRadius: '20px',
               overflow: 'hidden',
               minHeight: '190px',
-              background: 'radial-gradient(circle at 80% 50%, #0d2847 0%, #071526 100%)',
+              background: 'radial-gradient(circle at 80% 50%, #19191b 0%, #071526 100%)',
               color: '#fff',
               display: 'flex',
               alignItems: 'center',
@@ -212,7 +212,7 @@ export default function CustomerDashboard() {
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '8px',
-                  background: '#087cf0',
+                  background: '#141415',
                   color: '#fff',
                   border: 'none',
                   borderRadius: '24px',
@@ -220,7 +220,7 @@ export default function CustomerDashboard() {
                   fontSize: '12px',
                   fontWeight: 700,
                   cursor: 'pointer',
-                  boxShadow: '0 4px 14px rgba(8, 124, 240, 0.4)',
+                  boxShadow: '0 4px 14px rgba(20, 20, 21, 0.4)',
                   transition: 'transform 0.2s, background 0.2s'
                 }}
                 onMouseEnter={(e) => {
@@ -229,7 +229,7 @@ export default function CustomerDashboard() {
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'translateY(0)'
-                  e.currentTarget.style.background = '#087cf0'
+                  e.currentTarget.style.background = '#141415'
                 }}
               >
                 <span>Book a new wash</span>
@@ -258,8 +258,8 @@ export default function CustomerDashboard() {
                   width: '44px',
                   height: '44px',
                   borderRadius: '12px',
-                  background: '#eaf4ff',
-                  color: '#087cf0',
+                  background: '#f4f4f5',
+                  color: '#141415',
                   display: 'grid',
                   placeItems: 'center',
                   flexShrink: 0
@@ -269,7 +269,7 @@ export default function CustomerDashboard() {
               </div>
               <div>
                 <span style={{ fontSize: '11px', color: '#8090a2', fontWeight: 600, display: 'block' }}>Total Bookings</span>
-                <strong style={{ fontSize: '22px', fontWeight: 800, color: '#102a40', fontFamily: 'Manrope, sans-serif' }}>
+                <strong style={{ fontSize: '22px', fontWeight: 800, color: '#171717', fontFamily: 'Manrope, sans-serif' }}>
                   {totalBookingsCount}
                 </strong>
               </div>
@@ -304,7 +304,7 @@ export default function CustomerDashboard() {
               </div>
               <div>
                 <span style={{ fontSize: '11px', color: '#8090a2', fontWeight: 600, display: 'block' }}>Completed</span>
-                <strong style={{ fontSize: '22px', fontWeight: 800, color: '#102a40', fontFamily: 'Manrope, sans-serif' }}>
+                <strong style={{ fontSize: '22px', fontWeight: 800, color: '#171717', fontFamily: 'Manrope, sans-serif' }}>
                   {completedCount}
                 </strong>
               </div>
@@ -339,7 +339,7 @@ export default function CustomerDashboard() {
               </div>
               <div>
                 <span style={{ fontSize: '11px', color: '#8090a2', fontWeight: 600, display: 'block' }}>Pending</span>
-                <strong style={{ fontSize: '22px', fontWeight: 800, color: '#102a40', fontFamily: 'Manrope, sans-serif' }}>
+                <strong style={{ fontSize: '22px', fontWeight: 800, color: '#171717', fontFamily: 'Manrope, sans-serif' }}>
                   {pendingCount}
                 </strong>
               </div>
@@ -357,7 +357,7 @@ export default function CustomerDashboard() {
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
-              <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#102a40', fontFamily: 'Manrope, sans-serif' }}>
+              <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#171717', fontFamily: 'Manrope, sans-serif' }}>
                 Recent Bookings
               </h3>
               <button
@@ -365,7 +365,7 @@ export default function CustomerDashboard() {
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: '#087cf0',
+                  color: '#141415',
                   fontSize: '11px',
                   fontWeight: 700,
                   cursor: 'pointer',
@@ -388,7 +388,7 @@ export default function CustomerDashboard() {
                       }}
                     >
                       {/* Booking ID */}
-                      <td style={{ padding: '14px 10px', fontSize: '12px', fontWeight: 700, color: '#102a40' }}>
+                      <td style={{ padding: '14px 10px', fontSize: '12px', fontWeight: 700, color: '#171717' }}>
                         {b.bookingNumber}
                       </td>
 
@@ -403,7 +403,7 @@ export default function CustomerDashboard() {
                       </td>
 
                       {/* Price */}
-                      <td style={{ padding: '14px 10px', fontSize: '12px', fontWeight: 700, color: '#102a40' }}>
+                      <td style={{ padding: '14px 10px', fontSize: '12px', fontWeight: 700, color: '#171717' }}>
                         {b.price}
                       </td>
 
@@ -416,8 +416,8 @@ export default function CustomerDashboard() {
                             padding: '4px 10px',
                             borderRadius: '20px',
                             display: 'inline-block',
-                            backgroundColor: b.statusType === 'completed' ? '#eafbf2' : '#eaf4ff',
-                            color: b.statusType === 'completed' ? '#1da46f' : '#087cf0'
+                            backgroundColor: b.statusType === 'completed' ? '#eafbf2' : '#f4f4f5',
+                            color: b.statusType === 'completed' ? '#1da46f' : '#141415'
                           }}
                         >
                           {b.status}
@@ -446,14 +446,14 @@ export default function CustomerDashboard() {
                             border: '1px solid #dce6ef',
                             borderRadius: '8px',
                             padding: '6px 12px',
-                            color: '#087cf0',
+                            color: '#141415',
                             fontSize: '11px',
                             fontWeight: 700,
                             cursor: 'pointer',
                             transition: 'all 0.2s'
                           }}
                           onMouseEnter={(e) => {
-                            e.currentTarget.style.borderColor = '#087cf0'
+                            e.currentTarget.style.borderColor = '#141415'
                             e.currentTarget.style.background = '#f0f7ff'
                           }}
                           onMouseLeave={(e) => {
@@ -486,7 +486,7 @@ export default function CustomerDashboard() {
           }}
         >
           {/* Header */}
-          <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#102a40', fontFamily: 'Manrope, sans-serif' }}>
+          <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#171717', fontFamily: 'Manrope, sans-serif' }}>
             Your Next Wash
           </h3>
 
@@ -497,7 +497,7 @@ export default function CustomerDashboard() {
                 width: '46px',
                 height: '46px',
                 borderRadius: '12px',
-                background: '#07172c',
+                background: '#0f0f10',
                 color: '#fff',
                 display: 'grid',
                 placeItems: 'center',
@@ -507,7 +507,7 @@ export default function CustomerDashboard() {
               <Car size={24} color="#60b4ff" />
             </div>
             <div>
-              <b style={{ display: 'block', fontSize: '13px', color: '#102a40' }}>{nextWash.packageName}</b>
+              <b style={{ display: 'block', fontSize: '13px', color: '#171717' }}>{nextWash.packageName}</b>
               <small style={{ display: 'block', fontSize: '11px', color: '#8493a2', marginTop: '2px' }}>
                 {nextWash.scheduledDate}
               </small>
@@ -519,7 +519,7 @@ export default function CustomerDashboard() {
             onClick={() => setShowLiveTracking(true)}
             style={{
               width: '100%',
-              background: '#087cf0',
+              background: '#141415',
               color: '#fff',
               border: 'none',
               borderRadius: '10px',
@@ -527,7 +527,7 @@ export default function CustomerDashboard() {
               fontSize: '12px',
               fontWeight: 700,
               cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(8, 124, 240, 0.25)',
+              boxShadow: '0 4px 12px rgba(20, 20, 21, 0.25)',
               transition: 'background 0.2s'
             }}
           >
@@ -576,7 +576,7 @@ export default function CustomerDashboard() {
                   width: '32px',
                   height: '32px',
                   borderRadius: '50%',
-                  background: 'rgba(8, 124, 240, 0.2)',
+                  background: 'rgba(20, 20, 21, 0.2)',
                   display: 'grid',
                   placeItems: 'center',
                   animation: 'pulse 2s infinite'
@@ -587,7 +587,7 @@ export default function CustomerDashboard() {
                     width: '20px',
                     height: '20px',
                     borderRadius: '50%',
-                    background: '#087cf0',
+                    background: '#141415',
                     color: '#fff',
                     display: 'grid',
                     placeItems: 'center',
@@ -622,7 +622,7 @@ export default function CustomerDashboard() {
               style={{
                 display: 'inline-block',
                 background: '#eff6ff',
-                color: '#2563eb',
+                color: '#141415',
                 fontSize: '10px',
                 fontWeight: 700,
                 padding: '3px 10px',
@@ -641,7 +641,7 @@ export default function CustomerDashboard() {
                   style={{ width: '42px', height: '42px', borderRadius: '50%', objectFit: 'cover' }}
                 />
                 <div>
-                  <b style={{ display: 'block', fontSize: '12px', color: '#102a40' }}>{nextWash.technicianName}</b>
+                  <b style={{ display: 'block', fontSize: '12px', color: '#171717' }}>{nextWash.technicianName}</b>
                   <small style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '10px', color: '#64748b', marginTop: '2px' }}>
                     <Star size={11} fill="#eab308" color="#eab308" />
                     <span>{nextWash.technicianRating}</span>
@@ -657,7 +657,7 @@ export default function CustomerDashboard() {
                   borderRadius: '50%',
                   background: '#f1f5f9',
                   border: 'none',
-                  color: '#087cf0',
+                  color: '#141415',
                   display: 'grid',
                   placeItems: 'center',
                   cursor: 'pointer',
@@ -698,7 +698,7 @@ export default function CustomerDashboard() {
                 </div>
                 <div>
                   <span style={{ fontSize: '10px', color: '#64748b' }}>Total Price</span>
-                  <b style={{ display: 'block', fontSize: '13px', color: '#087cf0' }}>EGP {selectedBooking.totalPrice || 300}</b>
+                  <b style={{ display: 'block', fontSize: '13px', color: '#141415' }}>EGP {selectedBooking.totalPrice || 300}</b>
                 </div>
                 <div>
                   <span style={{ fontSize: '10px', color: '#64748b' }}>Deposit Status</span>
@@ -750,11 +750,11 @@ export default function CustomerDashboard() {
               </button>
             </div>
             <div className="modal-body" style={{ textAlign: 'center', padding: '24px' }}>
-              <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: '#eaf4ff', color: '#087cf0', display: 'grid', placeItems: 'center', margin: '0 auto 16px' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: '#f4f4f5', color: '#141415', display: 'grid', placeItems: 'center', margin: '0 auto 16px' }}>
                 <CreditCard size={28} />
               </div>
               <span style={{ fontSize: '11px', color: '#6d8294' }}>Deposit Amount</span>
-              <h1 style={{ margin: '4px 0 16px', color: '#087cf0', fontSize: '32px', fontWeight: 800 }}>EGP 200.00</h1>
+              <h1 style={{ margin: '4px 0 16px', color: '#141415', fontSize: '32px', fontWeight: 800 }}>EGP 200.00</h1>
               <p style={{ fontSize: '11px', color: '#64748b', lineHeight: 1.5, margin: 0 }}>
                 This deposit reserves your technician and will be deducted from your final wash bill upon completion.
               </p>
@@ -785,8 +785,8 @@ export default function CustomerDashboard() {
             <div className="modal-body">
               <div style={{ height: '240px', borderRadius: '12px', overflow: 'hidden', position: 'relative', background: '#dce8dc', border: '1px solid #c8d8c8', marginBottom: '16px' }}>
                 <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(8, 124, 240, 0.25)', display: 'grid', placeItems: 'center', animation: 'pulse 1.5s infinite' }}>
-                    <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#087cf0', color: '#fff', display: 'grid', placeItems: 'center' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(20, 20, 21, 0.25)', display: 'grid', placeItems: 'center', animation: 'pulse 1.5s infinite' }}>
+                    <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#141415', color: '#fff', display: 'grid', placeItems: 'center' }}>
                       <MapPin size={16} />
                     </div>
                   </div>
@@ -804,7 +804,7 @@ export default function CustomerDashboard() {
                     style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
                   />
                   <div>
-                    <b style={{ fontSize: '12px', color: '#102a40' }}>{nextWash.technicianName}</b>
+                    <b style={{ fontSize: '12px', color: '#171717' }}>{nextWash.technicianName}</b>
                     <span style={{ fontSize: '10px', color: '#64748b', display: 'block' }}>ETA: 10:06 AM</span>
                   </div>
                 </div>

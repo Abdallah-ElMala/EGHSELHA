@@ -69,14 +69,14 @@ export default function CustomerPublicProfileModal({ customerData, onClose }) {
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '0 25px 60px rgba(7, 23, 44, 0.35)'
+          boxShadow: '0 25px 60px rgba(15, 15, 16, 0.35)'
         }}
       >
         {/* Header */}
         <div
           style={{
             padding: '22px 24px',
-            background: 'linear-gradient(135deg, #07172c 0%, #0d2847 100%)',
+            background: '#141415',
             color: '#fff',
             display: 'flex',
             alignItems: 'center',
@@ -90,28 +90,28 @@ export default function CustomerPublicProfileModal({ customerData, onClose }) {
                 width: '54px',
                 height: '54px',
                 borderRadius: '50%',
-                background: 'linear-gradient(135deg, #2563eb, #38bdf8)',
+                background: '#141415',
                 color: '#fff',
-                fontWeight: 800,
+                fontWeight: 600,
                 fontSize: '18px',
                 display: 'grid',
                 placeItems: 'center',
                 flexShrink: 0,
-                boxShadow: '0 4px 14px rgba(37, 99, 235, 0.4)'
+                boxShadow: '0 4px 14px rgba(20, 20, 21, 0.4)'
               }}
             >
               {initials}
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800 }}>{name}</h3>
+                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 600 }}>{name}</h3>
                 <span
                   style={{
                     fontSize: '10px',
                     fontWeight: 700,
                     padding: '3px 9px',
                     borderRadius: '20px',
-                    background: 'rgba(56, 189, 248, 0.2)',
+                    background: 'rgba(212, 155, 75, 0.2)',
                     color: '#7dd3fc',
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -149,36 +149,36 @@ export default function CustomerPublicProfileModal({ customerData, onClose }) {
         <div style={{ padding: '24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '18px' }}>
           {/* Stats */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
-            <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: '14px', padding: '14px', textAlign: 'center' }}>
-              <small style={{ fontSize: '10px', color: '#0369a1', display: 'block', fontWeight: 700 }}>TOTAL BOOKINGS</small>
+            <div style={{ background: '#f4f4f5', border: '1px solid #e4e4e7', borderRadius: '14px', padding: '14px', textAlign: 'center' }}>
+              <small style={{ fontSize: '10px', color: '#92400e', display: 'block', fontWeight: 700 }}>TOTAL BOOKINGS</small>
               <b style={{ fontSize: '18px', color: '#0c4a6e', display: 'inline-flex', alignItems: 'center', gap: '5px', marginTop: '4px' }}>
-                <CalendarCheck size={16} color="#0284c7" /> {totalBookings} Trips
+                <CalendarCheck size={16} color="#92400e" /> {totalBookings} Trips
               </b>
             </div>
             <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '14px', textAlign: 'center' }}>
               <small style={{ fontSize: '10px', color: '#64748b', display: 'block', fontWeight: 700 }}>REGISTERED VEHICLES</small>
               <b style={{ fontSize: '18px', color: '#0f172a', display: 'inline-flex', alignItems: 'center', gap: '5px', marginTop: '4px' }}>
-                <Car size={16} color="#087cf0" /> {vehicles.length || (bookedCarName ? 1 : 0)} Cars
+                <Car size={16} color="#141415" /> {vehicles.length || (bookedCarName ? 1 : 0)} Cars
               </b>
             </div>
           </div>
 
           {/* Contact & Location */}
           <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '16px' }}>
-            <h4 style={{ margin: '0 0 10px', fontSize: '12px', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+            <h4 style={{ margin: '0 0 10px', fontSize: '12px', fontWeight: 600, color: '#0f172a', letterSpacing: '0.4px' }}>
               Contact &amp; Location Details
             </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12px', color: '#334155' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Phone size={14} color="#087cf0" />
+                  <Phone size={14} color="#141415" />
                   <span><b>Phone:</b> {phone || 'Not provided'}</span>
                 </div>
                 {phone && (
                   <a
                     href={`tel:${phone.replace(/\s+/g, '')}`}
                     className="btn outline"
-                    style={{ fontSize: '11px', padding: '4px 10px', textDecoration: 'none', borderColor: '#087cf0', color: '#087cf0' }}
+                    style={{ fontSize: '11px', padding: '4px 10px', textDecoration: 'none', borderColor: '#141415', color: '#141415' }}
                   >
                     <Phone size={12} /> Call Customer
                   </a>
@@ -186,13 +186,13 @@ export default function CustomerPublicProfileModal({ customerData, onClose }) {
               </div>
               {email && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Mail size={14} color="#087cf0" />
+                  <Mail size={14} color="#141415" />
                   <span><b>Email:</b> {email}</span>
                 </div>
               )}
               {address && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <MapPin size={14} color="#087cf0" />
+                  <MapPin size={14} color="#141415" />
                   <span><b>Service Address:</b> {address}</span>
                 </div>
               )}
@@ -222,8 +222,8 @@ export default function CustomerPublicProfileModal({ customerData, onClose }) {
 
           {/* Booked Vehicle & Customer Garage */}
           <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '16px' }}>
-            <h4 style={{ margin: '0 0 12px', fontSize: '12px', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Car size={15} color="#087cf0" /> Customer Vehicles
+            <h4 style={{ margin: '0 0 12px', fontSize: '12px', fontWeight: 600, color: '#0f172a', letterSpacing: '0.4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Car size={15} color="#141415" /> Customer Vehicles
             </h4>
 
             {vehicles.length > 0 ? (
@@ -234,15 +234,15 @@ export default function CustomerPublicProfileModal({ customerData, onClose }) {
                     <div
                       key={idx}
                       style={{
-                        background: isBookedCar ? '#f0f9ff' : '#f8fafc',
-                        border: isBookedCar ? '1.5px solid #087cf0' : '1px solid #e2e8f0',
+                        background: isBookedCar ? '#f4f4f5' : '#f8fafc',
+                        border: isBookedCar ? '1.5px solid #141415' : '1px solid #e2e8f0',
                         borderRadius: '12px',
                         padding: '12px'
                       }}
                     >
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px', gap: '6px' }}>
                         <b style={{ fontSize: '13px', color: '#0f172a' }}>{v.make} {v.model}</b>
-                        <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 7px', borderRadius: '6px', background: '#e0f2fe', color: '#0369a1' }}>
+                        <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 7px', borderRadius: '6px', background: '#fef7ec', color: '#92400e' }}>
                           {v.sizeType || 'SEDAN'}
                         </span>
                       </div>
@@ -252,7 +252,7 @@ export default function CustomerPublicProfileModal({ customerData, onClose }) {
                       <div style={{ fontSize: '11px', color: '#334155', marginTop: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span>Plate: <b>{v.licensePlate}</b></span>
                         {isBookedCar && (
-                          <span style={{ fontSize: '9px', fontWeight: 800, color: '#087cf0', textTransform: 'uppercase' }}>Booked Car</span>
+                          <span style={{ fontSize: '9px', fontWeight: 600, color: '#141415' }}>Booked Car</span>
                         )}
                       </div>
                     </div>
@@ -260,11 +260,11 @@ export default function CustomerPublicProfileModal({ customerData, onClose }) {
                 })}
               </div>
             ) : bookedCarName ? (
-              <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: '12px', padding: '12px' }}>
+              <div style={{ background: '#f4f4f5', border: '1px solid #e4e4e7', borderRadius: '12px', padding: '12px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                   <b style={{ fontSize: '13px', color: '#0c4a6e' }}>{bookedCarName}</b>
                   {bookedSize && (
-                    <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 7px', borderRadius: '6px', background: '#e0f2fe', color: '#0369a1' }}>
+                    <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 7px', borderRadius: '6px', background: '#fef7ec', color: '#92400e' }}>
                       {bookedSize}
                     </span>
                   )}

@@ -176,7 +176,7 @@ async function searchPlacesInZone(rawQuery, signal) {
 const PIN_ICON = L.divIcon({
   className: 'eghselha-map-pin',
   html: `<div style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;transform:translate(-50%,-100%);">
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="#0b6bcb" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 3px 6px rgba(0,0,0,0.35));">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="#141415" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 3px 6px rgba(0,0,0,0.35));">
       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
       <circle cx="12" cy="10" r="3" fill="#ffffff"></circle>
     </svg>
@@ -307,10 +307,10 @@ export default function LocationPicker({
         [COVERAGE_BOUNDS.maxLat, COVERAGE_BOUNDS.maxLng]
       ],
       {
-        color: '#0b6bcb',
+        color: '#141415',
         weight: 2,
         dashArray: '6 4',
-        fillColor: '#0b6bcb',
+        fillColor: '#141415',
         fillOpacity: 0.06
       }
     ).addTo(map)
@@ -446,8 +446,8 @@ export default function LocationPicker({
           style={{
             padding: '12px 14px',
             borderRadius: '10px',
-            background: '#f0f9ff',
-            border: '1px solid #bae6fd',
+            background: '#f4f4f5',
+            border: '1px solid #e4e4e7',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -455,13 +455,13 @@ export default function LocationPicker({
           }}
         >
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', minWidth: 0 }}>
-            <MapPin size={17} color="#0b6bcb" style={{ flexShrink: 0, marginTop: '2px' }} />
+            <MapPin size={17} color="#141415" style={{ flexShrink: 0, marginTop: '2px' }} />
             <div style={{ minWidth: 0 }}>
               <b style={{ fontSize: '12px', color: '#0f172a', display: 'block', wordBreak: 'break-word' }}>
                 {value}
               </b>
               {latitude && longitude && (
-                <small style={{ fontSize: '10px', color: '#0369a1', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+                <small style={{ fontSize: '10px', color: '#92400e', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
                   <CheckCircle2 size={11} /> GPS Verified ({Number(latitude).toFixed(4)}, {Number(longitude).toFixed(4)}) · Sheikh Zayed / 6th of October
                 </small>
               )}
@@ -543,14 +543,14 @@ export default function LocationPicker({
               overflow: 'hidden',
               display: 'flex',
               flexDirection: 'column',
-              boxShadow: '0 25px 60px rgba(7, 23, 44, 0.35)'
+              boxShadow: '0 25px 60px rgba(15, 15, 16, 0.35)'
             }}
           >
             {/* Modal Header */}
             <div
               style={{
                 padding: '16px 22px',
-                background: 'linear-gradient(135deg, #07172c 0%, #0d2847 100%)',
+                background: '#0f0f10',
                 color: '#fff',
                 display: 'flex',
                 alignItems: 'center',
@@ -559,10 +559,10 @@ export default function LocationPicker({
               }}
             >
               <div>
-                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800 }}>
+                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 600 }}>
                   Search &amp; Select Location on Map
                 </h3>
-                <p style={{ margin: '3px 0 0', fontSize: '11px', color: '#93c5fd' }}>
+                <p style={{ margin: '3px 0 0', fontSize: '11px', color: '#d49b4b' }}>
                   Search any street, compound, or landmark in Sheikh Zayed &amp; 6th of October, then fine-tune the pin
                 </p>
               </div>
@@ -615,7 +615,7 @@ export default function LocationPicker({
                 {searching ? (
                   <Loader2
                     size={16}
-                    color="#0b6bcb"
+                    color="#141415"
                     className="animate-spin"
                     style={{ position: 'absolute', right: '12px' }}
                   />
@@ -682,10 +682,10 @@ export default function LocationPicker({
                           cursor: 'pointer',
                           transition: 'background 0.15s'
                         }}
-                        onMouseEnter={(e) => (e.currentTarget.style.background = '#f0f9ff')}
+                        onMouseEnter={(e) => (e.currentTarget.style.background = '#f4f4f5')}
                         onMouseLeave={(e) => (e.currentTarget.style.background = '#ffffff')}
                       >
-                        <MapPin size={15} color="#0b6bcb" style={{ flexShrink: 0, marginTop: '2px' }} />
+                        <MapPin size={15} color="#141415" style={{ flexShrink: 0, marginTop: '2px' }} />
                         <div style={{ minWidth: 0 }}>
                           <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {item.primary}
@@ -718,13 +718,13 @@ export default function LocationPicker({
                   <span>This pin is outside our Sheikh Zayed &amp; 6th of October coverage zone (dashed blue box). Please search or tap inside the zone.</span>
                 </div>
               ) : (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#f0f9ff', border: '1px solid #bae6fd', padding: '10px 14px', borderRadius: '10px' }}>
-                  <MapPin size={18} color="#0b6bcb" style={{ flexShrink: 0 }} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#f4f4f5', border: '1px solid #e4e4e7', padding: '10px 14px', borderRadius: '10px' }}>
+                  <MapPin size={18} color="#141415" style={{ flexShrink: 0 }} />
                   <div style={{ minWidth: 0 }}>
                     <b style={{ fontSize: '12px', color: '#0f172a', display: 'block' }}>
                       {resolvingAddr ? 'Resolving address...' : draftAddress || 'Search above or tap on map to pick a location'}
                     </b>
-                    <small style={{ fontSize: '10px', color: '#0369a1' }}>
+                    <small style={{ fontSize: '10px', color: '#92400e' }}>
                       Lat: {draftCoords.lat.toFixed(5)} · Lng: {draftCoords.lng.toFixed(5)} · Drag the pin or tap map to adjust exact spot
                     </small>
                   </div>

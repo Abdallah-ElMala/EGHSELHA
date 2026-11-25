@@ -250,7 +250,7 @@ export default function CustomerBookings() {
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             style={{
-              background: activeTab === tab.id ? '#087cf0' : 'transparent',
+              background: activeTab === tab.id ? '#141415' : 'transparent',
               color: activeTab === tab.id ? '#fff' : '#64748b',
               border: 'none',
               borderRadius: '8px',
@@ -258,7 +258,7 @@ export default function CustomerBookings() {
               fontSize: '12px',
               fontWeight: 700,
               cursor: 'pointer',
-              transition: 'all 0.2s'
+              transition: 'background-color 150ms cubic-bezier(0.22, 1, 0.36, 1), border-color 150ms cubic-bezier(0.22, 1, 0.36, 1), color 150ms cubic-bezier(0.22, 1, 0.36, 1)'
             }}
           >
             {tab.label}
@@ -310,13 +310,13 @@ export default function CustomerBookings() {
                 {/* Header row */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: '#eaf4ff', color: '#087cf0', display: 'grid', placeItems: 'center' }}>
+                    <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: '#f4f4f5', color: '#141415', display: 'grid', placeItems: 'center' }}>
                       <Car size={22} />
                     </div>
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                        <b style={{ fontSize: '15px', color: '#102a40' }}>
-                          {packageTitle}{vehicleInfo} <span style={{ color: '#087cf0', fontWeight: 700 }}>({b.bookingNumber})</span>
+                        <b style={{ fontSize: '15px', color: '#171717' }}>
+                          {packageTitle}{vehicleInfo} <span style={{ color: '#141415', fontWeight: 700 }}>({b.bookingNumber})</span>
                         </b>
                         <span
                           style={{
@@ -327,20 +327,20 @@ export default function CustomerBookings() {
                             background:
                               b.bookingType === 'SUBSCRIPTION_WEEKLY' ? '#f0fdf4'
                               : b.bookingType === 'SUBSCRIPTION_MONTHLY' ? '#faf5ff'
-                              : b.bookingType === 'FAST_TRACK' ? '#eff6ff'
+                              : b.bookingType === 'FAST_TRACK' ? '#f4f4f5'
                               : '#f1f5f9',
                             color:
                               b.bookingType === 'SUBSCRIPTION_WEEKLY' ? '#16a34a'
-                              : b.bookingType === 'SUBSCRIPTION_MONTHLY' ? '#7c3aed'
-                              : b.bookingType === 'FAST_TRACK' ? '#2563eb'
+                              : b.bookingType === 'SUBSCRIPTION_MONTHLY' ? '#b45309'
+                              : b.bookingType === 'FAST_TRACK' ? '#141415'
                               : '#475569',
                             border: '1px solid currentColor'
                           }}
                         >
-                          {b.bookingType === 'SUBSCRIPTION_WEEKLY' ? '🔄 Weekly (-10%)'
-                            : b.bookingType === 'SUBSCRIPTION_MONTHLY' ? '👑 Monthly (-15%)'
-                            : b.bookingType === 'FAST_TRACK' ? '⚡ Fast Track'
-                            : '📅 Scheduled'}
+                          {b.bookingType === 'SUBSCRIPTION_WEEKLY' ? 'Weekly (-10%)'
+                            : b.bookingType === 'SUBSCRIPTION_MONTHLY' ? 'Monthly (-15%)'
+                            : b.bookingType === 'FAST_TRACK' ? 'Fast Track'
+                            : 'Scheduled'}
                         </span>
                       </div>
                       <small style={{ color: '#64748b', fontSize: '11px', display: 'block', marginTop: '3px' }}>
@@ -348,7 +348,7 @@ export default function CustomerBookings() {
                         {b.technicianName && (
                           <span
                             onClick={() => setTechProfileBooking(b)}
-                            style={{ color: '#087cf0', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}
+                            style={{ color: '#141415', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}
                             title="Click to view Technician Profile"
                           >
                             {' '}· Technician: {b.technicianName}
@@ -365,8 +365,8 @@ export default function CustomerBookings() {
                         fontWeight: 700,
                         padding: '4px 12px',
                         borderRadius: '20px',
-                        backgroundColor: isCompleted ? '#eafbf2' : b.status === 'DISPATCHED' ? '#dcfce7' : b.status === 'ON_THE_WAY' || b.status === 'ARRIVED' || b.status === 'WASHING' ? '#eff6ff' : b.status === 'DEPOSIT_PAID' ? '#ecfdf5' : '#fff7ed',
-                        color: isCompleted ? '#1da46f' : b.status === 'DISPATCHED' ? '#15803d' : b.status === 'ON_THE_WAY' || b.status === 'ARRIVED' || b.status === 'WASHING' ? '#2563eb' : b.status === 'DEPOSIT_PAID' ? '#059669' : '#c2410c'
+                        backgroundColor: isCompleted ? '#eafbf2' : b.status === 'DISPATCHED' ? '#dcfce7' : b.status === 'ON_THE_WAY' || b.status === 'ARRIVED' || b.status === 'WASHING' ? '#f4f4f5' : b.status === 'DEPOSIT_PAID' ? '#ecfdf5' : '#fff7ed',
+                        color: isCompleted ? '#1da46f' : b.status === 'DISPATCHED' ? '#15803d' : b.status === 'ON_THE_WAY' || b.status === 'ARRIVED' || b.status === 'WASHING' ? '#141415' : b.status === 'DEPOSIT_PAID' ? '#059669' : '#c2410c'
                       }}
                     >
                       {b.status === 'PENDING' ? 'Pending Deposit'
@@ -377,7 +377,7 @@ export default function CustomerBookings() {
                         : b.status === 'WASHING' ? 'Washing In Progress'
                         : b.status}
                     </span>
-                    <strong style={{ fontSize: '16px', color: '#102a40' }}>EGP {b.totalPrice}</strong>
+                    <strong style={{ fontSize: '16px', color: '#171717' }}>EGP {b.totalPrice}</strong>
                   </div>
                 </div>
 
@@ -387,12 +387,12 @@ export default function CustomerBookings() {
                     Base: EGP {b.basePackagePrice ?? b.totalPrice}
                   </span>
                   {(b.vehicleMultiplier ?? 1) > 1 && (
-                    <span style={{ fontSize: '10px', fontWeight: 600, padding: '3px 9px', borderRadius: '8px', background: '#f0f9ff', border: '1px solid #bae6fd', color: '#0369a1' }}>
+                    <span style={{ fontSize: '10px', fontWeight: 600, padding: '3px 9px', borderRadius: '8px', background: '#f4f4f5', border: '1px solid #e4e4e7', color: '#92400e' }}>
                       Vehicle {b.vehicleMultiplier}×
                     </span>
                   )}
                   {(b.addOnsSubtotal ?? 0) > 0 && (
-                    <span style={{ fontSize: '10px', fontWeight: 600, padding: '3px 9px', borderRadius: '8px', background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1d4ed8' }}>
+                    <span style={{ fontSize: '10px', fontWeight: 600, padding: '3px 9px', borderRadius: '8px', background: '#f4f4f5', border: '1px solid #e4e4e7', color: '#141415' }}>
                       Add-Ons: +EGP {b.addOnsSubtotal}{b.addOnNames?.length ? ` (${b.addOnNames.join(', ')})` : ''}
                     </span>
                   )}
@@ -439,7 +439,7 @@ export default function CustomerBookings() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#92400e' }}>
                       <Clock size={16} color="#d97706" />
                       <span>
-                        <b>Technician accepted your booking!</b> You have <b>{formatMmSs(graceSecondsLeft)}</b> left to cancel before the job is locked in.
+                        <b>Technician accepted your booking.</b> You have <b>{formatMmSs(graceSecondsLeft)}</b> left to cancel before the job is locked in.
                       </span>
                     </div>
                   </div>
@@ -459,7 +459,7 @@ export default function CustomerBookings() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ fontSize: '11px', color: '#64748b' }}>Deposit:</span>
                     <b style={{ fontSize: '12px', color: isDepositPaid ? '#1da46f' : isCancelled ? '#dc2626' : '#ea580c' }}>
-                      {isCancelled ? 'Cancelled' : isDepositPaid ? '✓ Paid (200 EGP)' : '⚠ Unpaid (Required)'}
+                      {isCancelled ? 'Cancelled' : isDepositPaid ? 'Paid (200 EGP)' : 'Unpaid (Required)'}
                     </b>
                     {isDepositPaid && b.remainingBalance !== undefined && (
                       <span style={{ fontSize: '11px', color: '#64748b', marginLeft: '6px' }}>
@@ -575,7 +575,7 @@ export default function CustomerBookings() {
                 {/* Overall Rating Display */}
                 <div style={{ textAlign: 'center', padding: '14px', background: '#fffbeb', borderRadius: '12px' }}>
                   <span style={{ fontSize: '11px', color: '#b45309' }}>Average Star Rating</span>
-                  <div style={{ fontSize: '30px', fontWeight: 800, color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                  <div style={{ fontSize: '30px', fontWeight: 600, color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
                     <Star size={26} fill="#d97706" color="#d97706" />
                     <span>{averageRating} / 5.0</span>
                   </div>
@@ -629,9 +629,9 @@ export default function CustomerBookings() {
                           key={tag}
                           onClick={() => toggleReviewTag(tag)}
                           style={{
-                            border: `1px solid ${isTagSelected ? '#087cf0' : '#cbd5e1'}`,
-                            background: isTagSelected ? '#e0f2fe' : '#fff',
-                            color: isTagSelected ? '#0369a1' : '#475569',
+                            border: `1px solid ${isTagSelected ? '#141415' : '#cbd5e1'}`,
+                            background: isTagSelected ? '#fef7ec' : '#fff',
+                            color: isTagSelected ? '#92400e' : '#475569',
                             borderRadius: '16px',
                             padding: '4px 10px',
                             fontSize: '11px',
@@ -775,12 +775,12 @@ export default function CustomerBookings() {
               <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
                 <div>
                   <span style={{ fontSize: '10px', color: '#64748b' }}>Customer</span>
-                  <b style={{ display: 'block', fontSize: '12px', color: '#102a40' }}>{user?.fullName || profile?.fullName || 'Customer'}</b>
+                  <b style={{ display: 'block', fontSize: '12px', color: '#171717' }}>{user?.fullName || profile?.fullName || 'Customer'}</b>
                   <small style={{ fontSize: '10px', color: '#64748b' }}>{user?.phone || profile?.phone || ''}</small>
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   <span style={{ fontSize: '10px', color: '#64748b' }}>Invoice Date</span>
-                  <b style={{ display: 'block', fontSize: '12px', color: '#102a40' }}>{new Date().toLocaleDateString('en-GB')}</b>
+                  <b style={{ display: 'block', fontSize: '12px', color: '#171717' }}>{new Date().toLocaleDateString('en-GB')}</b>
                 </div>
               </div>
 
@@ -799,7 +799,7 @@ export default function CustomerBookings() {
                 {(invoiceModal.addOnsSubtotal ?? 0) > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
                     <span style={{ color: '#64748b' }}>Extra Add-Ons {invoiceModal.addOnNames?.length ? `(${invoiceModal.addOnNames.join(', ')})` : ''}</span>
-                    <b style={{ color: '#087cf0' }}>+EGP {invoiceModal.addOnsSubtotal}</b>
+                    <b style={{ color: '#141415' }}>+EGP {invoiceModal.addOnsSubtotal}</b>
                   </div>
                 )}
                 {(invoiceModal.distanceSurcharge ?? 0) > 0 && (
@@ -815,8 +815,8 @@ export default function CustomerBookings() {
                   </div>
                 )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', borderTop: '1px solid #e2e8f0', paddingTop: '8px' }}>
-                  <span style={{ fontWeight: 700, color: '#102a40' }}>Total Amount</span>
-                  <b style={{ color: '#087cf0', fontSize: '16px' }}>EGP {invoiceModal.totalPrice}</b>
+                  <span style={{ fontWeight: 700, color: '#171717' }}>Total Amount</span>
+                  <b style={{ color: '#141415', fontSize: '16px' }}>EGP {invoiceModal.totalPrice}</b>
                 </div>
 
                 <div style={{ background: '#f8fafc', padding: '10px 14px', borderRadius: '8px', marginTop: '6px', display: 'flex', justifyContent: 'space-between', fontSize: '11px' }}>

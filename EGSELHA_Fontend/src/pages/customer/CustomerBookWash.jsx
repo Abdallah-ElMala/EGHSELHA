@@ -325,13 +325,13 @@ export default function CustomerBookWash() {
             {/* 1. Vehicle Selection */}
             <div className="panel" style={{ borderRadius: '16px', padding: '22px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#102a40' }}>
+                <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: '#171717' }}>
                   1. Select Registered Vehicle
                 </h3>
                 <button
                   type="button"
                   onClick={() => navigate('/customer/vehicles')}
-                  style={{ background: 'none', border: 'none', color: '#087cf0', fontSize: '11px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                  style={{ background: 'none', border: 'none', color: '#141415', fontSize: '11px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
                 >
                   <Plus size={14} /> Add New Vehicle
                 </button>
@@ -357,17 +357,17 @@ export default function CustomerBookWash() {
                         key={v.id}
                         onClick={() => setSelectedVehicleId(v.id)}
                         style={{
-                          border: `2px solid ${isSelected ? '#087cf0' : '#e2e8f0'}`,
+                          border: `2px solid ${isSelected ? '#141415' : '#e2e8f0'}`,
                           borderRadius: '12px',
                           padding: '14px',
                           cursor: 'pointer',
                           background: isSelected ? '#f0f7ff' : '#fff',
-                          transition: 'all 0.2s',
+                          transition: 'background-color 150ms cubic-bezier(0.22, 1, 0.36, 1), border-color 150ms cubic-bezier(0.22, 1, 0.36, 1), color 150ms cubic-bezier(0.22, 1, 0.36, 1)',
                           position: 'relative'
                         }}
                       >
                         {isSelected && (
-                          <div style={{ position: 'absolute', top: '10px', right: '10px', color: '#087cf0' }}>
+                          <div style={{ position: 'absolute', top: '10px', right: '10px', color: '#141415' }}>
                             <CheckCircle2 size={16} />
                           </div>
                         )}
@@ -375,7 +375,7 @@ export default function CustomerBookWash() {
                         <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginTop: '2px' }}>
                           Plate: {v.licensePlate} · {v.color}
                         </span>
-                        <div style={{ marginTop: '8px', display: 'inline-block', fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: '#e0f2fe', color: '#0369a1' }}>
+                        <div style={{ marginTop: '8px', display: 'inline-block', fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: '#fef7ec', color: '#92400e' }}>
                           {v.sizeType === 1 || s === 'SUV' ? 'SUV' : v.sizeType === 2 || s === 'TRUCK_VAN' ? 'Truck/Van' : 'Sedan'} ({multText})
                         </div>
                       </div>
@@ -388,7 +388,7 @@ export default function CustomerBookWash() {
 
             {/* 2. Wash Package Selection */}
             <div className="panel" style={{ borderRadius: '16px', padding: '22px' }}>
-              <h3 style={{ margin: '0 0 14px', fontSize: '15px', fontWeight: 800, color: '#102a40' }}>
+              <h3 style={{ margin: '0 0 14px', fontSize: '15px', fontWeight: 600, color: '#171717' }}>
                 2. Choose Wash Package
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: '14px' }}>
@@ -401,13 +401,13 @@ export default function CustomerBookWash() {
                       key={pkg.id}
                       onClick={() => setSelectedPackageId(pkg.id)}
                       style={{
-                        border: `2px solid ${isSelected ? '#087cf0' : '#e2e8f0'}`,
+                        border: `2px solid ${isSelected ? '#141415' : '#e2e8f0'}`,
                         borderRadius: '14px',
                         padding: '16px',
                         cursor: 'pointer',
                         background: isSelected ? '#fbfdff' : '#fff',
-                        boxShadow: isSelected ? '0 4px 16px rgba(8, 124, 240, 0.12)' : 'none',
-                        transition: 'all 0.2s',
+                        boxShadow: isSelected ? '0 4px 16px rgba(20, 20, 21, 0.12)' : 'none',
+                        transition: 'background-color 150ms cubic-bezier(0.22, 1, 0.36, 1), border-color 150ms cubic-bezier(0.22, 1, 0.36, 1), color 150ms cubic-bezier(0.22, 1, 0.36, 1)',
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'space-between'
@@ -415,11 +415,11 @@ export default function CustomerBookWash() {
                     >
                       <div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <b style={{ fontSize: '14px', color: '#102a40' }}>{pkg.name}</b>
-                          {isSelected && <CheckCircle2 size={16} color="#087cf0" />}
+                          <b style={{ fontSize: '14px', color: '#171717' }}>{pkg.name}</b>
+                          {isSelected && <CheckCircle2 size={16} color="#141415" />}
                         </div>
                         <div style={{ margin: '6px 0 10px' }}>
-                          <span style={{ fontSize: '18px', fontWeight: 800, color: '#087cf0' }}>EGP {calculatedTierPrice}</span>
+                          <span style={{ fontSize: '18px', fontWeight: 600, color: '#141415' }}>EGP {calculatedTierPrice}</span>
                           <span style={{ fontSize: '10px', color: '#8493a2', marginLeft: '6px' }}>({pkg.durationMinutes} mins)</span>
                         </div>
                         <p style={{ fontSize: '11px', color: '#64748b', lineHeight: 1.4, margin: '0 0 12px 0' }}>{pkg.desc}</p>
@@ -441,8 +441,8 @@ export default function CustomerBookWash() {
             {/* 3. Add-Ons Selection (7. AddOn & 8. BookingAddOn) */}
             <div className="panel" style={{ borderRadius: '16px', padding: '22px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-                <Tag size={16} color="#087cf0" />
-                <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#102a40' }}>
+                <Tag size={16} color="#141415" />
+                <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: '#171717' }}>
                   3. Optional Extra Add-Ons
                 </h3>
               </div>
@@ -455,12 +455,12 @@ export default function CustomerBookWash() {
                       key={addon.id}
                       onClick={() => toggleAddon(addon.id)}
                       style={{
-                        border: `1.5px solid ${isChecked ? '#087cf0' : '#e2e8f0'}`,
+                        border: `1.5px solid ${isChecked ? '#141415' : '#e2e8f0'}`,
                         borderRadius: '12px',
                         padding: '12px 14px',
                         background: isChecked ? '#f0f7ff' : '#fff',
                         cursor: 'pointer',
-                        transition: 'all 0.2s',
+                        transition: 'background-color 150ms cubic-bezier(0.22, 1, 0.36, 1), border-color 150ms cubic-bezier(0.22, 1, 0.36, 1), color 150ms cubic-bezier(0.22, 1, 0.36, 1)',
                         display: 'flex',
                         alignItems: 'flex-start',
                         gap: '10px'
@@ -475,7 +475,7 @@ export default function CustomerBookWash() {
                       <div style={{ flex: 1 }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <b style={{ fontSize: '11px', color: '#1e293b' }}>{addon.name}</b>
-                          <span style={{ fontSize: '11px', fontWeight: 700, color: '#087cf0' }}>+EGP {addon.price}</span>
+                          <span style={{ fontSize: '11px', fontWeight: 700, color: '#141415' }}>+EGP {addon.price}</span>
                         </div>
                         <small style={{ fontSize: '9px', color: '#64748b', display: 'block', marginTop: '3px' }}>{addon.desc}</small>
                       </div>
@@ -487,31 +487,31 @@ export default function CustomerBookWash() {
 
             {/* 4. Booking Type & Schedule */}
             <div className="panel" style={{ borderRadius: '16px', padding: '22px' }}>
-              <h3 style={{ margin: '0 0 14px', fontSize: '15px', fontWeight: 800, color: '#102a40' }}>
+              <h3 style={{ margin: '0 0 14px', fontSize: '15px', fontWeight: 600, color: '#171717' }}>
                 4. Scheduling & Booking Type
               </h3>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '16px' }}>
                 {[
-                  { type: 0, title: '⚡ Fast Track', desc: 'Wash Now (within 5 km)' },
-                  { type: 1, title: '📅 Scheduled', desc: 'Pick Date & Slot' },
-                  { type: 2, title: '🔄 Weekly (10% Off)', desc: 'Recurring weekly' },
-                  { type: 3, title: '👑 Monthly (15% Off)', desc: 'Recurring monthly' }
+                  { type: 0, title: 'Fast Track', desc: 'Wash Now (within 5 km)' },
+                  { type: 1, title: 'Scheduled', desc: 'Pick Date & Slot' },
+                  { type: 2, title: 'Weekly (10% Off)', desc: 'Recurring weekly' },
+                  { type: 3, title: 'Monthly (15% Off)', desc: 'Recurring monthly' }
                 ].map((item) => (
                   <div
                     key={item.type}
                     onClick={() => setBookingType(item.type)}
                     style={{
-                      border: `1.5px solid ${bookingType === item.type ? '#087cf0' : '#e2e8f0'}`,
+                      border: `1.5px solid ${bookingType === item.type ? '#141415' : '#e2e8f0'}`,
                       borderRadius: '10px',
                       padding: '12px 10px',
                       textAlign: 'center',
                       background: bookingType === item.type ? '#f0f7ff' : '#fff',
                       cursor: 'pointer',
-                      transition: 'all 0.2s'
+                      transition: 'background-color 150ms cubic-bezier(0.22, 1, 0.36, 1), border-color 150ms cubic-bezier(0.22, 1, 0.36, 1), color 150ms cubic-bezier(0.22, 1, 0.36, 1)'
                     }}
                   >
-                    <b style={{ display: 'block', fontSize: '11px', color: bookingType === item.type ? '#087cf0' : '#334155' }}>
+                    <b style={{ display: 'block', fontSize: '11px', color: bookingType === item.type ? '#141415' : '#334155' }}>
                       {item.title}
                     </b>
                     <small style={{ fontSize: '9px', color: '#64748b', display: 'block', marginTop: '3px' }}>{item.desc}</small>
@@ -558,7 +558,7 @@ export default function CustomerBookWash() {
 
             {/* 5. Location & On-Site Utilities */}
             <div className="panel" style={{ borderRadius: '16px', padding: '22px' }}>
-              <h3 style={{ margin: '0 0 14px', fontSize: '15px', fontWeight: 800, color: '#102a40' }}>
+              <h3 style={{ margin: '0 0 14px', fontSize: '15px', fontWeight: 600, color: '#171717' }}>
                 5. Location & Site Utilities
               </h3>
 
@@ -676,14 +676,14 @@ export default function CustomerBookWash() {
                       key={p.id}
                       onClick={() => setParkingType(p.id)}
                       style={{
-                        border: `1.5px solid ${parkingType === p.id ? '#087cf0' : '#e2e8f0'}`,
+                        border: `1.5px solid ${parkingType === p.id ? '#141415' : '#e2e8f0'}`,
                         borderRadius: '8px',
                         padding: '10px 8px',
                         textAlign: 'center',
                         fontSize: '11px',
                         fontWeight: 600,
                         background: parkingType === p.id ? '#f0f7ff' : '#fff',
-                        color: parkingType === p.id ? '#087cf0' : '#475569',
+                        color: parkingType === p.id ? '#141415' : '#475569',
                         cursor: 'pointer'
                       }}
                     >
@@ -769,7 +769,7 @@ export default function CustomerBookWash() {
                 boxShadow: '0 4px 16px rgba(0,0,0,0.04)'
               }}
             >
-              <h3 style={{ margin: '0 0 16px', fontSize: '16px', fontWeight: 800, color: '#102a40' }}>
+              <h3 style={{ margin: '0 0 16px', fontSize: '16px', fontWeight: 600, color: '#171717' }}>
                 Booking Summary
               </h3>
 
@@ -788,7 +788,7 @@ export default function CustomerBookWash() {
                 {addOnsSubtotal > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
                     <span style={{ color: '#64748b' }}>Add-Ons ({selectedAddonIds.length})</span>
-                    <b style={{ color: '#087cf0' }}>+EGP {addOnsSubtotal}</b>
+                    <b style={{ color: '#141415' }}>+EGP {addOnsSubtotal}</b>
                   </div>
                 )}
 
@@ -809,14 +809,14 @@ export default function CustomerBookWash() {
               <div style={{ padding: '16px 0', borderBottom: '1px solid #f1f5f9' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '8px' }}>
                   <span style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>Total Price</span>
-                  <strong style={{ fontSize: '24px', fontWeight: 800, color: '#102a40' }}>EGP {totalPrice}</strong>
+                  <strong style={{ fontSize: '24px', fontWeight: 600, color: '#171717' }}>EGP {totalPrice}</strong>
                 </div>
 
                 {/* Upfront Deposit Highlight (Behavior payDeposit from Document) */}
-                <div style={{ background: '#f0f7ff', border: '1px solid #bae6fd', borderRadius: '10px', padding: '12px', marginTop: '10px' }}>
+                <div style={{ background: '#f0f7ff', border: '1px solid #e4e4e7', borderRadius: '10px', padding: '12px', marginTop: '10px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '4px' }}>
-                    <span style={{ color: '#0369a1', fontWeight: 700 }}>Upfront Deposit:</span>
-                    <b style={{ color: '#0284c7' }}>EGP {depositAmount}.00</b>
+                    <span style={{ color: '#92400e', fontWeight: 700 }}>Upfront Deposit:</span>
+                    <b style={{ color: '#92400e' }}>EGP {depositAmount}.00</b>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#64748b' }}>
                     <span>Remaining on Completion:</span>
@@ -832,7 +832,7 @@ export default function CustomerBookWash() {
                 style={{
                   width: '100%',
                   marginTop: '18px',
-                  background: '#087cf0',
+                  background: '#141415',
                   color: '#fff',
                   border: 'none',
                   borderRadius: '12px',
@@ -844,7 +844,7 @@ export default function CustomerBookWash() {
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px',
-                  boxShadow: '0 4px 14px rgba(8, 124, 240, 0.35)',
+                  boxShadow: '0 4px 14px rgba(20, 20, 21, 0.35)',
                   transition: 'background 0.2s'
                 }}
               >

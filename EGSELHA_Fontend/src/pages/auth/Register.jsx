@@ -17,19 +17,39 @@ import {
   Phone,
   KeyRound,
   IdCard,
-  Sparkles,
+  ArrowLeft,
   ArrowRight,
-  AlertCircle,
-  Car,
-  ShieldCheck,
-  CheckCircle2
+  AlertCircle
 } from 'lucide-react';
+
+const darkInputStyle = (hasError) => ({
+  width: '100%',
+  padding: '10px 14px',
+  fontSize: '13px',
+  borderRadius: '8px',
+  border: hasError ? '1px solid #e5484d' : '1px solid rgba(255, 255, 255, 0.12)',
+  background: '#232325',
+  outline: 'none',
+  color: '#f4f4f5',
+  boxSizing: 'border-box',
+  transition: 'border-color 150ms cubic-bezier(0.22, 1, 0.36, 1)'
+});
+
+const labelStyle = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
+  fontSize: '12px',
+  fontWeight: 500,
+  color: '#a1a1a6',
+  marginBottom: '6px'
+};
 
 export default function Register() {
   const { registerCustomer, registerTechnician } = useAuth();
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState('customer'); // 'customer' | 'technician'
+  const [activeTab, setActiveTab] = useState('customer');
   const [form, setForm] = useState({
     fullName: '',
     email: '',
@@ -121,7 +141,7 @@ export default function Register() {
     <div
       style={{
         minHeight: '100vh',
-        background: '#f4f7fb',
+        background: '#0f0f10',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -133,76 +153,54 @@ export default function Register() {
       <div
         style={{
           width: '100%',
-          maxWidth: '1080px',
-          background: '#ffffff',
-          borderRadius: '24px',
-          boxShadow: '0 20px 50px rgba(7, 27, 45, 0.08)',
-          border: '1px solid #e9eef4',
+          maxWidth: '1040px',
+          background: '#19191b',
+          borderRadius: '16px',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
           overflow: 'hidden',
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
-          minHeight: '660px'
+          gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+          minHeight: '640px'
         }}
       >
-        {/* Left Side: Brand Showcase */}
+        {/* Left Side: Obsidian Brand Showcase */}
         <div
           style={{
-            background: 'linear-gradient(165deg, #07172c 0%, #0c2942 55%, #051425 100%)',
-            color: '#fff',
-            padding: '48px 40px',
+            background: '#141415',
+            color: '#f4f4f5',
+            padding: '44px 40px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            position: 'relative',
-            overflow: 'hidden'
+            borderRight: '1px solid rgba(255, 255, 255, 0.08)'
           }}
         >
           <div>
-            <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '28px' }}>
-              <BrandLogo size={46} variant="blue" />
+            <Link to="/" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '12px', marginBottom: '40px' }}>
+              <BrandLogo size={40} />
               <div>
-                <b style={{ display: 'block', fontSize: '20px', letterSpacing: '0.5px', fontFamily: 'Manrope, sans-serif', color: '#fff' }}>
+                <b style={{ display: 'block', fontSize: '17px', fontWeight: 600, letterSpacing: '0.06em', fontFamily: 'Manrope, sans-serif', color: '#f4f4f5' }}>
                   EGHSELHA
                 </b>
-                <small style={{ display: 'block', fontSize: '11px', color: '#60b4ff', fontWeight: 600, letterSpacing: '0.8px', marginTop: '2px' }}>
-                  DOORSTEP MOBILE CAR WASH
+                <small style={{ display: 'block', fontSize: '11px', color: '#85858b', marginTop: '2px' }}>
+                  Mobile auto detailing
                 </small>
               </div>
             </Link>
 
-            <div
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                background: 'rgba(8, 124, 240, 0.16)',
-                border: '1px solid rgba(8, 124, 240, 0.35)',
-                borderRadius: '30px',
-                padding: '6px 14px',
-                fontSize: '11px',
-                fontWeight: 700,
-                color: '#60b4ff',
-                marginBottom: '20px'
-              }}
-            >
-              <Sparkles size={14} />
-              <span>Join thousands of customers and technicians in Cairo</span>
-            </div>
-
             <h1
               style={{
-                font: '800 28px Manrope, sans-serif',
-                color: '#ffffff',
-                lineHeight: 1.35,
-                margin: '0 0 14px 0',
-                letterSpacing: '-0.5px'
+                font: '500 32px/1.18 Manrope, sans-serif',
+                color: '#f4f4f5',
+                margin: '0 0 16px 0',
+                letterSpacing: '-0.02em'
               }}
             >
-              Get Started with EGHSELHA Today
+              Doorstep car detailing, scheduled around your day
             </h1>
 
-            <p style={{ fontSize: '13px', lineHeight: 1.7, color: '#9fb4c7', margin: 0, maxWidth: '440px' }}>
-              Whether you're looking for premium doorstep car detailing or ready to join our certified technician fleet, we've got you covered.
+            <p style={{ fontSize: '14px', lineHeight: 1.65, color: '#a1a1a6', margin: 0, maxWidth: '400px' }}>
+              Create a customer account to book on-demand washes with live GPS tracking, or register as a certified mobile technician.
             </p>
           </div>
 
@@ -213,23 +211,23 @@ export default function Register() {
               justifyContent: 'space-between',
               paddingTop: '20px',
               borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-              fontSize: '11px',
-              color: '#6e859b'
+              fontSize: '12px',
+              color: '#737378'
             }}
           >
-            <span>© 2026 EGHSELHA Platform</span>
-            <span>Your smart mobile car detailing platform</span>
+            <span>© 2026 EGHSELHA</span>
+            <span>On-demand mobile detailing</span>
           </div>
         </div>
 
-        {/* Right Side: Registration Form */}
+        {/* Right Side: Dark Obsidian Registration Form */}
         <div
           style={{
             padding: '44px 40px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
-            background: '#ffffff'
+            background: '#19191b'
           }}
         >
           <div style={{ marginBottom: '20px' }}>
@@ -239,38 +237,41 @@ export default function Register() {
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                color: '#087cf0',
+                color: '#a1a1a6',
                 fontSize: '12px',
-                fontWeight: 600,
+                fontWeight: 500,
                 textDecoration: 'none',
-                marginBottom: '14px'
+                marginBottom: '16px'
               }}
             >
-              ← Back to Home
+              <ArrowLeft size={14} strokeWidth={1.6} />
+              <span>Back to home</span>
             </Link>
             <h2
               style={{
-                font: '800 24px Manrope, sans-serif',
-                color: '#102a40',
+                font: '500 24px/1.2 Manrope, sans-serif',
+                color: '#f4f4f5',
                 margin: '0 0 6px 0',
-                letterSpacing: '-0.4px'
+                letterSpacing: '-0.02em'
               }}
             >
-              Create Account
+              Create account
             </h2>
-            <p style={{ fontSize: '12px', color: '#8493a2', margin: 0 }}>
-              Choose account type and enter your details to get started
+            <p style={{ fontSize: '13px', color: '#85858b', margin: 0 }}>
+              Choose your role and enter your details
             </p>
           </div>
 
-          {/* Account Type Tabs matching EGHSELHA design */}
+          {/* Account Type Tabs */}
           <div
             style={{
               display: 'flex',
-              background: '#f1f5f9',
-              borderRadius: '14px',
+              background: '#141415',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              borderRadius: '10px',
               padding: '4px',
-              marginBottom: '22px'
+              marginBottom: '20px',
+              gap: '4px'
             }}
           >
             <button
@@ -281,23 +282,22 @@ export default function Register() {
               }}
               style={{
                 flex: 1,
-                padding: '10px 12px',
-                fontSize: '12px',
-                fontWeight: 700,
-                borderRadius: '10px',
-                border: 'none',
+                padding: '9px 12px',
+                fontSize: '13px',
+                fontWeight: 500,
+                borderRadius: '7px',
+                border: activeTab === 'customer' ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid transparent',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px',
-                transition: 'all 0.2s ease',
-                background: activeTab === 'customer' ? '#ffffff' : 'transparent',
-                color: activeTab === 'customer' ? '#087cf0' : '#64748b',
-                boxShadow: activeTab === 'customer' ? '0 2px 8px rgba(0, 0, 0, 0.05)' : 'none'
+                transition: 'background-color 150ms cubic-bezier(0.22, 1, 0.36, 1), color 150ms cubic-bezier(0.22, 1, 0.36, 1)',
+                background: activeTab === 'customer' ? '#232325' : 'transparent',
+                color: activeTab === 'customer' ? '#f4f4f5' : '#85858b'
               }}
             >
-              <User size={15} />
+              <User size={15} strokeWidth={1.6} color={activeTab === 'customer' ? '#d49b4b' : 'currentColor'} />
               <span>Customer</span>
             </button>
             <button
@@ -308,23 +308,22 @@ export default function Register() {
               }}
               style={{
                 flex: 1,
-                padding: '10px 12px',
-                fontSize: '12px',
-                fontWeight: 700,
-                borderRadius: '10px',
-                border: 'none',
+                padding: '9px 12px',
+                fontSize: '13px',
+                fontWeight: 500,
+                borderRadius: '7px',
+                border: activeTab === 'technician' ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid transparent',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px',
-                transition: 'all 0.2s ease',
-                background: activeTab === 'technician' ? '#ffffff' : 'transparent',
-                color: activeTab === 'technician' ? '#087cf0' : '#64748b',
-                boxShadow: activeTab === 'technician' ? '0 2px 8px rgba(0, 0, 0, 0.05)' : 'none'
+                transition: 'background-color 150ms cubic-bezier(0.22, 1, 0.36, 1), color 150ms cubic-bezier(0.22, 1, 0.36, 1)',
+                background: activeTab === 'technician' ? '#232325' : 'transparent',
+                color: activeTab === 'technician' ? '#f4f4f5' : '#85858b'
               }}
             >
-              <Wrench size={15} />
+              <Wrench size={15} strokeWidth={1.6} color={activeTab === 'technician' ? '#d49b4b' : 'currentColor'} />
               <span>Technician</span>
             </button>
           </div>
@@ -333,52 +332,42 @@ export default function Register() {
             <div
               style={{
                 padding: '12px 14px',
-                borderRadius: '12px',
+                borderRadius: '8px',
                 marginBottom: '16px',
                 fontSize: '12px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '10px',
-                background: '#fef2f2',
-                border: '1px solid #fecaca',
-                color: '#b91c1c'
+                background: 'rgba(229, 72, 77, 0.12)',
+                border: '1px solid rgba(229, 72, 77, 0.3)',
+                color: '#fca5a5'
               }}
             >
-              <AlertCircle size={17} style={{ flexShrink: 0 }} />
+              <AlertCircle size={16} style={{ flexShrink: 0 }} />
               <span>{globalError}</span>
             </div>
           )}
 
           <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '14px' }}>
             <div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '5px' }}>
-                <User size={14} color="#64748b" />
-                Full Name
+              <label style={labelStyle}>
+                <User size={14} strokeWidth={1.6} color="#85858b" />
+                Full name
               </label>
               <input
                 type="text"
                 value={form.fullName}
                 onChange={(e) => handleInputChange('fullName', e.target.value)}
                 placeholder="Ahmed Ali"
-                style={{
-                  width: '100%',
-                  padding: '11px 14px',
-                  fontSize: '13px',
-                  borderRadius: '12px',
-                  border: errors.fullName ? '1.5px solid #ef4444' : '1px solid #cbd5e1',
-                  background: errors.fullName ? '#fffbfb' : '#ffffff',
-                  outline: 'none',
-                  color: '#1e293b',
-                  boxSizing: 'border-box'
-                }}
+                style={darkInputStyle(errors.fullName)}
               />
               <FieldError error={errors.fullName} />
             </div>
 
             <div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '5px' }}>
-                <Mail size={14} color="#64748b" />
-                Email Address
+              <label style={labelStyle}>
+                <Mail size={14} strokeWidth={1.6} color="#85858b" />
+                Email address
               </label>
               <input
                 type="email"
@@ -386,25 +375,15 @@ export default function Register() {
                 onChange={(e) => handleInputChange('email', e.target.value)}
                 placeholder="name@example.com"
                 dir="ltr"
-                style={{
-                  width: '100%',
-                  padding: '11px 14px',
-                  fontSize: '13px',
-                  borderRadius: '12px',
-                  border: errors.email ? '1.5px solid #ef4444' : '1px solid #cbd5e1',
-                  background: errors.email ? '#fffbfb' : '#ffffff',
-                  outline: 'none',
-                  color: '#1e293b',
-                  boxSizing: 'border-box'
-                }}
+                style={darkInputStyle(errors.email)}
               />
               <FieldError error={errors.email} />
             </div>
 
             <div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '5px' }}>
-                <Phone size={14} color="#64748b" />
-                Phone Number
+              <label style={labelStyle}>
+                <Phone size={14} strokeWidth={1.6} color="#85858b" />
+                Phone number
               </label>
               <input
                 type="tel"
@@ -412,25 +391,15 @@ export default function Register() {
                 onChange={(e) => handleInputChange('phone', e.target.value)}
                 placeholder="01012345678"
                 dir="ltr"
-                style={{
-                  width: '100%',
-                  padding: '11px 14px',
-                  fontSize: '13px',
-                  borderRadius: '12px',
-                  border: errors.phone ? '1.5px solid #ef4444' : '1px solid #cbd5e1',
-                  background: errors.phone ? '#fffbfb' : '#ffffff',
-                  outline: 'none',
-                  color: '#1e293b',
-                  boxSizing: 'border-box'
-                }}
+                style={darkInputStyle(errors.phone)}
               />
               <FieldError error={errors.phone} />
             </div>
 
             {activeTab === 'technician' && (
               <div>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '5px' }}>
-                  <IdCard size={14} color="#64748b" />
+                <label style={labelStyle}>
+                  <IdCard size={14} strokeWidth={1.6} color="#85858b" />
                   National ID (14 digits)
                 </label>
                 <input
@@ -440,25 +409,15 @@ export default function Register() {
                   onChange={(e) => handleInputChange('nationalId', e.target.value)}
                   placeholder="29801011234567"
                   dir="ltr"
-                  style={{
-                    width: '100%',
-                    padding: '11px 14px',
-                    fontSize: '13px',
-                    borderRadius: '12px',
-                    border: errors.nationalId ? '1.5px solid #ef4444' : '1px solid #cbd5e1',
-                    background: errors.nationalId ? '#fffbfb' : '#ffffff',
-                    outline: 'none',
-                    color: '#1e293b',
-                    boxSizing: 'border-box'
-                  }}
+                  style={darkInputStyle(errors.nationalId)}
                 />
                 <FieldError error={errors.nationalId} />
               </div>
             )}
 
             <div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '5px' }}>
-                <KeyRound size={14} color="#64748b" />
+              <label style={labelStyle}>
+                <KeyRound size={14} strokeWidth={1.6} color="#85858b" />
                 Password
               </label>
               <input
@@ -467,17 +426,7 @@ export default function Register() {
                 onChange={(e) => handleInputChange('password', e.target.value)}
                 placeholder="••••••••"
                 dir="ltr"
-                style={{
-                  width: '100%',
-                  padding: '11px 14px',
-                  fontSize: '13px',
-                  borderRadius: '12px',
-                  border: errors.password ? '1.5px solid #ef4444' : '1px solid #cbd5e1',
-                  background: errors.password ? '#fffbfb' : '#ffffff',
-                  outline: 'none',
-                  color: '#1e293b',
-                  boxSizing: 'border-box'
-                }}
+                style={darkInputStyle(errors.password)}
               />
               <FieldError error={errors.password} />
             </div>
@@ -485,30 +434,32 @@ export default function Register() {
             <button
               type="submit"
               disabled={loading}
-              className="btn primary"
               style={{
                 width: '100%',
-                padding: '13px',
+                minHeight: '42px',
+                padding: '10px 16px',
                 fontSize: '13px',
-                fontWeight: 700,
-                borderRadius: '12px',
-                background: '#087cf0',
-                color: '#ffffff',
-                boxShadow: '0 6px 18px rgba(8, 124, 240, 0.32)',
-                cursor: 'pointer',
+                fontWeight: 600,
+                borderRadius: '8px',
+                background: '#f4f4f5',
+                border: '1px solid #f4f4f5',
+                color: '#141415',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                opacity: loading ? 0.6 : 1,
                 marginTop: '6px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '8px'
+                gap: '8px',
+                transition: 'background-color 150ms cubic-bezier(0.22, 1, 0.36, 1)'
               }}
             >
               {loading ? (
-                <div style={{ width: '18px', height: '18px', border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                <div style={{ width: '16px', height: '16px', border: '2px solid #141415', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
               ) : (
                 <>
-                  <UserPlus size={16} />
-                  <span>{activeTab === 'customer' ? 'Create Customer Account' : 'Submit Technician Application'}</span>
+                  <UserPlus size={15} strokeWidth={1.8} />
+                  <span>{activeTab === 'customer' ? 'Create customer account' : 'Create technician account'}</span>
                 </>
               )}
             </button>
@@ -518,26 +469,26 @@ export default function Register() {
             style={{
               marginTop: '24px',
               paddingTop: '18px',
-              borderTop: '1px solid #f1f5f9',
+              borderTop: '1px solid rgba(255, 255, 255, 0.08)',
               textAlign: 'center',
-              fontSize: '12px',
-              color: '#64748b'
+              fontSize: '13px',
+              color: '#85858b'
             }}
           >
             Already have an account?{' '}
             <Link
               to="/login"
               style={{
-                color: '#087cf0',
-                fontWeight: 800,
+                color: '#d49b4b',
+                fontWeight: 600,
                 textDecoration: 'none',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '4px'
               }}
             >
-              <span>Sign In</span>
-              <ArrowRight size={14} />
+              <span>Sign in</span>
+              <ArrowRight size={14} strokeWidth={1.6} />
             </Link>
           </div>
         </div>

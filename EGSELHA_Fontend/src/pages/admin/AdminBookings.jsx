@@ -70,13 +70,13 @@ function getStatusBadgeMeta(booking) {
     return { text: 'CANCELLED', bg: '#fef2f2', color: '#dc2626', border: '#fca5a5' };
   }
   if (s === 'WASHING') {
-    return { text: 'IN PROGRESS', bg: '#eff6ff', color: '#1d4ed8', border: '#93c5fd' };
+    return { text: 'IN PROGRESS', bg: '#f4f4f5', color: '#141415', border: '#d49b4b' };
   }
   if (s === 'ARRIVED') {
-    return { text: 'ARRIVED', bg: '#f0f9ff', color: '#0369a1', border: '#7dd3fc' };
+    return { text: 'ARRIVED', bg: '#f4f4f5', color: '#92400e', border: '#7dd3fc' };
   }
   if (s === 'ON_THE_WAY') {
-    return { text: 'ON_THE_WAY', bg: '#f5f3ff', color: '#6d28d9', border: '#c4b5fd' };
+    return { text: 'ON_THE_WAY', bg: '#fef7ec', color: '#6d28d9', border: '#e4e4e7' };
   }
   if (s === 'DISPATCHED') {
     return { text: 'DISPATCHED', bg: '#ecfeff', color: '#0e7490', border: '#a5f3fc' };
@@ -204,8 +204,8 @@ export default function AdminBookings() {
                   fontSize: '11px',
                   fontWeight: 600,
                   cursor: 'pointer',
-                  border: cancelledFilter === sub.key ? '1px solid #0b6bcb' : '1px solid #cbd5e1',
-                  background: cancelledFilter === sub.key ? '#0b6bcb' : '#ffffff',
+                  border: cancelledFilter === sub.key ? '1px solid #141415' : '1px solid #cbd5e1',
+                  background: cancelledFilter === sub.key ? '#141415' : '#ffffff',
                   color: cancelledFilter === sub.key ? '#ffffff' : '#334155',
                 }}
               >
@@ -245,13 +245,13 @@ export default function AdminBookings() {
                   {/* Card Top Row */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#eff6ff', color: '#087cf0', display: 'grid', placeItems: 'center' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#f4f4f5', color: '#141415', display: 'grid', placeItems: 'center' }}>
                         <CarFront size={20} />
                       </div>
                       <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                           <b style={{ fontSize: '14px', color: '#0f172a' }}>{b.bookingNumber}</b>
-                          <span style={{ fontSize: '12px', fontWeight: 700, color: '#087cf0' }}>{b.serviceName}</span>
+                          <span style={{ fontSize: '12px', fontWeight: 700, color: '#141415' }}>{b.serviceName}</span>
                           <span style={{ fontSize: '11px', color: '#64748b' }}>· {b.vehicleName} ({b.licensePlate || 'No plate'})</span>
                         </div>
                         <small style={{ color: '#64748b', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '3px', flexWrap: 'wrap' }}>
@@ -292,7 +292,7 @@ export default function AdminBookings() {
                         Base: EGP {b.basePackagePrice} × {b.vehicleMultiplier}
                       </span>
                       {b.addOnsSubtotal > 0 && (
-                        <span style={{ padding: '4px 9px', background: '#eff6ff', borderRadius: '6px', border: '1px solid #bfdbfe', color: '#1d4ed8' }}>
+                        <span style={{ padding: '4px 9px', background: '#f4f4f5', borderRadius: '6px', border: '1px solid #e4e4e7', color: '#141415' }}>
                           Add-Ons: +EGP {b.addOnsSubtotal} {b.addOnNames?.length ? `(${b.addOnNames.join(', ')})` : ''}
                         </span>
                       )}
@@ -317,8 +317,8 @@ export default function AdminBookings() {
                         style={{
                           padding: '6px 12px',
                           fontSize: '11px',
-                          borderColor: '#087cf0',
-                          color: '#087cf0',
+                          borderColor: '#141415',
+                          color: '#141415',
                           display: 'inline-flex',
                           alignItems: 'center',
                           gap: '6px',
@@ -333,7 +333,7 @@ export default function AdminBookings() {
                           borderRadius: '8px',
                           border: `1px solid ${badge.border}`,
                           fontSize: '11px',
-                          fontWeight: 800,
+                          fontWeight: 600,
                           background: badge.bg,
                           color: badge.color,
                           whiteSpace: 'nowrap',
@@ -399,7 +399,7 @@ export default function AdminBookings() {
               }}>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                    <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>
+                    <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 600, color: '#0f172a' }}>
                       Trip Details · {selectedBooking.bookingNumber}
                     </h2>
                     <span style={{
@@ -409,7 +409,7 @@ export default function AdminBookings() {
                       background: badge.bg,
                       color: badge.color,
                       fontSize: '10px',
-                      fontWeight: 800,
+                      fontWeight: 600,
                     }}>
                       {badge.text}
                     </span>
@@ -439,12 +439,12 @@ export default function AdminBookings() {
               <div style={{ padding: '22px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 {/* Timing & Durations Summary */}
                 <div>
-                  <h3 style={{ margin: '0 0 10px', fontSize: '13px', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Timer size={15} color="#087cf0" /> Trip Timing &amp; Durations
+                  <h3 style={{ margin: '0 0 10px', fontSize: '13px', fontWeight: 600, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Timer size={15} color="#141415" /> Trip Timing &amp; Durations
                   </h3>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '10px' }}>
-                    <div style={{ padding: '12px 14px', borderRadius: '12px', background: '#f0f9ff', border: '1px solid #bae6fd' }}>
-                      <small style={{ display: 'block', fontSize: '10px', color: '#0369a1', fontWeight: 700 }}>Technician Travel Time</small>
+                    <div style={{ padding: '12px 14px', borderRadius: '12px', background: '#f4f4f5', border: '1px solid #e4e4e7' }}>
+                      <small style={{ display: 'block', fontSize: '10px', color: '#92400e', fontWeight: 700 }}>Technician Travel Time</small>
                       <b style={{ fontSize: '16px', color: '#0c4a6e' }}>{formatDuration(selectedBooking.travelDurationMinutes)}</b>
                       <small style={{ display: 'block', fontSize: '10px', color: '#64748b', marginTop: '2px' }}>
                         {formatDateTime(selectedBooking.onTheWayAt)} → {formatDateTime(selectedBooking.arrivedAt)}
@@ -479,14 +479,14 @@ export default function AdminBookings() {
 
                 {/* Service Location Card */}
                 <div>
-                  <h3 style={{ margin: '0 0 10px', fontSize: '13px', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <MapPin size={15} color="#087cf0" /> Service Location
+                  <h3 style={{ margin: '0 0 10px', fontSize: '13px', fontWeight: 600, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <MapPin size={15} color="#141415" /> Service Location
                   </h3>
                   <div style={{
                     padding: '14px 16px',
                     borderRadius: '12px',
-                    border: '1px solid #dbeafe',
-                    background: 'linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%)',
+                    border: '1px solid #f4f4f5',
+                    background: '#141415',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
@@ -516,8 +516,8 @@ export default function AdminBookings() {
 
                 {/* QA Photos Section (Before & After) */}
                 <div>
-                  <h3 style={{ margin: '0 0 10px', fontSize: '13px', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Camera size={15} color="#087cf0" /> QA Inspection Photos ({selectedBooking.photos?.length ?? 0} total)
+                  <h3 style={{ margin: '0 0 10px', fontSize: '13px', fontWeight: 600, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Camera size={15} color="#141415" /> QA Inspection Photos ({selectedBooking.photos?.length ?? 0} total)
                   </h3>
 
                   {(!selectedBooking.photos || selectedBooking.photos.length === 0) ? (
@@ -587,7 +587,7 @@ export default function AdminBookings() {
                   color: '#475569',
                 }}>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                    <Clock size={12} color="#087cf0" /> Accepted: <b>{formatDateTime(selectedBooking.acceptedAt)}</b>
+                    <Clock size={12} color="#141415" /> Accepted: <b>{formatDateTime(selectedBooking.acceptedAt)}</b>
                   </span>
                   <span>On The Way: <b>{formatDateTime(selectedBooking.onTheWayAt)}</b></span>
                   <span>Arrived: <b>{formatDateTime(selectedBooking.arrivedAt)}</b></span>

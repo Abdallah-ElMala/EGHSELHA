@@ -22,67 +22,67 @@ import { useAuth } from '../context/AuthContext'
 import EghselhaLogo from '../component/EghselhaLogo'
 
 const CAR_BACKGROUNDS = [
-  { id: 'foam', label: 'Dense Snow Foam', icon: '🫧', src: '/washed-car-foam.jpg' },
-  { id: 'wet', label: 'Hydrophobic Gloss', icon: '💧', src: '/wet-luxury-car.jpg' },
-  { id: 'spray', label: 'High Pressure Rinse', icon: '⚡', src: '/car-wash-spray.jpg' }
+  { id: 'foam', label: 'Snow Foam', src: '/washed-car-foam.jpg' },
+  { id: 'wet', label: 'Hydrophobic Gloss', src: '/wet-luxury-car.jpg' },
+  { id: 'spray', label: 'High-Pressure Rinse', src: '/car-wash-spray.jpg' }
 ]
 
 const PACKAGES = [
   {
     id: 'basic-wash',
     name: 'Basic Wash',
-    badge: 'Quick & Clean',
+    badge: 'Exterior',
     price: 200,
-    duration: '30 mins',
-    desc: 'Exterior pressure wash, snow foam bath, tire gloss & streak-free windows.',
-    highlights: ['Snow Foam Wash', 'High Pressure Rinse', 'Tire Gloss Dressing', 'Exterior Windows'],
+    duration: '30 min',
+    desc: 'Exterior pressure wash, snow foam bath, tire dressing and streak-free windows.',
+    highlights: ['Snow foam wash', 'High-pressure rinse', 'Tire gloss dressing', 'Exterior glass'],
     isPopular: false
   },
   {
     id: 'premium-wash',
     name: 'Premium Wash',
-    badge: 'Most Popular ⭐',
+    badge: 'Most selected',
     price: 350,
-    duration: '60 mins',
-    desc: 'Full cabin vacuum, dashboard dressing, snow foam bath & spray wax shine.',
+    duration: '60 min',
+    desc: 'Full cabin vacuum, dashboard dressing, snow foam bath and spray wax sealant.',
     highlights: [
-      'Interior Cabin Vacuum',
-      'Dashboard & Trim Care',
-      'Hand Foam Wash',
-      'Spray Wax Sealant',
-      'Air Freshener'
+      'Interior cabin vacuum',
+      'Dashboard & trim care',
+      'Hand foam wash',
+      'Spray wax sealant',
+      'Cabin deodorizer'
     ],
     isPopular: true
   },
   {
     id: 'deep-clean',
     name: 'Deep Clean',
-    badge: 'Full Detailing',
+    badge: 'Full detailing',
     price: 500,
-    duration: '90 mins',
-    desc: 'Steam upholstery detailing, carpet extraction & AC antibacterial sanitation.',
+    duration: '90 min',
+    desc: 'Steam upholstery detailing, carpet extraction and AC antibacterial sanitation.',
     highlights: [
-      'Interior Steam Extraction',
-      'Carpet & Mat Shampoo',
-      'Leather Conditioning',
-      'AC Vent Disinfection',
-      'Engine Bay Wipe'
+      'Interior steam extraction',
+      'Carpet & mat shampoo',
+      'Leather conditioning',
+      'AC vent disinfection',
+      'Engine bay wipe'
     ],
     isPopular: false
   },
   {
     id: 'ultimate-detail',
     name: 'Ultimate Detail',
-    badge: 'Ceramic & Polish',
+    badge: 'Ceramic & polish',
     price: 700,
-    duration: '140 mins',
-    desc: 'Clay bar paint decontamination, machine polish & 6-month ceramic protection.',
+    duration: '140 min',
+    desc: 'Clay bar paint decontamination, machine polish and 6-month ceramic protection.',
     highlights: [
-      'Clay Bar Paint Treatment',
-      'Machine Gloss Polish',
-      '6-Month Ceramic Coat',
-      'Complete Interior Restore',
-      'Headlight Clarity'
+      'Clay bar paint treatment',
+      'Machine gloss polish',
+      '6-month ceramic coat',
+      'Complete interior restore',
+      'Headlight clarity'
     ],
     isPopular: false
   }
@@ -312,7 +312,6 @@ export default function LandingHome() {
                     onClick={() => setActiveBg(bg)}
                     className={`landing-switcher-btn ${activeBg.id === bg.id ? 'active' : ''}`}
                   >
-                    <span>{bg.icon}</span>
                     <span>{bg.label}</span>
                   </button>
                 ))}
@@ -329,45 +328,29 @@ export default function LandingHome() {
         id="services"
         style={{
           padding: '80px 24px',
-          background: '#050a14',
-          borderTop: '1px solid rgba(255, 255, 255, 0.06)'
+          background: '#141415',
+          borderTop: '1px solid rgba(255, 255, 255, 0.08)'
         }}
       >
         <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', maxWidth: '700px', margin: '0 auto 60px' }}>
-            <div
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '6px 16px',
-                borderRadius: '9999px',
-                background: 'rgba(14, 165, 233, 0.12)',
-                border: '1px solid rgba(56, 189, 248, 0.25)',
-                color: '#38bdf8',
-                fontSize: '11px',
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '0.8px',
-                marginBottom: '14px'
-              }}
-            >
-              <Sparkles size={14} />
-              <span>Tailored Care Packages</span>
-            </div>
+          <div style={{ maxWidth: '640px', margin: '0 0 48px' }}>
+            <span style={{ display: 'block', fontSize: '12px', fontWeight: 500, color: '#d49b4b', marginBottom: '8px' }}>
+              Service tiers
+            </span>
             <h2
               style={{
                 fontFamily: 'Manrope, sans-serif',
-                fontSize: '36px',
-                fontWeight: 800,
-                color: '#ffffff',
+                fontSize: '32px',
+                fontWeight: 500,
+                letterSpacing: '-0.02em',
+                color: '#f4f4f5',
                 margin: '0 0 12px'
               }}
             >
-              Our Wash Packages & Detailing
+              Wash packages &amp; detailing
             </h2>
-            <p style={{ color: '#94a3b8', fontSize: '15px', lineHeight: 1.6, margin: 0 }}>
-              From swift weekly maintenance to deep interior steam extraction and ceramic coat protection.
+            <p style={{ color: '#a1a1a6', fontSize: '15px', lineHeight: 1.6, margin: 0 }}>
+              From routine exterior washes to steam interior extraction and ceramic paint protection.
             </p>
           </div>
 
@@ -375,7 +358,7 @@ export default function LandingHome() {
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-              gap: '24px'
+              gap: '20px'
             }}
           >
             {PACKAGES.map((pkg) => (
@@ -383,236 +366,12 @@ export default function LandingHome() {
                 key={pkg.id}
                 style={{
                   position: 'relative',
-                  borderRadius: '24px',
-                  padding: '30px 26px',
-                  background: pkg.isPopular
-                    ? 'linear-gradient(180deg, #0d2a52 0%, #07172e 100%)'
-                    : 'rgba(255, 255, 255, 0.03)',
+                  borderRadius: '14px',
+                  padding: '24px',
+                  background: pkg.isPopular ? '#1c1c1f' : '#19191b',
                   border: pkg.isPopular
-                    ? '2px solid #38bdf8'
+                    ? '1px solid rgba(212, 155, 75, 0.45)'
                     : '1px solid rgba(255, 255, 255, 0.08)',
-                  boxShadow: pkg.isPopular ? '0 12px 35px rgba(14, 165, 233, 0.2)' : 'none',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between'
-                }}
-              >
-                {pkg.isPopular && (
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: '-13px',
-                      left: '50%',
-                      transform: 'translateX(-50%)',
-                      background: '#0ea5e9',
-                      color: '#ffffff',
-                      fontSize: '11px',
-                      fontWeight: 800,
-                      padding: '4px 14px',
-                      borderRadius: '9999px',
-                      boxShadow: '0 4px 12px rgba(14, 165, 233, 0.4)',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.6px'
-                    }}
-                  >
-                    Most Popular ⭐
-                  </div>
-                )}
-
-                <div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      marginBottom: '14px'
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: '12px',
-                        fontWeight: 700,
-                        color: '#38bdf8',
-                        background: 'rgba(14, 165, 233, 0.15)',
-                        padding: '4px 10px',
-                        borderRadius: '9999px'
-                      }}
-                    >
-                      {pkg.badge}
-                    </span>
-                    <span
-                      style={{
-                        fontSize: '12px',
-                        color: '#94a3b8',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px'
-                      }}
-                    >
-                      <Clock size={13} />
-                      {pkg.duration}
-                    </span>
-                  </div>
-
-                  <h3
-                    style={{
-                      fontFamily: 'Manrope, sans-serif',
-                      fontSize: '22px',
-                      fontWeight: 800,
-                      color: '#ffffff',
-                      margin: '0 0 6px'
-                    }}
-                  >
-                    {pkg.name}
-                  </h3>
-                  <p
-                    style={{
-                      fontSize: '12px',
-                      color: '#94a3b8',
-                      lineHeight: 1.5,
-                      margin: '0 0 20px',
-                      minHeight: '36px'
-                    }}
-                  >
-                    {pkg.desc}
-                  </p>
-
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '22px' }}>
-                    <span
-                      style={{
-                        fontFamily: 'Manrope, sans-serif',
-                        fontSize: '34px',
-                        fontWeight: 900,
-                        color: '#ffffff'
-                      }}
-                    >
-                      {pkg.price}
-                    </span>
-                    <span style={{ fontSize: '13px', color: '#94a3b8', fontWeight: 600 }}>EGP</span>
-                  </div>
-
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '10px',
-                      paddingTop: '18px',
-                      borderTop: '1px solid rgba(255, 255, 255, 0.08)'
-                    }}
-                  >
-                    {pkg.highlights.map((h, i) => (
-                      <div
-                        key={i}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                          fontSize: '12px',
-                          color: '#cbd5e1'
-                        }}
-                      >
-                        <Check size={14} color="#38bdf8" style={{ flexShrink: 0 }} />
-                        <span>{h}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div style={{ marginTop: '30px' }}>
-                  <button
-                    onClick={() => handleBookNow(pkg.id)}
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      borderRadius: '12px',
-                      fontWeight: 700,
-                      fontSize: '13px',
-                      border: 'none',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '8px',
-                      background: pkg.isPopular ? '#0ea5e9' : 'rgba(255, 255, 255, 0.1)',
-                      color: '#ffffff',
-                      boxShadow: pkg.isPopular ? '0 6px 18px rgba(14, 165, 233, 0.35)' : 'none',
-                      transition: 'all 0.2s ease'
-                    }}
-                  >
-                    <span>Book {pkg.name}</span>
-                    <ArrowRight size={14} />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ─────────────────────────────────────────────────────────────
-          4. BOOKING PROCESS
-      ───────────────────────────────────────────────────────────── */}
-      <section
-        id="how-it-works"
-        style={{
-          padding: '80px 24px',
-          background: '#070e1b',
-          borderTop: '1px solid rgba(255, 255, 255, 0.06)'
-        }}
-      >
-        <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', maxWidth: '700px', margin: '0 auto 60px' }}>
-            <div
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '6px 16px',
-                borderRadius: '9999px',
-                background: 'rgba(14, 165, 233, 0.12)',
-                border: '1px solid rgba(56, 189, 248, 0.25)',
-                color: '#38bdf8',
-                fontSize: '11px',
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '0.8px',
-                marginBottom: '14px'
-              }}
-            >
-              <Zap size={14} />
-              <span>Simple & Convenient</span>
-            </div>
-            <h2
-              style={{
-                fontFamily: 'Manrope, sans-serif',
-                fontSize: '36px',
-                fontWeight: 800,
-                color: '#ffffff',
-                margin: '0 0 12px'
-              }}
-            >
-              Booking Process
-            </h2>
-            <p style={{ color: '#94a3b8', fontSize: '15px', lineHeight: 1.6, margin: 0 }}>
-              We bring the complete detailing shop right to your driveway. No lines, no wasted time, zero hassle.
-            </p>
-          </div>
-
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-              gap: '24px'
-            }}
-          >
-            {STEPS.map((s, idx) => (
-              <div
-                key={s.step}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.03)',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
-                  borderRadius: '20px',
-                  padding: '28px 24px',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between'
@@ -629,10 +388,189 @@ export default function LandingHome() {
                   >
                     <span
                       style={{
+                        fontSize: '12px',
+                        fontWeight: 500,
+                        color: pkg.isPopular ? '#e5b56c' : '#a1a1a6',
+                        background: pkg.isPopular ? 'rgba(212, 155, 75, 0.14)' : '#232325',
+                        padding: '4px 10px',
+                        borderRadius: '6px'
+                      }}
+                    >
+                      {pkg.badge}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: '12px',
+                        color: '#85858b',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        fontVariantNumeric: 'tabular-nums'
+                      }}
+                    >
+                      <Clock size={13} strokeWidth={1.6} />
+                      {pkg.duration}
+                    </span>
+                  </div>
+
+                  <h3
+                    style={{
+                      fontFamily: 'Manrope, sans-serif',
+                      fontSize: '20px',
+                      fontWeight: 600,
+                      color: '#f4f4f5',
+                      margin: '0 0 8px'
+                    }}
+                  >
+                    {pkg.name}
+                  </h3>
+                  <p
+                    style={{
+                      fontSize: '13px',
+                      color: '#a1a1a6',
+                      lineHeight: 1.55,
+                      margin: '0 0 20px',
+                      minHeight: '40px'
+                    }}
+                  >
+                    {pkg.desc}
+                  </p>
+
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', marginBottom: '20px' }}>
+                    <span
+                      style={{
                         fontFamily: 'Manrope, sans-serif',
                         fontSize: '32px',
-                        fontWeight: 900,
-                        color: 'rgba(56, 189, 248, 0.5)'
+                        fontWeight: 500,
+                        color: '#f4f4f5',
+                        fontVariantNumeric: 'tabular-nums'
+                      }}
+                    >
+                      {pkg.price}
+                    </span>
+                    <span style={{ fontSize: '13px', color: '#85858b', fontWeight: 500 }}>EGP</span>
+                  </div>
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '10px',
+                      paddingTop: '16px',
+                      borderTop: '1px solid rgba(255, 255, 255, 0.08)'
+                    }}
+                  >
+                    {pkg.highlights.map((h, i) => (
+                      <div
+                        key={i}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          fontSize: '13px',
+                          color: '#d4d4d8'
+                        }}
+                      >
+                        <Check size={14} strokeWidth={1.8} color="#d49b4b" style={{ flexShrink: 0 }} />
+                        <span>{h}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{ marginTop: '24px' }}>
+                  <button
+                    onClick={() => handleBookNow(pkg.id)}
+                    style={{
+                      width: '100%',
+                      padding: '10px 16px',
+                      minHeight: '40px',
+                      borderRadius: '8px',
+                      fontWeight: 600,
+                      fontSize: '13px',
+                      border: pkg.isPopular ? '1px solid #f4f4f5' : '1px solid rgba(255, 255, 255, 0.14)',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      background: pkg.isPopular ? '#f4f4f5' : '#232325',
+                      color: pkg.isPopular ? '#141415' : '#ededed',
+                      transition: 'background-color 150ms cubic-bezier(0.22, 1, 0.36, 1)'
+                    }}
+                  >
+                    <span>Book {pkg.name}</span>
+                    <ArrowRight size={14} strokeWidth={1.6} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─────────────────────────────────────────────────────────────
+          4. BOOKING PROCESS
+      ───────────────────────────────────────────────────────────── */}
+      <section
+        id="how-it-works"
+        style={{
+          padding: '80px 24px',
+          background: '#141415',
+          borderTop: '1px solid rgba(255, 255, 255, 0.08)'
+        }}
+      >
+        <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
+          <div style={{ maxWidth: '640px', margin: '0 0 48px' }}>
+            <span style={{ display: 'block', fontSize: '12px', fontWeight: 500, color: '#d49b4b', marginBottom: '8px' }}>
+              How it works
+            </span>
+            <h2
+              style={{
+                fontFamily: 'Manrope, sans-serif',
+                fontSize: '32px',
+                fontWeight: 500,
+                letterSpacing: '-0.02em',
+                color: '#f4f4f5',
+                margin: '0 0 12px'
+              }}
+            >
+              Booking process
+            </h2>
+            <p style={{ color: '#a1a1a6', fontSize: '15px', lineHeight: 1.6, margin: 0 }}>
+              Certified technicians arrive at your home or office with self-contained water and power.
+            </p>
+          </div>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+              gap: '20px'
+            }}
+          >
+            {STEPS.map((s, idx) => (
+              <div
+                key={s.step}
+                style={{
+                  background: '#19191b',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  borderRadius: '14px',
+                  padding: '24px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between'
+                }}
+              >
+                <div>
+                  <div style={{ marginBottom: '16px' }}>
+                    <span
+                      style={{
+                        fontFamily: 'Manrope, sans-serif',
+                        fontSize: '24px',
+                        fontWeight: 500,
+                        color: '#d49b4b',
+                        fontVariantNumeric: 'tabular-nums'
                       }}
                     >
                       {s.step}
@@ -641,32 +579,31 @@ export default function LandingHome() {
                   <h3
                     style={{
                       fontFamily: 'Manrope, sans-serif',
-                      fontSize: '18px',
-                      fontWeight: 700,
-                      color: '#ffffff',
+                      fontSize: '16px',
+                      fontWeight: 600,
+                      color: '#f4f4f5',
                       margin: '0 0 8px'
                     }}
                   >
                     {s.title}
                   </h3>
-                  <p style={{ fontSize: '13px', color: '#94a3b8', lineHeight: 1.6, margin: 0 }}>
+                  <p style={{ fontSize: '13px', color: '#a1a1a6', lineHeight: 1.6, margin: 0 }}>
                     {s.desc}
                   </p>
                 </div>
 
                 <div
                   style={{
-                    marginTop: '24px',
-                    paddingTop: '16px',
-                    borderTop: '1px solid rgba(255, 255, 255, 0.06)',
-                    display: 'flex',
-                    alignItems: 'center',
+                    marginTop: '20px',
+                    paddingTop: '14px',
+                    borderTop: '1px solid rgba(255, 255, 255, 0.08)',
                     fontSize: '12px',
-                    fontWeight: 600,
-                    color: '#38bdf8'
+                    fontWeight: 500,
+                    color: '#85858b',
+                    fontVariantNumeric: 'tabular-nums'
                   }}
                 >
-                  <span>Step {idx + 1} of 4</span>
+                  Step {idx + 1} of 4
                 </div>
               </div>
             ))}
@@ -680,9 +617,9 @@ export default function LandingHome() {
       <footer
         style={{
           borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-          background: '#030712',
-          padding: '40px 24px',
-          color: '#64748b',
+          background: '#0f0f10',
+          padding: '36px 24px',
+          color: '#737378',
           fontSize: '13px'
         }}
       >
@@ -744,7 +681,7 @@ export default function LandingHome() {
             style={{
               width: '100%',
               maxWidth: '720px',
-              background: '#091528',
+              background: '#141415',
               borderRadius: '20px',
               border: '1px solid rgba(255, 255, 255, 0.2)',
               overflow: 'hidden',
@@ -758,11 +695,11 @@ export default function LandingHome() {
                 justifyContent: 'space-between',
                 padding: '16px 20px',
                 borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                background: '#071122'
+                background: '#0f0f10'
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Play size={16} fill="#38bdf8" color="#38bdf8" />
+                <Play size={16} fill="#d49b4b" color="#d49b4b" />
                 <b style={{ color: '#ffffff', fontSize: '14px' }}>
                   EGHSELHA Doorstep Detailing Experience
                 </b>
@@ -811,7 +748,7 @@ export default function LandingHome() {
                 >
                   <span
                     style={{
-                      color: '#38bdf8',
+                      color: '#d49b4b',
                       fontWeight: 800,
                       fontSize: '11px',
                       letterSpacing: '1px',

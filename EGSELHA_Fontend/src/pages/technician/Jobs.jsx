@@ -90,8 +90,8 @@ export default function Jobs() {
               style={{
                 padding: '18px 20px',
                 borderRadius: '14px',
-                background: 'linear-gradient(135deg, #eff6ff 0%, #e0f2fe 100%)',
-                border: '2px solid #3b82f6',
+                background: '#141415',
+                border: '2px solid #b45309',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
@@ -100,22 +100,22 @@ export default function Jobs() {
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#2563eb', color: '#fff', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#141415', color: '#fff', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
                   <BellRing size={19} />
                 </div>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                    <b style={{ color: '#1e3a8a', fontSize: '14px' }}>
+                    <b style={{ color: '#141415', fontSize: '14px' }}>
                       New Booking Request ({offer.bookingNumber})
                     </b>
                     <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '20px', background: '#dcfce7', color: '#15803d' }}>
                       Booking Total: EGP {offer.totalPrice ?? offer.payoutAmount}
                     </span>
-                    <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '20px', background: '#dbeafe', color: '#1d4ed8' }}>
+                    <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '20px', background: '#f4f4f5', color: '#141415' }}>
                       Deposit Paid · Tech Share (70%): EGP {offer.payoutAmount}
                     </span>
                   </div>
-                  <p style={{ margin: '3px 0 0', fontSize: '12px', color: '#1e40af' }}>
+                  <p style={{ margin: '3px 0 0', fontSize: '12px', color: '#171717' }}>
                     {offer.serviceName} · {offer.customerName} ({offer.vehicleModel}) · {offer.customerAddress}
                     {offer.addOnNames?.length > 0 && ` · Add-Ons: ${offer.addOnNames.join(', ')}`}
                   </p>
@@ -184,7 +184,7 @@ export default function Jobs() {
                   {j.id} ·{' '}
                   <b
                     onClick={() => setProfileModalCustomer(j)}
-                    style={{ color: '#087cf0', cursor: 'pointer', textDecoration: 'underline' }}
+                    style={{ color: '#141415', cursor: 'pointer', textDecoration: 'underline' }}
                     title="Click to show customer profile"
                   >
                     {j.customer}

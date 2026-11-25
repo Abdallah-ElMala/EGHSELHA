@@ -25,8 +25,8 @@ import { adminApi } from '../../services/adminApi';
 
 const STATUS_COLORS = {
   COMPLETED: { bg: '#dcfce7', color: '#15803d' },
-  WASHING: { bg: '#e0f2fe', color: '#0369a1' },
-  ON_THE_WAY: { bg: '#dbeafe', color: '#1d4ed8' },
+  WASHING: { bg: '#fef7ec', color: '#92400e' },
+  ON_THE_WAY: { bg: '#f4f4f5', color: '#141415' },
   ARRIVED: { bg: '#ede9fe', color: '#6d28d9' },
   DISPATCHED: { bg: '#fef3c7', color: '#b45309' },
   DEPOSIT_PAID: { bg: '#fef3c7', color: '#b45309' },
@@ -119,9 +119,9 @@ export default function AdminTechnicians() {
                       width: '46px',
                       height: '46px',
                       borderRadius: '50%',
-                      background: 'linear-gradient(135deg, #087cf0, #1d4ed8)',
+                      background: '#141415',
                       color: '#fff',
-                      fontWeight: 800,
+                      fontWeight: 600,
                       display: 'grid',
                       placeItems: 'center',
                     }}
@@ -270,14 +270,14 @@ export default function AdminTechnicians() {
               overflow: 'hidden',
               display: 'flex',
               flexDirection: 'column',
-              boxShadow: '0 25px 60px rgba(7, 23, 44, 0.35)'
+              boxShadow: '0 25px 60px rgba(15, 15, 16, 0.35)'
             }}
           >
             {/* Header */}
             <div
               style={{
                 padding: '20px 24px',
-                background: 'linear-gradient(135deg, #07172c 0%, #0d2847 100%)',
+                background: '#141415',
                 color: '#fff',
                 display: 'flex',
                 alignItems: 'center',
@@ -291,9 +291,9 @@ export default function AdminTechnicians() {
                     width: '52px',
                     height: '52px',
                     borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #087cf0, #38bdf8)',
+                    background: '#141415',
                     color: '#fff',
-                    fontWeight: 800,
+                    fontWeight: 600,
                     fontSize: '18px',
                     display: 'grid',
                     placeItems: 'center',
@@ -304,7 +304,7 @@ export default function AdminTechnicians() {
                 </div>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800 }}>{selectedTech.fullName}</h3>
+                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 600 }}>{selectedTech.fullName}</h3>
                     <span
                       style={{
                         fontSize: '10px',
@@ -323,7 +323,7 @@ export default function AdminTechnicians() {
                         fontWeight: 700,
                         padding: '3px 9px',
                         borderRadius: '20px',
-                        background: 'rgba(56, 189, 248, 0.2)',
+                        background: 'rgba(212, 155, 75, 0.2)',
                         color: '#7dd3fc'
                       }}
                     >
@@ -366,12 +366,12 @@ export default function AdminTechnicians() {
                   <small style={{ fontSize: '10px', color: '#64748b' }}>Acceptance: {selectedTech.acceptanceRate ?? 100}%</small>
                 </div>
 
-                <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: '14px', padding: '14px' }}>
-                  <small style={{ fontSize: '11px', color: '#0369a1', display: 'block' }}>Trips / Jobs</small>
+                <div style={{ background: '#f4f4f5', border: '1px solid #e4e4e7', borderRadius: '14px', padding: '14px' }}>
+                  <small style={{ fontSize: '11px', color: '#92400e', display: 'block' }}>Trips / Jobs</small>
                   <b style={{ fontSize: '17px', color: '#0c4a6e', display: 'block', marginTop: '4px' }}>
                     {selectedTech.completedJobsCount} Completed
                   </b>
-                  <small style={{ fontSize: '10px', color: '#0284c7' }}>{selectedTech.activeJobsCount} Active now</small>
+                  <small style={{ fontSize: '10px', color: '#92400e' }}>{selectedTech.activeJobsCount} Active now</small>
                 </div>
 
                 <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '14px', padding: '14px' }}>
@@ -393,32 +393,32 @@ export default function AdminTechnicians() {
 
               {/* Personal & Schedule Details */}
               <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '18px' }}>
-                <h4 style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                <h4 style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: 600, color: '#0f172a', letterSpacing: '0.4px' }}>
                   Personal & Contact Details
                 </h4>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '12px', fontSize: '12px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#334155' }}>
-                    <Phone size={14} color="#087cf0" />
+                    <Phone size={14} color="#141415" />
                     <span><b>Phone:</b> {selectedTech.phone || '—'}</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#334155' }}>
-                    <Mail size={14} color="#087cf0" />
+                    <Mail size={14} color="#141415" />
                     <span><b>Email:</b> {selectedTech.email || '—'}</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#334155' }}>
-                    <IdCard size={14} color="#087cf0" />
+                    <IdCard size={14} color="#141415" />
                     <span><b>National ID:</b> {selectedTech.nationalId || '—'}</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#334155' }}>
-                    <MapPin size={14} color="#087cf0" />
+                    <MapPin size={14} color="#141415" />
                     <span><b>Service Area:</b> {selectedTech.serviceArea || 'Cairo'}</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#334155' }}>
-                    <Calendar size={14} color="#087cf0" />
+                    <Calendar size={14} color="#141415" />
                     <span><b>Working Days:</b> {selectedTech.workingDays || 'Sunday – Thursday'}</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#334155' }}>
-                    <Clock size={14} color="#087cf0" />
+                    <Clock size={14} color="#141415" />
                     <span><b>Working Hours:</b> {selectedTech.workingHours || '09:00 AM – 06:00 PM'}</span>
                   </div>
                 </div>
@@ -431,8 +431,8 @@ export default function AdminTechnicians() {
 
               {/* Vehicle & Equipment Details */}
               <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '18px' }}>
-                <h4 style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Car size={15} color="#087cf0" /> Mobile Unit & Verified Equipment
+                <h4 style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: 600, color: '#0f172a', letterSpacing: '0.4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Car size={15} color="#141415" /> Mobile Unit & Verified Equipment
                 </h4>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '10px', background: '#f8fafc', padding: '12px', borderRadius: '10px', marginBottom: '12px', fontSize: '12px' }}>
                   <div>
@@ -449,7 +449,7 @@ export default function AdminTechnicians() {
                   </div>
                   <div>
                     <small style={{ color: '#64748b', display: 'block', fontSize: '10px' }}>VAN LEVEL</small>
-                    <b style={{ color: '#087cf0' }}>{selectedTech.vanLevel || 'Standard'}</b>
+                    <b style={{ color: '#141415' }}>{selectedTech.vanLevel || 'Standard'}</b>
                   </div>
                 </div>
 
@@ -486,11 +486,11 @@ export default function AdminTechnicians() {
                         fontWeight: 600,
                         padding: '4px 10px',
                         borderRadius: '8px',
-                        background: '#eff6ff',
-                        color: '#1d4ed8',
+                        background: '#f4f4f5',
+                        color: '#141415',
                       }}
                     >
-                      ✓ {eqName}
+                      {eqName}
                     </span>
                   ))}
                 </div>
@@ -498,8 +498,8 @@ export default function AdminTechnicians() {
 
               {/* Trips / Bookings History */}
               <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '18px' }}>
-                <h4 style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Briefcase size={15} color="#087cf0" /> Trips & Jobs History ({techBookings.length})
+                <h4 style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: 600, color: '#0f172a', letterSpacing: '0.4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Briefcase size={15} color="#141415" /> Trips & Jobs History ({techBookings.length})
                 </h4>
                 {techBookings.length === 0 ? (
                   <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>No trips assigned to this technician yet.</p>
@@ -552,7 +552,7 @@ export default function AdminTechnicians() {
               {/* Payouts History */}
               {techPayouts.length > 0 && (
                 <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '18px' }}>
-                  <h4 style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <h4 style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: 600, color: '#0f172a', letterSpacing: '0.4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <Wallet size={15} color="#16a34a" /> Payout Requests ({techPayouts.length})
                   </h4>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>

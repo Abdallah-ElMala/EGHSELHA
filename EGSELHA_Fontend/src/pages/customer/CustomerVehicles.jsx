@@ -156,13 +156,13 @@ export default function CustomerVehicles() {
   const getSizeBadge = (sizeType) => {
     switch (sizeType) {
       case 0:
-        return { label: 'Sedan (1.0× Multiplier)', color: '#087cf0', bg: '#eaf4ff' }
+        return { label: 'Sedan (1.0× Multiplier)', color: '#141415', bg: '#f4f4f5' }
       case 1:
         return { label: 'SUV (1.25× Multiplier)', color: '#d97706', bg: '#fef3c7' }
       case 2:
-        return { label: 'Truck / Van (1.5× Multiplier)', color: '#7c3aed', bg: '#ede9fe' }
+        return { label: 'Truck / Van (1.5× Multiplier)', color: '#b45309', bg: '#ede9fe' }
       default:
-        return { label: 'Sedan (1.0×)', color: '#087cf0', bg: '#eaf4ff' }
+        return { label: 'Sedan (1.0×)', color: '#141415', bg: '#f4f4f5' }
     }
   }
 
@@ -178,11 +178,11 @@ export default function CustomerVehicles() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           <span style={{ fontSize: '13px', fontWeight: 700, color: '#1e293b' }}>
-            Registered Vehicles: <span style={{ color: '#087cf0' }}>{vehicles.length}</span>
+            Registered Vehicles: <span style={{ color: '#141415' }}>{vehicles.length}</span>
           </span>
           <span style={{ color: '#cbd5e1' }}>•</span>
           <span style={{ fontSize: '13px', fontWeight: 700, color: '#1e293b' }}>
-            Saved Addresses: <span style={{ color: '#087cf0' }}>{profile?.savedAddresses?.length || 0}</span>
+            Saved Addresses: <span style={{ color: '#141415' }}>{profile?.savedAddresses?.length || 0}</span>
           </span>
         </div>
 
@@ -199,8 +199,8 @@ export default function CustomerVehicles() {
       {/* SECTION 1: Registered Vehicles Grid (5. Vehicle specifications) */}
       <div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-          <Car size={18} style={{ color: '#087cf0' }} />
-          <h2 style={{ fontSize: '16px', fontWeight: 800, color: '#102a40', margin: 0 }}>
+          <Car size={18} style={{ color: '#141415' }} />
+          <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#171717', margin: 0 }}>
             Registered Garage Vehicles
           </h2>
         </div>
@@ -246,7 +246,7 @@ export default function CustomerVehicles() {
                           background: '#f1f5f9',
                           display: 'grid',
                           placeItems: 'center',
-                          color: '#087cf0',
+                          color: '#141415',
                           overflow: 'hidden'
                         }}
                       >
@@ -280,7 +280,7 @@ export default function CustomerVehicles() {
 
                     {/* Car Name & Year */}
                     <div style={{ marginBottom: '12px' }}>
-                      <h3 style={{ margin: '0 0 3px', fontSize: '16px', fontWeight: 800, color: '#102a40' }}>
+                      <h3 style={{ margin: '0 0 3px', fontSize: '16px', fontWeight: 600, color: '#171717' }}>
                         {v.make} {v.model}
                       </h3>
                       <div style={{ display: 'flex', gap: '8px', fontSize: '11px', color: '#64748b' }}>
@@ -338,7 +338,7 @@ export default function CustomerVehicles() {
       <div className="panel" style={{ borderRadius: '16px', padding: '22px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <div>
-            <h3 style={{ margin: '0 0 4px', fontSize: '15px', fontWeight: 800, color: '#102a40' }}>
+            <h3 style={{ margin: '0 0 4px', fontSize: '15px', fontWeight: 600, color: '#171717' }}>
               Saved Parking Addresses (savedAddresses)
             </h3>
             <p style={{ margin: 0, fontSize: '11px', color: '#64748b' }}>
@@ -366,7 +366,7 @@ export default function CustomerVehicles() {
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
-                <MapPin size={16} style={{ color: '#087cf0', flexShrink: 0 }} />
+                <MapPin size={16} style={{ color: '#141415', flexShrink: 0 }} />
                 <span style={{ fontSize: '12px', color: '#1e293b', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {addr}
                 </span>
@@ -555,7 +555,7 @@ export default function CustomerVehicles() {
                         key={s.id}
                         onClick={() => setSizeType(s.id)}
                         style={{
-                          border: `1.5px solid ${sizeType === s.id ? '#087cf0' : '#cbd5e1'}`,
+                          border: `1.5px solid ${sizeType === s.id ? '#141415' : '#cbd5e1'}`,
                           borderRadius: '8px',
                           padding: '10px 8px',
                           textAlign: 'center',
@@ -563,10 +563,10 @@ export default function CustomerVehicles() {
                           background: sizeType === s.id ? '#f0f7ff' : '#fff'
                         }}
                       >
-                        <b style={{ display: 'block', fontSize: '12px', color: sizeType === s.id ? '#087cf0' : '#1e293b' }}>
+                        <b style={{ display: 'block', fontSize: '12px', color: sizeType === s.id ? '#141415' : '#1e293b' }}>
                           {s.title}
                         </b>
-                        <span style={{ fontSize: '10px', color: '#0284c7', fontWeight: 700 }}>{s.mult}</span>
+                        <span style={{ fontSize: '10px', color: '#92400e', fontWeight: 700 }}>{s.mult}</span>
                       </div>
                     ))}
                   </div>

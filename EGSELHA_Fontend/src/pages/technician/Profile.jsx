@@ -263,9 +263,9 @@ export default function Profile() {
 
   const getFieldStyle = (active) => ({
     backgroundColor: active ? '#fff' : '#f8fafc',
-    color: active ? '#102a40' : '#475569',
+    color: active ? '#171717' : '#475569',
     cursor: active ? 'text' : 'not-allowed',
-    borderColor: active ? '#087cf0' : '#e2e8f0'
+    borderColor: active ? '#141415' : '#e2e8f0'
   })
 
   return (
@@ -302,7 +302,7 @@ export default function Profile() {
               <i><Camera size={13} /></i>
             </label>
             <div style={{ paddingTop: '38px', minWidth: 0, flex: 1 }}>
-              <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#102a40', margin: '0 0 4px 0', fontFamily: 'Manrope, sans-serif' }}>
+              <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#171717', margin: '0 0 4px 0', fontFamily: 'Manrope, sans-serif' }}>
                 {profile.name}
               </h2>
               <p>Verified Technician <ShieldCheck size={15} /></p>
@@ -331,7 +331,7 @@ export default function Profile() {
                   style={{
                     border: '1px solid #dce6ef',
                     background: '#f8fafc',
-                    color: '#087cf0',
+                    color: '#141415',
                     borderRadius: '8px',
                     width: '30px',
                     height: '30px',
@@ -356,7 +356,7 @@ export default function Profile() {
                     width: '100%',
                     padding: '10px 12px',
                     borderRadius: '10px',
-                    border: '1px solid #bfd7ef',
+                    border: '1px solid #d4d4d8',
                     fontSize: '12px',
                     color: '#29445b',
                     background: '#fbfdff',
@@ -395,7 +395,7 @@ export default function Profile() {
         <section className="panel edit-profile">
           <div className="panel-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
             <div>
-              <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#102a40' }}>Personal information</h2>
+              <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 600, color: '#171717' }}>Personal information</h2>
               <p style={{ margin: '4px 0 0', fontSize: '11px', color: '#64748b' }}>
                 {isEditing ? 'Editing your personal contact details...' : 'Keep your details up to date.'}
               </p>
@@ -406,7 +406,7 @@ export default function Profile() {
                 type="button"
                 className="btn outline"
                 onClick={() => setIsEditing(true)}
-                style={{ fontSize: '11px', padding: '8px 14px', display: 'flex', alignItems: 'center', gap: '6px', borderColor: '#087cf0', color: '#087cf0' }}
+                style={{ fontSize: '11px', padding: '8px 14px', display: 'flex', alignItems: 'center', gap: '6px', borderColor: '#141415', color: '#141415' }}
               >
                 <Pencil size={13} />
                 <span>Edit Profile</span>
@@ -489,8 +489,8 @@ export default function Profile() {
                     style={{
                       fontSize: '11px',
                       fontWeight: 700,
-                      color: '#0369a1',
-                      background: '#e0f2fe',
+                      color: '#92400e',
+                      background: '#fef7ec',
                       padding: '2px 10px',
                       borderRadius: '999px'
                     }}
@@ -540,11 +540,11 @@ export default function Profile() {
         <section className="panel edit-profile">
           <div className="panel-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#eaf4ff', color: '#087cf0', display: 'grid', placeItems: 'center' }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#f4f4f5', color: '#141415', display: 'grid', placeItems: 'center' }}>
                 <Wrench size={18} />
               </div>
               <div>
-                <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#102a40' }}>Equipment &amp; Tools</h2>
+                <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 600, color: '#171717' }}>Equipment &amp; Tools</h2>
                 <p style={{ margin: '3px 0 0', fontSize: '11px', color: '#64748b' }}>
                   {editingTools ? 'Edit, remove, or add tools to your kit.' : `${equipment.length} tools in your mobile wash kit`}
                 </p>
@@ -559,7 +559,7 @@ export default function Profile() {
                   setToolsDraft(equipment)
                   setEditingTools(true)
                 }}
-                style={{ fontSize: '11px', padding: '8px 14px', display: 'flex', alignItems: 'center', gap: '6px', borderColor: '#087cf0', color: '#087cf0' }}
+                style={{ fontSize: '11px', padding: '8px 14px', display: 'flex', alignItems: 'center', gap: '6px', borderColor: '#141415', color: '#141415' }}
               >
                 <Pencil size={13} />
                 <span>Edit Tools</span>
@@ -620,7 +620,7 @@ export default function Profile() {
                       borderRadius: '9px',
                       border: '1px solid #cbd5e1',
                       fontSize: '12px',
-                      color: '#102a40',
+                      color: '#171717',
                       background: '#fff'
                     }}
                   />
@@ -661,9 +661,9 @@ export default function Profile() {
                     flex: 1,
                     padding: '9px 12px',
                     borderRadius: '9px',
-                    border: '1px dashed #93c5fd',
+                    border: '1px dashed #d49b4b',
                     fontSize: '12px',
-                    color: '#102a40',
+                    color: '#171717',
                     background: '#f8fbff'
                   }}
                 />
@@ -671,7 +671,7 @@ export default function Profile() {
                   type="button"
                   className="btn outline"
                   onClick={handleAddTool}
-                  style={{ borderColor: '#087cf0', color: '#087cf0', padding: '9px 14px' }}
+                  style={{ borderColor: '#141415', color: '#141415', padding: '9px 14px' }}
                 >
                   <Plus size={14} />
                   <span>Add</span>
@@ -704,7 +704,7 @@ export default function Profile() {
                 <CarFront size={18} />
               </div>
               <div>
-                <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#102a40' }}>Service Vehicle</h2>
+                <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 600, color: '#171717' }}>Service Vehicle</h2>
                 <p style={{ margin: '3px 0 0', fontSize: '11px', color: '#64748b' }}>
                   {editingVehicle ? 'Update your vehicle type, model, and plate number.' : 'Your registered mobile service vehicle.'}
                 </p>
@@ -716,7 +716,7 @@ export default function Profile() {
                 type="button"
                 className="btn outline"
                 onClick={() => setEditingVehicle(true)}
-                style={{ fontSize: '11px', padding: '8px 14px', display: 'flex', alignItems: 'center', gap: '6px', borderColor: '#087cf0', color: '#087cf0' }}
+                style={{ fontSize: '11px', padding: '8px 14px', display: 'flex', alignItems: 'center', gap: '6px', borderColor: '#141415', color: '#141415' }}
               >
                 <Pencil size={13} />
                 <span>Edit Vehicle</span>
@@ -745,9 +745,9 @@ export default function Profile() {
                     width: '100%',
                     padding: '10px 12px',
                     borderRadius: '10px',
-                    border: '1px solid #087cf0',
+                    border: '1px solid #141415',
                     fontSize: '12px',
-                    color: '#102a40',
+                    color: '#171717',
                     background: '#fff'
                   }}
                 >

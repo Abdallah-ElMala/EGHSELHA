@@ -64,14 +64,14 @@ export default function TechnicianPublicProfileModal({ booking, onClose }) {
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '0 25px 60px rgba(7, 23, 44, 0.35)'
+          boxShadow: '0 25px 60px rgba(15, 15, 16, 0.35)'
         }}
       >
         {/* Header */}
         <div
           style={{
             padding: '22px 24px',
-            background: 'linear-gradient(135deg, #07172c 0%, #0d2847 100%)',
+            background: '#0f0f10',
             color: '#fff',
             display: 'flex',
             alignItems: 'center',
@@ -85,21 +85,21 @@ export default function TechnicianPublicProfileModal({ booking, onClose }) {
                 width: '56px',
                 height: '56px',
                 borderRadius: '50%',
-                background: 'linear-gradient(135deg, #087cf0, #38bdf8)',
+                background: '#141415',
                 color: '#fff',
-                fontWeight: 800,
+                fontWeight: 600,
                 fontSize: '19px',
                 display: 'grid',
                 placeItems: 'center',
                 flexShrink: 0,
-                boxShadow: '0 4px 14px rgba(8, 124, 240, 0.4)'
+                boxShadow: '0 4px 14px rgba(20, 20, 21, 0.4)'
               }}
             >
               {initials}
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800 }}>
+                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 600 }}>
                   {booking.technicianName}
                 </h3>
                 <span
@@ -152,10 +152,10 @@ export default function TechnicianPublicProfileModal({ booking, onClose }) {
                 <Star size={15} fill="#eab308" color="#eab308" /> {booking.technicianRating ? Number(booking.technicianRating).toFixed(1) : '4.9'}
               </b>
             </div>
-            <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: '14px', padding: '12px', textAlign: 'center' }}>
-              <small style={{ fontSize: '10px', color: '#0369a1', display: 'block', fontWeight: 700 }}>COMPLETED WASHES</small>
+            <div style={{ background: '#f4f4f5', border: '1px solid #e4e4e7', borderRadius: '14px', padding: '12px', textAlign: 'center' }}>
+              <small style={{ fontSize: '10px', color: '#92400e', display: 'block', fontWeight: 700 }}>COMPLETED WASHES</small>
               <b style={{ fontSize: '17px', color: '#0c4a6e', display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
-                <Award size={15} color="#0284c7" /> {booking.technicianCompletedJobsCount ?? 0}
+                <Award size={15} color="#92400e" /> {booking.technicianCompletedJobsCount ?? 0}
               </b>
             </div>
             <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '14px', padding: '12px', textAlign: 'center' }}>
@@ -168,24 +168,24 @@ export default function TechnicianPublicProfileModal({ booking, onClose }) {
 
           {/* Contact & Bio */}
           <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '16px' }}>
-            <h4 style={{ margin: '0 0 10px', fontSize: '12px', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+            <h4 style={{ margin: '0 0 10px', fontSize: '12px', fontWeight: 600, color: '#0f172a', letterSpacing: '0.4px' }}>
               Technician Details
             </h4>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px', fontSize: '12px', color: '#334155' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Phone size={14} color="#087cf0" />
+                <Phone size={14} color="#141415" />
                 <span><b>Phone:</b> {booking.technicianPhone || 'Available on dispatch'}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <MapPin size={14} color="#087cf0" />
+                <MapPin size={14} color="#141415" />
                 <span><b>Area:</b> {booking.technicianServiceArea || 'Cairo'}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Calendar size={14} color="#087cf0" />
+                <Calendar size={14} color="#141415" />
                 <span><b>Working Days:</b> {booking.technicianWorkingDays || 'Sunday – Thursday'}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Clock size={14} color="#087cf0" />
+                <Clock size={14} color="#141415" />
                 <span><b>Hours:</b> {booking.technicianWorkingHours || '09:00 AM – 06:00 PM'}</span>
               </div>
             </div>
@@ -199,26 +199,26 @@ export default function TechnicianPublicProfileModal({ booking, onClose }) {
 
           {/* Arriving Mobile Unit / Vehicle */}
           <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '16px' }}>
-            <h4 style={{ margin: '0 0 12px', fontSize: '12px', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Car size={15} color="#087cf0" /> Arriving Service Vehicle
+            <h4 style={{ margin: '0 0 12px', fontSize: '12px', fontWeight: 600, color: '#0f172a', letterSpacing: '0.4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Car size={15} color="#141415" /> Arriving Service Vehicle
             </h4>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px', background: '#f0f9ff', border: '1px solid #bae6fd', padding: '12px 14px', borderRadius: '12px', fontSize: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px', background: '#f4f4f5', border: '1px solid #e4e4e7', padding: '12px 14px', borderRadius: '12px', fontSize: '12px' }}>
               <div>
-                <small style={{ color: '#0369a1', display: 'block', fontSize: '10px', fontWeight: 700 }}>VEHICLE TYPE</small>
+                <small style={{ color: '#92400e', display: 'block', fontSize: '10px', fontWeight: 700 }}>VEHICLE TYPE</small>
                 <b style={{ color: '#0c4a6e' }}>{booking.technicianVehicleType || 'Mobile Detailing Van'}</b>
               </div>
               <div>
-                <small style={{ color: '#0369a1', display: 'block', fontSize: '10px', fontWeight: 700 }}>MODEL / NAME</small>
+                <small style={{ color: '#92400e', display: 'block', fontSize: '10px', fontWeight: 700 }}>MODEL / NAME</small>
                 <b style={{ color: '#0c4a6e' }}>{booking.technicianVehicleName || 'EGHSELHA Service Van'}</b>
               </div>
               <div>
-                <small style={{ color: '#0369a1', display: 'block', fontSize: '10px', fontWeight: 700 }}>LICENSE PLATE</small>
+                <small style={{ color: '#92400e', display: 'block', fontSize: '10px', fontWeight: 700 }}>LICENSE PLATE</small>
                 <b style={{ color: '#0c4a6e' }}>{booking.technicianVehiclePlate || 'Verified Plate'}</b>
               </div>
               {booking.technicianVanLevel && (
                 <div>
-                  <small style={{ color: '#0369a1', display: 'block', fontSize: '10px', fontWeight: 700 }}>UNIT LEVEL</small>
-                  <b style={{ color: '#0284c7' }}>{booking.technicianVanLevel}</b>
+                  <small style={{ color: '#92400e', display: 'block', fontSize: '10px', fontWeight: 700 }}>UNIT LEVEL</small>
+                  <b style={{ color: '#92400e' }}>{booking.technicianVanLevel}</b>
                 </div>
               )}
             </div>
@@ -226,8 +226,8 @@ export default function TechnicianPublicProfileModal({ booking, onClose }) {
 
           {/* Equipment On Board */}
           <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '16px' }}>
-            <h4 style={{ margin: '0 0 10px', fontSize: '12px', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Wrench size={15} color="#087cf0" /> On-Board Detailing Equipment
+            <h4 style={{ margin: '0 0 10px', fontSize: '12px', fontWeight: 600, color: '#0f172a', letterSpacing: '0.4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Wrench size={15} color="#141415" /> On-Board Detailing Equipment
             </h4>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
               {equipmentFlags.map((eq) => (
@@ -258,12 +258,12 @@ export default function TechnicianPublicProfileModal({ booking, onClose }) {
                     fontWeight: 600,
                     padding: '5px 10px',
                     borderRadius: '8px',
-                    background: '#eff6ff',
-                    border: '1px solid #bfdbfe',
-                    color: '#1d4ed8'
+                    background: '#f4f4f5',
+                    border: '1px solid #e4e4e7',
+                    color: '#141415'
                   }}
                 >
-                  ✓ {item}
+                  {item}
                 </span>
               ))}
             </div>

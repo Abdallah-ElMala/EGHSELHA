@@ -180,9 +180,9 @@ export default function Dashboard() {
           margin: '0 0 24px 0',
           padding: '20px',
           borderRadius: '14px',
-          background: 'linear-gradient(135deg, #eff6ff 0%, #e0f2fe 100%)',
-          border: '2px solid #3b82f6',
-          boxShadow: '0 10px 25px -5px rgba(59, 130, 246, 0.2)',
+          background: '#141415',
+          border: '2px solid #b45309',
+          boxShadow: '0 10px 25px -5px rgba(180, 83, 9, 0.2)',
           display: 'flex',
           flexDirection: 'column',
           gap: '14px'
@@ -190,7 +190,7 @@ export default function Dashboard() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div style={{
-                background: '#2563eb',
+                background: '#141415',
                 color: '#fff',
                 width: '38px',
                 height: '38px',
@@ -203,12 +203,12 @@ export default function Dashboard() {
                 <BellRing size={20} />
               </div>
               <div>
-                <b style={{ color: '#1e3a8a', fontSize: '1.1rem' }}>⚡ Fast-Track Dispatch: New Job Offer ({activeOffer.bookingNumber})</b>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: '#1d4ed8' }}>
+                <b style={{ color: '#141415', fontSize: '1.1rem' }}>Fast-Track Dispatch: New Job Offer ({activeOffer.bookingNumber})</b>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: '#141415' }}>
                   {activeOffer.serviceName} · {activeOffer.vehicleModel} · {activeOffer.customerAddress} ({activeOffer.distanceText})
                 </p>
                 {activeOffer.addOnNames?.length > 0 && (
-                  <p style={{ margin: '4px 0 0', fontSize: '0.78rem', color: '#0369a1', fontWeight: 600 }}>
+                  <p style={{ margin: '4px 0 0', fontSize: '0.78rem', color: '#92400e', fontWeight: 600 }}>
                     Add-Ons: {activeOffer.addOnNames.join(' · ')} (+EGP {activeOffer.addOnsSubtotal})
                   </p>
                 )}
@@ -216,7 +216,7 @@ export default function Dashboard() {
             </div>
 
             <div style={{
-              background: secondsLeft <= 10 ? '#ef4444' : '#2563eb',
+              background: secondsLeft <= 10 ? '#ef4444' : '#141415',
               color: '#fff',
               padding: '6px 14px',
               borderRadius: '20px',
@@ -231,11 +231,11 @@ export default function Dashboard() {
           </div>
 
           {/* Offer details & CTA */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #bfdbfe', paddingTop: '12px', flexWrap: 'wrap', gap: '10px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e4e4e7', paddingTop: '12px', flexWrap: 'wrap', gap: '10px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '18px', flexWrap: 'wrap' }}>
               <div>
                 <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Booking Total:</span>
-                <span style={{ marginLeft: '6px', fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>
+                <span style={{ marginLeft: '6px', fontSize: '1.25rem', fontWeight: 600, color: '#0f172a' }}>
                   EGP {activeOffer.totalPrice ?? activeOffer.payoutAmount}
                 </span>
               </div>
@@ -410,8 +410,8 @@ export default function Dashboard() {
               <svg viewBox="0 0 600 170" preserveAspectRatio="none">
                 <defs>
                   <linearGradient id="fill" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0" stopColor="#1687f8" stopOpacity=".22" />
-                    <stop offset="1" stopColor="#1687f8" stopOpacity="0" />
+                    <stop offset="0" stopColor="#141415" stopOpacity=".22" />
+                    <stop offset="1" stopColor="#141415" stopOpacity="0" />
                   </linearGradient>
                 </defs>
 
@@ -429,7 +429,7 @@ export default function Dashboard() {
                       <path
                         d={lineD}
                         fill="none"
-                        stroke="#1687f8"
+                        stroke="#141415"
                         strokeWidth="3"
                         vectorEffect="non-scaling-stroke"
                       />
@@ -440,14 +440,14 @@ export default function Dashboard() {
                             cy={y}
                             r="4.5"
                             fill="#ffffff"
-                            stroke="#1687f8"
+                            stroke="#141415"
                             strokeWidth="2.5"
                           />
                           <text
                             x={x}
                             y={y - 8}
                             textAnchor="middle"
-                            fill="#087cf0"
+                            fill="#141415"
                             fontSize="11"
                             fontWeight="800"
                           >

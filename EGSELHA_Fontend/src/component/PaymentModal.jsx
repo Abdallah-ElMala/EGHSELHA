@@ -164,7 +164,7 @@ export default function PaymentModal({
           background: '#ffffff',
           borderRadius: '24px',
           overflow: 'hidden',
-          boxShadow: '0 25px 60px rgba(7, 23, 44, 0.35)',
+          boxShadow: '0 25px 60px rgba(15, 15, 16, 0.35)',
           border: '1px solid #e2e8f0',
           animation: 'slideUp 0.25s ease'
         }}
@@ -173,7 +173,7 @@ export default function PaymentModal({
         <div
           style={{
             padding: '20px 24px',
-            background: 'linear-gradient(135deg, #07172c 0%, #0d2847 100%)',
+            background: '#0f0f10',
             color: '#fff',
             display: 'flex',
             alignItems: 'center',
@@ -186,9 +186,9 @@ export default function PaymentModal({
                 width: '40px',
                 height: '40px',
                 borderRadius: '12px',
-                background: 'rgba(14, 165, 233, 0.2)',
-                border: '1px solid rgba(56, 189, 248, 0.3)',
-                color: '#38bdf8',
+                background: 'rgba(180, 83, 9, 0.2)',
+                border: '1px solid rgba(212, 155, 75, 0.3)',
+                color: '#d49b4b',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
@@ -197,10 +197,10 @@ export default function PaymentModal({
               <CreditCard size={20} />
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, fontFamily: 'Manrope, sans-serif' }}>
+              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 600, fontFamily: 'Manrope, sans-serif' }}>
                 {isTopUp ? 'Wallet Top-Up' : 'Pay Booking Deposit'}
               </h3>
-              <p style={{ margin: '2px 0 0', fontSize: '11px', color: '#93c5fd' }}>
+              <p style={{ margin: '2px 0 0', fontSize: '11px', color: '#d49b4b' }}>
                 {isTopUp
                   ? 'Secure & encrypted payment · Visa, Mastercard, and Mobile Wallets'
                   : `Booking #${booking?.bookingNumber || 'BK-NEW'} · Required Deposit: 200 EGP`}
@@ -247,7 +247,7 @@ export default function PaymentModal({
               >
                 <CheckCircle2 size={36} />
               </div>
-              <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#102a40', margin: '0 0 6px' }}>
+              <h3 style={{ fontSize: '20px', fontWeight: 600, color: '#171717', margin: '0 0 6px' }}>
                 {receipt.title}
               </h3>
               <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 20px', lineHeight: 1.5 }}>
@@ -273,7 +273,7 @@ export default function PaymentModal({
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                   <span style={{ fontSize: '12px', color: '#64748b' }}>Transaction Ref:</span>
-                  <code style={{ fontSize: '12px', color: '#0284c7', background: '#e0f2fe', padding: '2px 6px', borderRadius: '4px' }}>
+                  <code style={{ fontSize: '12px', color: '#92400e', background: '#fef7ec', padding: '2px 6px', borderRadius: '4px' }}>
                     {receipt.transactionId}
                   </code>
                 </div>
@@ -285,9 +285,8 @@ export default function PaymentModal({
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ fontSize: '12px', color: '#64748b' }}>Status:</span>
-                  <span style={{ fontSize: '11px', background: '#dcfce7', color: '#15803d', padding: '2px 8px', borderRadius: '9999px', fontWeight: 800 }}>
-                    Success & Bank Verified ✓
-                  </span>
+                  <span style={{ fontSize: '11px', background: '#dcfce7', color: '#15803d', padding: '2px 8px', borderRadius: '9999px', fontWeight: 600 }}>
+                    Success & Bank Verified </span>
                 </div>
               </div>
 
@@ -318,15 +317,15 @@ export default function PaymentModal({
                           setIsCustom(false)
                         }}
                         style={{
-                          border: !isCustom && topUpAmount === amt ? '2px solid #0284c7' : '1px solid #cbd5e1',
-                          background: !isCustom && topUpAmount === amt ? '#e0f2fe' : '#ffffff',
-                          color: !isCustom && topUpAmount === amt ? '#0284c7' : '#475569',
+                          border: !isCustom && topUpAmount === amt ? '2px solid #92400e' : '1px solid #cbd5e1',
+                          background: !isCustom && topUpAmount === amt ? '#fef7ec' : '#ffffff',
+                          color: !isCustom && topUpAmount === amt ? '#92400e' : '#475569',
                           fontWeight: 700,
                           fontSize: '12px',
                           padding: '10px 4px',
                           borderRadius: '10px',
                           cursor: 'pointer',
-                          transition: 'all 0.15s'
+                          transition: 'background-color 150ms cubic-bezier(0.22, 1, 0.36, 1), border-color 150ms cubic-bezier(0.22, 1, 0.36, 1), color 150ms cubic-bezier(0.22, 1, 0.36, 1)'
                         }}
                       >
                         +{amt}
@@ -348,7 +347,7 @@ export default function PaymentModal({
                         flex: 1,
                         padding: '10px 14px',
                         borderRadius: '10px',
-                        border: isCustom ? '2px solid #0284c7' : '1px solid #cbd5e1',
+                        border: isCustom ? '2px solid #92400e' : '1px solid #cbd5e1',
                         fontSize: '13px',
                         outline: 'none'
                       }}
@@ -369,9 +368,9 @@ export default function PaymentModal({
                     type="button"
                     onClick={() => setSelectedMethod(PAYMENT_METHODS.CREDIT_CARD)}
                     style={{
-                      border: selectedMethod === PAYMENT_METHODS.CREDIT_CARD ? '2px solid #0284c7' : '1px solid #cbd5e1',
-                      background: selectedMethod === PAYMENT_METHODS.CREDIT_CARD ? '#f0f9ff' : '#ffffff',
-                      color: selectedMethod === PAYMENT_METHODS.CREDIT_CARD ? '#0284c7' : '#475569',
+                      border: selectedMethod === PAYMENT_METHODS.CREDIT_CARD ? '2px solid #92400e' : '1px solid #cbd5e1',
+                      background: selectedMethod === PAYMENT_METHODS.CREDIT_CARD ? '#f4f4f5' : '#ffffff',
+                      color: selectedMethod === PAYMENT_METHODS.CREDIT_CARD ? '#92400e' : '#475569',
                       padding: '10px 6px',
                       borderRadius: '12px',
                       fontWeight: 700,
@@ -392,9 +391,9 @@ export default function PaymentModal({
                     type="button"
                     onClick={() => setSelectedMethod(PAYMENT_METHODS.INSTAPAY)}
                     style={{
-                      border: selectedMethod === PAYMENT_METHODS.INSTAPAY ? '2px solid #0284c7' : '1px solid #cbd5e1',
-                      background: selectedMethod === PAYMENT_METHODS.INSTAPAY ? '#f0f9ff' : '#ffffff',
-                      color: selectedMethod === PAYMENT_METHODS.INSTAPAY ? '#0284c7' : '#475569',
+                      border: selectedMethod === PAYMENT_METHODS.INSTAPAY ? '2px solid #92400e' : '1px solid #cbd5e1',
+                      background: selectedMethod === PAYMENT_METHODS.INSTAPAY ? '#f4f4f5' : '#ffffff',
+                      color: selectedMethod === PAYMENT_METHODS.INSTAPAY ? '#92400e' : '#475569',
                       padding: '10px 6px',
                       borderRadius: '12px',
                       fontWeight: 700,
@@ -415,9 +414,9 @@ export default function PaymentModal({
                     type="button"
                     onClick={() => setSelectedMethod(PAYMENT_METHODS.VODAFONE_CASH)}
                     style={{
-                      border: selectedMethod === PAYMENT_METHODS.VODAFONE_CASH ? '2px solid #0284c7' : '1px solid #cbd5e1',
-                      background: selectedMethod === PAYMENT_METHODS.VODAFONE_CASH ? '#f0f9ff' : '#ffffff',
-                      color: selectedMethod === PAYMENT_METHODS.VODAFONE_CASH ? '#0284c7' : '#475569',
+                      border: selectedMethod === PAYMENT_METHODS.VODAFONE_CASH ? '2px solid #92400e' : '1px solid #cbd5e1',
+                      background: selectedMethod === PAYMENT_METHODS.VODAFONE_CASH ? '#f4f4f5' : '#ffffff',
+                      color: selectedMethod === PAYMENT_METHODS.VODAFONE_CASH ? '#92400e' : '#475569',
                       padding: '10px 6px',
                       borderRadius: '12px',
                       fontWeight: 700,
@@ -439,9 +438,9 @@ export default function PaymentModal({
                       type="button"
                       onClick={() => setSelectedMethod(PAYMENT_METHODS.WALLET)}
                       style={{
-                        border: selectedMethod === PAYMENT_METHODS.WALLET ? '2px solid #0284c7' : '1px solid #cbd5e1',
-                        background: selectedMethod === PAYMENT_METHODS.WALLET ? '#f0f9ff' : '#ffffff',
-                        color: selectedMethod === PAYMENT_METHODS.WALLET ? '#0284c7' : '#475569',
+                        border: selectedMethod === PAYMENT_METHODS.WALLET ? '2px solid #92400e' : '1px solid #cbd5e1',
+                        background: selectedMethod === PAYMENT_METHODS.WALLET ? '#f4f4f5' : '#ffffff',
+                        color: selectedMethod === PAYMENT_METHODS.WALLET ? '#92400e' : '#475569',
                         padding: '10px 6px',
                         borderRadius: '12px',
                         fontWeight: 700,
@@ -466,7 +465,7 @@ export default function PaymentModal({
                   {/* Interactive Visual Credit Card */}
                   <div
                     style={{
-                      background: 'linear-gradient(135deg, #0b1f3a 0%, #173860 50%, #081a33 100%)',
+                      background: '#141415',
                       borderRadius: '18px',
                       padding: '20px 24px',
                       color: '#ffffff',
@@ -491,7 +490,7 @@ export default function PaymentModal({
                         {/* Contactless waves */}
                         <span style={{ fontSize: '16px', opacity: 0.8 }}>) ) )</span>
                       </div>
-                      <span style={{ fontSize: '16px', fontWeight: 900, letterSpacing: '1px', textTransform: 'uppercase' }}>
+                      <span style={{ fontSize: '16px', fontWeight: 600, letterSpacing: '1px' }}>
                         {cardBrand === 'mastercard' ? 'Mastercard' : 'VISA'}
                       </span>
                     </div>
@@ -521,7 +520,7 @@ export default function PaymentModal({
                       style={{
                         background: '#f1f5f9',
                         border: '1px solid #cbd5e1',
-                        color: '#0284c7',
+                        color: '#92400e',
                         borderRadius: '6px',
                         padding: '3px 8px',
                         fontSize: '11px',
@@ -532,7 +531,7 @@ export default function PaymentModal({
                         gap: '4px'
                       }}
                     >
-                      <Sparkles size={12} />
+                      <ShieldCheck size={12} strokeWidth={1.6} />
                       <span>Fill Test Card</span>
                     </button>
                   </div>
@@ -618,16 +617,16 @@ export default function PaymentModal({
               {/* METHOD 2: INSTAPAY */}
               {selectedMethod === PAYMENT_METHODS.INSTAPAY && (
                 <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '16px', marginBottom: '16px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#0369a1', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#92400e', marginBottom: '8px' }}>
                     <Building2 size={18} />
                     <b style={{ fontSize: '13px' }}>Instant Transfer via Instapay</b>
                   </div>
                   <p style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.5, margin: '0 0 12px' }}>
                     Transfer the requested amount via Instapay to the following address:
                   </p>
-                  <div style={{ background: '#fff', border: '1px dashed #0284c7', borderRadius: '8px', padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                  <div style={{ background: '#fff', border: '1px dashed #92400e', borderRadius: '8px', padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                     <span style={{ fontSize: '12px', color: '#64748b' }}>Instant Payment Address (IPA):</span>
-                    <strong style={{ fontSize: '14px', color: '#0284c7' }}>eghselha@instapay</strong>
+                    <strong style={{ fontSize: '14px', color: '#92400e' }}>eghselha@instapay</strong>
                   </div>
                   <div>
                     <input
@@ -687,7 +686,7 @@ export default function PaymentModal({
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
                       <span style={{ fontSize: '12px', color: '#15803d' }}>Available Wallet Balance:</span>
-                      <h4 style={{ fontSize: '18px', fontWeight: 800, color: '#166534', margin: '4px 0 0' }}>
+                      <h4 style={{ fontSize: '18px', fontWeight: 600, color: '#166534', margin: '4px 0 0' }}>
                         {currentBalance.toLocaleString()} EGP
                       </h4>
                     </div>
@@ -737,9 +736,9 @@ export default function PaymentModal({
                   <span>Gateway Fee:</span>
                   <span style={{ color: '#16a34a', fontWeight: 700 }}>0.00 EGP (Free)</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: '#0f172a', fontWeight: 800, paddingTop: '8px', borderTop: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: '#0f172a', fontWeight: 600, paddingTop: '8px', borderTop: '1px solid #e2e8f0' }}>
                   <span>Total Charged:</span>
-                  <span style={{ color: '#0284c7' }}>{effectiveAmount.toLocaleString()} EGP</span>
+                  <span style={{ color: '#92400e' }}>{effectiveAmount.toLocaleString()} EGP</span>
                 </div>
               </div>
 

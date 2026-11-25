@@ -247,7 +247,7 @@ export default function CustomerProfile() {
   // Get Vehicle Type label
   const getVehicleTypeLabel = (type) => {
     const s = String(type).toUpperCase()
-    if (s === 'SUV' || type === 1) return { label: 'SUV', bg: '#e0f2fe', text: '#0369a1' }
+    if (s === 'SUV' || type === 1) return { label: 'SUV', bg: '#fef7ec', text: '#92400e' }
     if (s === 'TRUCK_VAN' || type === 2) return { label: 'Truck / Van', bg: '#fef3c7', text: '#b45309' }
     return { label: 'Sedan', bg: '#f0fdf4', text: '#16a34a' }
   }
@@ -292,7 +292,7 @@ export default function CustomerProfile() {
               <i><Camera size={13} /></i>
             </label>
             <div style={{ paddingTop: '38px', minWidth: 0, flex: 1 }}>
-              <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#102a40', margin: '0 0 4px 0', fontFamily: 'Manrope, sans-serif' }}>
+              <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#171717', margin: '0 0 4px 0', fontFamily: 'Manrope, sans-serif' }}>
                 {displayedName}
               </h2>
               <p style={{ display: 'flex', alignItems: 'center', gap: '5px', margin: '0 0 6px 0', color: '#16a34a', fontSize: '11px', fontWeight: 700 }}>
@@ -307,9 +307,9 @@ export default function CustomerProfile() {
           </div>
 
           <div className="profile-badges">
-            <span><Award size={14} color="#087cf0" /> Registered Customer</span>
+            <span><Award size={14} color="#141415" /> Registered Customer</span>
             <span><CheckCircle2 size={14} color="#16a34a" /> Phone Verified</span>
-            <span><Car size={14} color="#087cf0" /> {displayedVehicles.length} Registered Cars</span>
+            <span><Car size={14} color="#141415" /> {displayedVehicles.length} Registered Cars</span>
           </div>
 
           {/* Wallet Balance & Loyalty Banner */}
@@ -331,7 +331,7 @@ export default function CustomerProfile() {
         <section className="panel edit-profile">
           <div className="panel-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
             <div>
-              <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#102a40' }}>Personal Information</h2>
+              <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 600, color: '#171717' }}>Personal Information</h2>
               <p style={{ margin: '4px 0 0', fontSize: '11px', color: '#64748b' }}>
                 {isEditing ? 'Editing your personal contact details...' : 'Your contact details and technician gate notes.'}
               </p>
@@ -343,7 +343,7 @@ export default function CustomerProfile() {
                 type="button"
                 className="btn outline"
                 onClick={() => setIsEditing(true)}
-                style={{ fontSize: '11px', padding: '8px 14px', display: 'flex', alignItems: 'center', gap: '6px', borderColor: '#087cf0', color: '#087cf0' }}
+                style={{ fontSize: '11px', padding: '8px 14px', display: 'flex', alignItems: 'center', gap: '6px', borderColor: '#141415', color: '#141415' }}
               >
                 <Pencil size={13} />
                 <span>Edit Profile</span>
@@ -380,9 +380,9 @@ export default function CustomerProfile() {
                 }}
                 style={{
                   backgroundColor: isEditing ? '#fff' : '#f8fafc',
-                  color: isEditing ? '#102a40' : '#475569',
+                  color: isEditing ? '#171717' : '#475569',
                   cursor: isEditing ? 'text' : 'not-allowed',
-                  borderColor: profileErrors.fullName ? '#ef4444' : isEditing ? '#087cf0' : '#e2e8f0'
+                  borderColor: profileErrors.fullName ? '#ef4444' : isEditing ? '#141415' : '#e2e8f0'
                 }}
               />
               <FieldError error={profileErrors.fullName} />
@@ -400,9 +400,9 @@ export default function CustomerProfile() {
                 }}
                 style={{
                   backgroundColor: isEditing ? '#fff' : '#f8fafc',
-                  color: isEditing ? '#102a40' : '#475569',
+                  color: isEditing ? '#171717' : '#475569',
                   cursor: isEditing ? 'text' : 'not-allowed',
-                  borderColor: profileErrors.phone ? '#ef4444' : isEditing ? '#087cf0' : '#e2e8f0'
+                  borderColor: profileErrors.phone ? '#ef4444' : isEditing ? '#141415' : '#e2e8f0'
                 }}
               />
               <FieldError error={profileErrors.phone} />
@@ -421,9 +421,9 @@ export default function CustomerProfile() {
                 }}
                 style={{
                   backgroundColor: isEditing ? '#fff' : '#f8fafc',
-                  color: isEditing ? '#102a40' : '#475569',
+                  color: isEditing ? '#171717' : '#475569',
                   cursor: isEditing ? 'text' : 'not-allowed',
-                  borderColor: profileErrors.email ? '#ef4444' : isEditing ? '#087cf0' : '#e2e8f0'
+                  borderColor: profileErrors.email ? '#ef4444' : isEditing ? '#141415' : '#e2e8f0'
                 }}
               />
               <FieldError error={profileErrors.email} />
@@ -444,9 +444,9 @@ export default function CustomerProfile() {
                 }}
                 style={{
                   backgroundColor: isEditing ? '#fff' : '#f8fafc',
-                  color: isEditing ? '#102a40' : '#475569',
+                  color: isEditing ? '#171717' : '#475569',
                   cursor: isEditing ? 'text' : 'not-allowed',
-                  borderColor: profileErrors.gateNotes ? '#ef4444' : isEditing ? '#087cf0' : '#e2e8f0'
+                  borderColor: profileErrors.gateNotes ? '#ef4444' : isEditing ? '#141415' : '#e2e8f0'
                 }}
               />
               <FieldError error={profileErrors.gateNotes} />
@@ -481,7 +481,7 @@ export default function CustomerProfile() {
       <div className="panel" style={{ borderRadius: '18px', padding: '24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <div>
-            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#102a40' }}>
+            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 600, color: '#171717' }}>
               My Registered Vehicles ({displayedVehicles.length})
             </h3>
             <small style={{ color: '#64748b', fontSize: '11px' }}>
@@ -528,8 +528,8 @@ export default function CustomerProfile() {
                         width: '46px',
                         height: '46px',
                         borderRadius: '12px',
-                        background: '#07172c',
-                        color: '#60b4ff',
+                        background: '#0f0f10',
+                        color: '#d49b4b',
                         display: 'grid',
                         placeItems: 'center',
                         flexShrink: 0
@@ -539,7 +539,7 @@ export default function CustomerProfile() {
                     </div>
 
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <b style={{ fontSize: '14px', color: '#102a40', display: 'block' }}>{carTitle}</b>
+                      <b style={{ fontSize: '14px', color: '#171717', display: 'block' }}>{carTitle}</b>
                       <span style={{ fontSize: '11px', color: '#64748b' }}>
                         {v.year} · Color: {v.color}
                       </span>
@@ -559,7 +559,7 @@ export default function CustomerProfile() {
                         display: 'grid',
                         placeItems: 'center',
                         cursor: 'pointer',
-                        transition: 'all 0.2s',
+                        transition: 'background-color 150ms cubic-bezier(0.22, 1, 0.36, 1), border-color 150ms cubic-bezier(0.22, 1, 0.36, 1), color 150ms cubic-bezier(0.22, 1, 0.36, 1)',
                         flexShrink: 0
                       }}
                       title="Delete vehicle"
@@ -579,7 +579,7 @@ export default function CustomerProfile() {
                   <div style={{ background: '#f8fafc', padding: '10px 12px', borderRadius: '8px', border: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px' }}>
                       <span style={{ color: '#64748b' }}>License Plate:</span>
-                      <b style={{ color: '#102a40' }}>{v.licensePlate}</b>
+                      <b style={{ color: '#171717' }}>{v.licensePlate}</b>
                     </div>
 
                     {/* ONLY VEHICLE TYPE */}
@@ -601,7 +601,7 @@ export default function CustomerProfile() {
       <div className="panel" style={{ borderRadius: '18px', padding: '24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <div>
-            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#102a40' }}>
+            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 600, color: '#171717' }}>
               Saved Locations & Parking Spots ({displayedAddresses.length})
             </h3>
             <small style={{ color: '#64748b', fontSize: '11px' }}>
@@ -628,12 +628,12 @@ export default function CustomerProfile() {
                 position: 'relative'
               }}
             >
-              <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: '#eaf4ff', color: '#087cf0', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+              <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: '#f4f4f5', color: '#141415', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
                 <MapPin size={20} />
               </div>
 
               <div style={{ flex: 1, minWidth: 0, paddingRight: '10px' }}>
-                <b style={{ fontSize: '13px', color: '#102a40', display: 'block' }}>
+                <b style={{ fontSize: '13px', color: '#171717', display: 'block' }}>
                   {idx === 0 ? 'Home Location' : idx === 1 ? 'Office / Work' : `Saved Location #${idx + 1}`}
                 </b>
                 <p style={{ margin: '4px 0 0', fontSize: '11px', color: '#64748b', lineHeight: 1.4 }}>{addr}</p>
@@ -653,7 +653,7 @@ export default function CustomerProfile() {
                   display: 'grid',
                   placeItems: 'center',
                   cursor: 'pointer',
-                  transition: 'all 0.2s',
+                  transition: 'background-color 150ms cubic-bezier(0.22, 1, 0.36, 1), border-color 150ms cubic-bezier(0.22, 1, 0.36, 1), color 150ms cubic-bezier(0.22, 1, 0.36, 1)',
                   flexShrink: 0
                 }}
                 title="Delete saved address"
@@ -832,7 +832,7 @@ export default function CustomerProfile() {
                         key={s.id}
                         onClick={() => setSizeType(s.id)}
                         style={{
-                          border: `1.5px solid ${sizeType === s.id ? '#087cf0' : '#cbd5e1'}`,
+                          border: `1.5px solid ${sizeType === s.id ? '#141415' : '#cbd5e1'}`,
                           borderRadius: '8px',
                           padding: '10px 8px',
                           textAlign: 'center',
@@ -840,7 +840,7 @@ export default function CustomerProfile() {
                           background: sizeType === s.id ? '#f0f7ff' : '#fff'
                         }}
                       >
-                        <b style={{ display: 'block', fontSize: '12px', color: sizeType === s.id ? '#087cf0' : '#1e293b' }}>
+                        <b style={{ display: 'block', fontSize: '12px', color: sizeType === s.id ? '#141415' : '#1e293b' }}>
                           {s.title}
                         </b>
                         <span style={{ fontSize: '10px', color: '#64748b' }}>{s.desc}</span>

@@ -137,8 +137,8 @@ export default function AdminDashboard() {
               style={{
                 padding: '14px 18px',
                 borderRadius: '12px',
-                background: '#eff6ff',
-                border: '1px solid #bfdbfe',
+                background: '#f4f4f5',
+                border: '1px solid #e4e4e7',
                 cursor: 'pointer',
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -146,12 +146,12 @@ export default function AdminDashboard() {
               }}
             >
               <div>
-                <b style={{ color: '#1e3a8a', fontSize: '13px', display: 'block' }}>
+                <b style={{ color: '#141415', fontSize: '13px', display: 'block' }}>
                   {dashboard.pendingApplicationsCount} Technician Application Pending
                 </b>
-                <small style={{ color: '#1d4ed8', fontSize: '11px' }}>Click to verify equipment & approve</small>
+                <small style={{ color: '#141415', fontSize: '11px' }}>Click to verify equipment & approve</small>
               </div>
-              <ChevronRight size={18} color="#2563eb" />
+              <ChevronRight size={18} color="#141415" />
             </div>
           )}
         </div>
@@ -165,7 +165,7 @@ export default function AdminDashboard() {
               <h2>Revenue by Service Package</h2>
               <p>Completed wash earnings breakdown (Tech 70% / Platform 30%)</p>
             </div>
-            <TrendingUp size={18} color="#087cf0" />
+            <TrendingUp size={18} color="#141415" />
           </div>
 
           {revenueByPackage.length === 0 ? (
@@ -177,13 +177,13 @@ export default function AdminDashboard() {
                 return (
                   <div key={pkg.packageName}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '5px' }}>
-                      <b style={{ color: '#102a40' }}>
+                      <b style={{ color: '#171717' }}>
                         {pkg.packageName} <span style={{ color: '#64748b', fontWeight: 500 }}>({pkg.bookingsCount} jobs)</span>
                       </b>
-                      <b style={{ color: '#087cf0' }}>EGP {pkg.revenue.toLocaleString()}</b>
+                      <b style={{ color: '#141415' }}>EGP {pkg.revenue.toLocaleString()}</b>
                     </div>
                     <div style={{ height: '8px', background: '#f1f5f9', borderRadius: '99px', overflow: 'hidden' }}>
-                      <div style={{ width: `${pct}%`, height: '100%', background: 'linear-gradient(90deg, #087cf0, #38bdf8)', borderRadius: '99px' }} />
+                      <div style={{ width: `${pct}%`, height: '100%', background: '#141415', borderRadius: '99px' }} />
                     </div>
                   </div>
                 );
@@ -250,7 +250,7 @@ export default function AdminDashboard() {
             <tbody>
               {recentBookings.map((b) => (
                 <tr key={b.id}>
-                  <td><b style={{ color: '#087cf0' }}>{b.bookingNumber}</b></td>
+                  <td><b style={{ color: '#141415' }}>{b.bookingNumber}</b></td>
                   <td>
                     <b>{b.customerName}</b>
                     <small style={{ display: 'block', color: '#94a3b8' }}>{b.address}</small>

@@ -126,7 +126,7 @@ export default function CustomerHome() {
       {activeWash && (
         <div
           style={{
-            background: 'linear-gradient(135deg, #07172c 0%, #0d2847 100%)',
+            background: '#0f0f10',
             borderRadius: '20px',
             padding: '20px 28px',
             color: '#fff',
@@ -135,8 +135,8 @@ export default function CustomerHome() {
             alignItems: 'center',
             flexWrap: 'wrap',
             gap: '16px',
-            boxShadow: '0 8px 25px rgba(7, 23, 44, 0.25)',
-            border: '1px solid rgba(8, 124, 240, 0.3)'
+            boxShadow: '0 8px 25px rgba(15, 15, 16, 0.25)',
+            border: '1px solid rgba(20, 20, 21, 0.3)'
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -145,8 +145,8 @@ export default function CustomerHome() {
                 width: '48px',
                 height: '48px',
                 borderRadius: '50%',
-                background: 'rgba(8, 124, 240, 0.25)',
-                color: '#60b4ff',
+                background: 'rgba(20, 20, 21, 0.25)',
+                color: '#d49b4b',
                 display: 'grid',
                 placeItems: 'center',
                 animation: 'pulse 2s infinite',
@@ -159,10 +159,10 @@ export default function CustomerHome() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                 <span
                   style={{
-                    background: '#087cf0',
+                    background: '#141415',
                     color: '#fff',
                     fontSize: '10px',
-                    fontWeight: 800,
+                    fontWeight: 600,
                     padding: '3px 10px',
                     borderRadius: '20px',
                     letterSpacing: '0.5px'
@@ -170,7 +170,7 @@ export default function CustomerHome() {
                 >
                   LIVE SERVICE · {activeWash.status}
                 </span>
-                <span style={{ fontSize: '12px', color: '#93c5fd' }}>{activeWash.bookingNumber}</span>
+                <span style={{ fontSize: '12px', color: '#d49b4b' }}>{activeWash.bookingNumber}</span>
               </div>
               <b style={{ fontSize: '15px', color: '#fff', display: 'block' }}>
                 {activeWash.serviceName || activeWash.packageName || 'Premium Wash'} in progress
@@ -179,7 +179,7 @@ export default function CustomerHome() {
                 Technician:{' '}
                 <b
                   onClick={() => activeWash.technicianName && setShowTechProfile(true)}
-                  style={{ cursor: activeWash.technicianName ? 'pointer' : 'default', textDecoration: activeWash.technicianName ? 'underline' : 'none', color: '#60b4ff' }}
+                  style={{ cursor: activeWash.technicianName ? 'pointer' : 'default', textDecoration: activeWash.technicianName ? 'underline' : 'none', color: '#d49b4b' }}
                 >
                   {activeWash.technicianName || 'Assigned Technician'}
                 </b>
@@ -194,7 +194,7 @@ export default function CustomerHome() {
                 onClick={() => setShowTechProfile(true)}
                 className="btn outline"
                 style={{
-                  background: 'rgba(8, 124, 240, 0.2)',
+                  background: 'rgba(20, 20, 21, 0.2)',
                   borderColor: 'rgba(96, 180, 255, 0.45)',
                   color: '#fff',
                   fontSize: '11px',
@@ -220,7 +220,7 @@ export default function CustomerHome() {
             <button
               onClick={() => setShowLiveTracking(true)}
               className="btn primary"
-              style={{ fontSize: '11px', padding: '9px 18px', background: '#087cf0' }}
+              style={{ fontSize: '11px', padding: '9px 18px', background: '#141415' }}
             >
               <MapPin size={14} /> Track Live On Map
             </button>
@@ -228,133 +228,126 @@ export default function CustomerHome() {
         </div>
       )}
 
-      {/* 2. HERO SECTION: Doorstep Car Wash Welcome */}
+      {/* 2. HERO SECTION: Doorstep Car Wash */}
       <section
         style={{
-          borderRadius: '24px',
+          borderRadius: '16px',
           overflow: 'hidden',
-          background: 'radial-gradient(circle at 75% 30%, #113359 0%, #07172c 60%, #050f1d 100%)',
-          color: '#fff',
-          padding: '44px 44px 38px 44px',
+          background: '#0f0f10',
+          border: '1px solid rgba(212, 155, 75, 0.25)',
+          color: '#f4f4f5',
+          padding: '44px 44px 36px 44px',
           position: 'relative',
-          boxShadow: '0 12px 30px rgba(7, 23, 44, 0.12)'
+          boxShadow: '0 10px 28px rgba(0, 0, 0, 0.14)'
         }}
       >
-        {/* Background Car Graphic */}
+        {/* Real Luxury Car Detailing Photo */}
         <div
           style={{
             position: 'absolute',
-            right: '-30px',
+            right: '0',
+            top: '0',
             bottom: '0',
-            width: '460px',
-            height: '100%',
-            backgroundImage: 'url("https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&w=900&q=80")',
+            width: '52%',
+            minWidth: '340px',
+            backgroundImage: 'url("/wet-luxury-car.jpg")',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
-            maskImage: 'linear-gradient(to right, transparent 0%, black 50%)',
-            WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 50%)',
-            opacity: 0.75,
+            maskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.92) 48%, black 100%)',
+            WebkitMaskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.92) 48%, black 100%)',
+            opacity: 0.88,
             pointerEvents: 'none'
           }}
         />
 
-        <div style={{ position: 'relative', zIndex: 2, maxWidth: '600px' }}>
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              background: 'rgba(8, 124, 240, 0.2)',
-              border: '1px solid rgba(8, 124, 240, 0.4)',
-              borderRadius: '20px',
-              padding: '5px 14px',
-              fontSize: '11px',
-              fontWeight: 700,
-              color: '#60b4ff',
-              marginBottom: '16px'
-            }}
-          >
-            <Sparkles size={13} />
-            <span>Doorstep Car Detailing Across Cairo</span>
-          </div>
-
+        <div style={{ position: 'relative', zIndex: 2, maxWidth: '540px' }}>
           <h1
             style={{
               fontSize: '34px',
-              fontWeight: 800,
+              fontWeight: 500,
               margin: '0 0 12px 0',
-              lineHeight: 1.2,
+              lineHeight: 1.16,
+              letterSpacing: '-0.02em',
+              color: '#f4f4f5',
               fontFamily: 'Manrope, sans-serif'
             }}
           >
-            Welcome back, {customerFirstName}!<br />
-            Keep your car showroom clean.
+            Mobile auto detailing,
+            <br />
+            <span style={{ color: '#d49b4b' }}>at your doorstep</span>
           </h1>
 
-          <p style={{ fontSize: '13px', color: '#cbd5e1', lineHeight: 1.6, margin: '0 0 24px 0', maxWidth: '480px' }}>
-            Certified mobile detailers come directly to your home, office, or driveway. We bring our own water, power, and professional equipment.
+          <p style={{ fontSize: '14px', color: '#a1a1a6', lineHeight: 1.6, margin: '0 0 24px 0', maxWidth: '460px' }}>
+            Certified mobile detailers come directly to your home, office, or driveway with self-contained water, power, and detailing equipment.
           </p>
 
-          {/* Quick Book Action Button */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+          {/* Quick Book Action Buttons */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
             <button
               onClick={handleHeroQuickBook}
               style={{
-                background: '#087cf0',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '12px',
-                padding: '13px 28px',
+                background: '#d49b4b',
+                color: '#141415',
+                border: '1px solid #d49b4b',
+                borderRadius: '8px',
+                padding: '11px 22px',
+                minHeight: '42px',
                 fontSize: '13px',
-                fontWeight: 700,
+                fontWeight: 600,
                 cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '8px',
-                boxShadow: '0 6px 20px rgba(8, 124, 240, 0.4)',
-                transition: 'transform 0.2s, background 0.2s'
+                transition: 'background-color 150ms cubic-bezier(0.22, 1, 0.36, 1), transform 120ms cubic-bezier(0.22, 1, 0.36, 1)'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)'
-                e.currentTarget.style.background = '#006bd5'
+                e.currentTarget.style.background = '#e5b56c'
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)'
-                e.currentTarget.style.background = '#087cf0'
+                e.currentTarget.style.background = '#d49b4b'
               }}
             >
-              <span>Book a Mobile Wash Now</span>
-              <ArrowRight size={16} />
+              <span>Book a wash</span>
+              <ArrowRight size={15} strokeWidth={1.8} />
             </button>
 
             <button
               onClick={() => navigate('/customer/bookings')}
               style={{
-                background: 'rgba(255, 255, 255, 0.1)',
-                color: '#fff',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                borderRadius: '12px',
-                padding: '13px 22px',
+                background: '#19191b',
+                color: '#f4f4f5',
+                border: '1px solid rgba(212, 155, 75, 0.32)',
+                borderRadius: '8px',
+                padding: '11px 20px',
+                minHeight: '42px',
                 fontSize: '13px',
-                fontWeight: 600,
+                fontWeight: 500,
                 cursor: 'pointer',
-                transition: 'background 0.2s'
+                transition: 'background-color 150ms cubic-bezier(0.22, 1, 0.36, 1), border-color 150ms cubic-bezier(0.22, 1, 0.36, 1)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#232325'
+                e.currentTarget.style.borderColor = 'rgba(212, 155, 75, 0.55)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#19191b'
+                e.currentTarget.style.borderColor = 'rgba(212, 155, 75, 0.32)'
               }}
             >
-              View My Bookings
+              View my bookings
             </button>
           </div>
 
           {/* Value highlights underneath */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginTop: '28px', paddingTop: '18px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: '#cbd5e1' }}>
-              <Droplets size={14} color="#60b4ff" /> 100% Mobile Water & Power
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap', marginTop: '28px', paddingTop: '16px', borderTop: '1px solid rgba(212, 155, 75, 0.16)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#a1a1a6' }}>
+              <Droplets size={14} strokeWidth={1.6} color="#d49b4b" /> Self-contained water &amp; power
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: '#cbd5e1' }}>
-              <ShieldCheck size={14} color="#4ade80" /> 100% Guarantee
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#a1a1a6' }}>
+              <ShieldCheck size={14} strokeWidth={1.6} color="#d49b4b" /> Quality guarantee
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: '#cbd5e1' }}>
-              <Star size={14} fill="#facc15" color="#facc15" /> 4.9/5 Certified Techs
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#a1a1a6' }}>
+              <Star size={14} strokeWidth={1.6} fill="#d49b4b" color="#d49b4b" /> Certified technicians
             </div>
           </div>
         </div>
@@ -364,7 +357,7 @@ export default function CustomerHome() {
       <section>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <div>
-            <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#102a40', fontFamily: 'Manrope, sans-serif' }}>
+            <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 600, color: '#171717', fontFamily: 'Manrope, sans-serif' }}>
               My Garage
             </h2>
             <small style={{ color: '#64748b', fontSize: '12px' }}>
@@ -373,7 +366,7 @@ export default function CustomerHome() {
           </div>
           <button
             onClick={() => navigate('/customer/profile')}
-            style={{ background: 'none', border: 'none', color: '#087cf0', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+            style={{ background: 'none', border: 'none', color: '#141415', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
           >
             <span>Manage Vehicles & Addresses</span>
             <ChevronRight size={14} />
@@ -395,10 +388,10 @@ export default function CustomerHome() {
                 alignItems: 'center',
                 cursor: 'pointer',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
-                transition: 'all 0.2s'
+                transition: 'background-color 150ms cubic-bezier(0.22, 1, 0.36, 1), border-color 150ms cubic-bezier(0.22, 1, 0.36, 1), color 150ms cubic-bezier(0.22, 1, 0.36, 1)'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = '#087cf0'
+                e.currentTarget.style.borderColor = '#141415'
                 e.currentTarget.style.transform = 'translateY(-2px)'
               }}
               onMouseLeave={(e) => {
@@ -412,8 +405,8 @@ export default function CustomerHome() {
                     width: '44px',
                     height: '44px',
                     borderRadius: '12px',
-                    background: '#07172c',
-                    color: '#60b4ff',
+                    background: '#0f0f10',
+                    color: '#d49b4b',
                     display: 'grid',
                     placeItems: 'center',
                     flexShrink: 0
@@ -422,7 +415,7 @@ export default function CustomerHome() {
                   <Car size={22} />
                 </div>
                 <div>
-                  <b style={{ fontSize: '14px', color: '#102a40', display: 'block' }}>{v.make} {v.model}</b>
+                  <b style={{ fontSize: '14px', color: '#171717', display: 'block' }}>{v.make} {v.model}</b>
                   <small style={{ color: '#64748b', fontSize: '11px' }}>
                     {v.licensePlate} · {v.color}
                   </small>
@@ -432,7 +425,7 @@ export default function CustomerHome() {
               <div
                 style={{
                   background: '#f0f7ff',
-                  color: '#087cf0',
+                  color: '#141415',
                   borderRadius: '50%',
                   width: '32px',
                   height: '32px',
@@ -459,10 +452,10 @@ export default function CustomerHome() {
               justifyContent: 'center',
               gap: '10px',
               cursor: 'pointer',
-              color: '#087cf0',
+              color: '#141415',
               fontWeight: 700,
               fontSize: '12px',
-              transition: 'all 0.2s'
+              transition: 'background-color 150ms cubic-bezier(0.22, 1, 0.36, 1), border-color 150ms cubic-bezier(0.22, 1, 0.36, 1), color 150ms cubic-bezier(0.22, 1, 0.36, 1)'
             }}
           >
             <Plus size={16} />
@@ -475,7 +468,7 @@ export default function CustomerHome() {
       <section>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
           <div>
-            <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 800, color: '#102a40', fontFamily: 'Manrope, sans-serif' }}>
+            <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 600, color: '#171717', fontFamily: 'Manrope, sans-serif' }}>
               Our Detailing Packages
             </h2>
             <small style={{ color: '#64748b', fontSize: '12px' }}>
@@ -484,7 +477,7 @@ export default function CustomerHome() {
           </div>
           <button
             onClick={() => navigate('/customer/book')}
-            style={{ background: 'none', border: 'none', color: '#087cf0', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+            style={{ background: 'none', border: 'none', color: '#141415', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
           >
             <span>Customise & Add-Ons</span>
             <ChevronRight size={14} />
@@ -499,12 +492,12 @@ export default function CustomerHome() {
                 background: '#fff',
                 borderRadius: '18px',
                 padding: '24px',
-                border: pkg.isPopular ? '2px solid #087cf0' : '1px solid #edf2f7',
+                border: pkg.isPopular ? '2px solid #141415' : '1px solid #edf2f7',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
                 position: 'relative',
-                boxShadow: pkg.isPopular ? '0 8px 24px rgba(8, 124, 240, 0.12)' : '0 2px 10px rgba(0,0,0,0.02)',
+                boxShadow: pkg.isPopular ? '0 8px 24px rgba(20, 20, 21, 0.12)' : '0 2px 10px rgba(0,0,0,0.02)',
                 transition: 'transform 0.2s'
               }}
               onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)' }}
@@ -516,10 +509,10 @@ export default function CustomerHome() {
                     position: 'absolute',
                     top: '-11px',
                     left: '20px',
-                    background: '#087cf0',
+                    background: '#141415',
                     color: '#fff',
                     fontSize: '10px',
-                    fontWeight: 800,
+                    fontWeight: 600,
                     padding: '3px 12px',
                     borderRadius: '20px',
                     letterSpacing: '0.5px'
@@ -531,21 +524,21 @@ export default function CustomerHome() {
 
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <b style={{ fontSize: '16px', color: '#102a40' }}>{pkg.name}</b>
+                  <b style={{ fontSize: '16px', color: '#171717' }}>{pkg.name}</b>
                   <span style={{ fontSize: '11px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '3px' }}>
                     <Clock size={12} /> {pkg.duration}
                   </span>
                 </div>
 
                 <div style={{ margin: '8px 0 14px' }}>
-                  <span style={{ fontSize: '24px', fontWeight: 800, color: '#102a40' }}>EGP {pkg.basePrice}</span>
+                  <span style={{ fontSize: '24px', fontWeight: 600, color: '#171717' }}>EGP {pkg.basePrice}</span>
                   <small style={{ fontSize: '11px', color: '#8493a2', marginLeft: '6px' }}>base rate</small>
                 </div>
 
                 <p style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.5, margin: '0 0 16px' }}>{pkg.desc}</p>
 
                 <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '14px', marginBottom: '20px' }}>
-                  <span style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.8px', display: 'block', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8', letterSpacing: '0.8px', display: 'block', marginBottom: '8px' }}>
                     Included Services
                   </span>
                   <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -563,8 +556,8 @@ export default function CustomerHome() {
                 onClick={() => handleBookPackage(pkg.id)}
                 style={{
                   width: '100%',
-                  background: pkg.isPopular ? '#087cf0' : '#f0f7ff',
-                  color: pkg.isPopular ? '#fff' : '#087cf0',
+                  background: pkg.isPopular ? '#141415' : '#f0f7ff',
+                  color: pkg.isPopular ? '#fff' : '#141415',
                   border: 'none',
                   borderRadius: '10px',
                   padding: '11px',
@@ -597,7 +590,7 @@ export default function CustomerHome() {
         }}
       >
         <div style={{ textAlign: 'center', maxWidth: '520px', margin: '0 auto 32px' }}>
-          <h2 style={{ margin: '0 0 8px 0', fontSize: '22px', fontWeight: 800, color: '#102a40', fontFamily: 'Manrope, sans-serif' }}>
+          <h2 style={{ margin: '0 0 8px 0', fontSize: '22px', fontWeight: 600, color: '#171717', fontFamily: 'Manrope, sans-serif' }}>
             Car Washing Made Effortless
           </h2>
           <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>
@@ -612,8 +605,8 @@ export default function CustomerHome() {
                 width: '60px',
                 height: '60px',
                 borderRadius: '16px',
-                background: '#eaf4ff',
-                color: '#087cf0',
+                background: '#f4f4f5',
+                color: '#141415',
                 display: 'grid',
                 placeItems: 'center',
                 marginBottom: '16px'
@@ -621,7 +614,7 @@ export default function CustomerHome() {
             >
               <Calendar size={28} />
             </div>
-            <b style={{ fontSize: '15px', color: '#102a40', display: 'block', marginBottom: '6px' }}>1. Book in 60 Seconds</b>
+            <b style={{ fontSize: '15px', color: '#171717', display: 'block', marginBottom: '6px' }}>1. Book in 60 Seconds</b>
             <p style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.5, margin: 0 }}>
               Choose on-demand Fast Track (under 5 km) or schedule a specific time at your home or office parking.
             </p>
@@ -633,8 +626,8 @@ export default function CustomerHome() {
                 width: '60px',
                 height: '60px',
                 borderRadius: '16px',
-                background: '#eff6ff',
-                color: '#2563eb',
+                background: '#f4f4f5',
+                color: '#141415',
                 display: 'grid',
                 placeItems: 'center',
                 marginBottom: '16px'
@@ -642,7 +635,7 @@ export default function CustomerHome() {
             >
               <Droplets size={28} />
             </div>
-            <b style={{ fontSize: '15px', color: '#102a40', display: 'block', marginBottom: '6px' }}>2. We Bring Water & Power</b>
+            <b style={{ fontSize: '15px', color: '#171717', display: 'block', marginBottom: '6px' }}>2. We Bring Water & Power</b>
             <p style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.5, margin: 0 }}>
               Our mobile detailing vans are 100% self-sufficient with onboard water tanks and electricity generators.
             </p>
@@ -663,7 +656,7 @@ export default function CustomerHome() {
             >
               <ShieldCheck size={28} />
             </div>
-            <b style={{ fontSize: '15px', color: '#102a40', display: 'block', marginBottom: '6px' }}>3. Guaranteed Quality</b>
+            <b style={{ fontSize: '15px', color: '#171717', display: 'block', marginBottom: '6px' }}>3. Guaranteed Quality</b>
             <p style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.5, margin: 0 }}>
               8 mandatory Quality Assurance photos verify every angle. 100% money-back or free re-wash guarantee.
             </p>
@@ -675,7 +668,7 @@ export default function CustomerHome() {
       <section
         style={{
           borderRadius: '20px',
-          background: 'linear-gradient(135deg, #1e3a8a 0%, #0369a1 100%)',
+          background: '#141415',
           color: '#fff',
           padding: '32px 36px',
           display: 'flex',
@@ -701,10 +694,10 @@ export default function CustomerHome() {
           >
             WEEKLY & MONTHLY WASH PLANS
           </span>
-          <h3 style={{ fontSize: '22px', fontWeight: 800, margin: '0 0 6px 0', fontFamily: 'Manrope, sans-serif' }}>
+          <h3 style={{ fontSize: '22px', fontWeight: 600, margin: '0 0 6px 0', fontFamily: 'Manrope, sans-serif' }}>
             Save up to 15% with Recurring Subscriptions
           </h3>
-          <p style={{ fontSize: '12px', color: '#e0f2fe', margin: 0, maxWidth: '520px', lineHeight: 1.5 }}>
+          <p style={{ fontSize: '12px', color: '#fef7ec', margin: 0, maxWidth: '520px', lineHeight: 1.5 }}>
             Automate your car care. Pick your preferred recurring day, and we'll keep your vehicle sparkling clean every week or month.
           </p>
         </div>
@@ -713,12 +706,12 @@ export default function CustomerHome() {
           onClick={() => navigate('/customer/book')}
           style={{
             background: '#fff',
-            color: '#0369a1',
+            color: '#92400e',
             border: 'none',
             borderRadius: '12px',
             padding: '13px 24px',
             fontSize: '13px',
-            fontWeight: 800,
+            fontWeight: 600,
             cursor: 'pointer',
             boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
           }}
@@ -745,11 +738,11 @@ export default function CustomerHome() {
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px', background: '#f8fafc', borderRadius: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: '#e0f2fe', color: '#0369a1', display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: '13px' }}>
+                  <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: '#fef7ec', color: '#92400e', display: 'grid', placeItems: 'center', fontWeight: 600, fontSize: '13px' }}>
                     {(activeWash.technicianName || 'Tech').split(' ').map((x) => x[0]).join('').slice(0, 2).toUpperCase()}
                   </div>
                   <div>
-                    <b style={{ fontSize: '13px', color: '#102a40' }}>{activeWash.technicianName || 'Assigned Technician'}</b>
+                    <b style={{ fontSize: '13px', color: '#171717' }}>{activeWash.technicianName || 'Assigned Technician'}</b>
                     <small style={{ fontSize: '11px', color: '#64748b', display: 'block' }}>
                       {activeWash.technicianPhone || 'Technician assigned · On the way'}
                     </small>

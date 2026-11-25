@@ -134,7 +134,7 @@ export default function AdminCatalogZones() {
             <h2>Wash Packages</h2>
             <p>Changes directly affect new customer booking prices</p>
           </div>
-          <Tags size={18} color="#087cf0" />
+          <Tags size={18} color="#141415" />
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))', gap: '14px', marginTop: '12px' }}>
@@ -235,7 +235,7 @@ export default function AdminCatalogZones() {
             <h2>Service Zones & Surge Multipliers</h2>
             <p>Manage coverage areas, distance surcharges, and peak surge multipliers</p>
           </div>
-          <MapPin size={18} color="#087cf0" />
+          <MapPin size={18} color="#141415" />
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>

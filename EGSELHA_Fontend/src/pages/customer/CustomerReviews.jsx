@@ -178,22 +178,22 @@ export default function CustomerReviews() {
       {/* Stats Summary - Total Reviews only (Points Earned, Technician Tips, Average Rating removed per request) */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
         <div style={{ background: '#fff', borderRadius: '14px', padding: '14px 22px', border: '1px solid #edf2f7', display: 'inline-flex', alignItems: 'center', gap: '14px', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#eaf4ff', color: '#087cf0', display: 'grid', placeItems: 'center' }}>
+          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#f4f4f5', color: '#141415', display: 'grid', placeItems: 'center' }}>
             <MessageSquare size={20} />
           </div>
           <div>
             <span style={{ fontSize: '11px', color: '#8090a2', fontWeight: 600, display: 'block' }}>Total Reviews</span>
-            <strong style={{ fontSize: '18px', fontWeight: 800, color: '#102a40' }}>{totalReviewsCount} Reviews</strong>
+            <strong style={{ fontSize: '18px', fontWeight: 600, color: '#171717' }}>{totalReviewsCount} Reviews</strong>
           </div>
         </div>
       </div>
 
       {/* SECTION 1: Pending Reviews (Washes awaiting feedback) */}
       {pendingReviews.length > 0 && (
-        <div className="panel" style={{ borderRadius: '18px', padding: '24px', background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)', border: '1.5px solid #fde68a' }}>
+        <div className="panel" style={{ borderRadius: '18px', padding: '24px', background: '#fef7ec', border: '1.5px solid #fde68a' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
-            <Sparkles size={20} color="#d97706" />
-            <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#92400e' }}>
+            <Star size={18} strokeWidth={1.6} color="#b45309" />
+            <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: '#92400e' }}>
               Completed Washes Awaiting Your Review ({pendingReviews.length})
             </h3>
           </div>
@@ -212,7 +212,7 @@ export default function CustomerReviews() {
                 }}
               >
                 <div>
-                  <b style={{ fontSize: '13px', color: '#102a40', display: 'block' }}>
+                  <b style={{ fontSize: '13px', color: '#171717', display: 'block' }}>
                     {b.serviceName || b.packageName || 'Wash Service'} ({b.bookingNumber})
                   </b>
                   <small style={{ fontSize: '11px', color: '#64748b' }}>
@@ -236,7 +236,7 @@ export default function CustomerReviews() {
       <div className="panel" style={{ borderRadius: '18px', padding: '24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
           <div>
-            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#102a40' }}>
+            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 600, color: '#171717' }}>
               My Submitted Reviews ({submittedReviews.length})
             </h3>
             <small style={{ color: '#64748b', fontSize: '11px' }}>
@@ -263,12 +263,12 @@ export default function CustomerReviews() {
               {/* Header */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ width: '44px', height: '44px', borderRadius: '10px', background: '#eff6ff', color: '#087cf0', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+                  <div style={{ width: '44px', height: '44px', borderRadius: '10px', background: '#f4f4f5', color: '#141415', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
                     <Car size={22} />
                   </div>
                   <div>
-                    <b style={{ fontSize: '14px', color: '#102a40', display: 'block' }}>
-                      {rev.packageName} · {rev.vehicleName} <span style={{ color: '#087cf0' }}>({rev.bookingNumber})</span>
+                    <b style={{ fontSize: '14px', color: '#171717', display: 'block' }}>
+                      {rev.packageName} · {rev.vehicleName} <span style={{ color: '#141415' }}>({rev.bookingNumber})</span>
                     </b>
                     <small style={{ fontSize: '11px', color: '#64748b' }}>
                       Technician: <b>{rev.technicianName}</b> · {rev.date}
@@ -291,11 +291,11 @@ export default function CustomerReviews() {
                 </span>
                 <span style={{ color: '#cbd5e1' }}>•</span>
                 <span style={{ fontSize: '11px', color: '#334155' }}>
-                  🧽 <b>Cleanliness:</b> {rev.cleanlinessRating} / 5
+                  <b>Cleanliness:</b> {rev.cleanlinessRating} / 5
                 </span>
                 <span style={{ color: '#cbd5e1' }}>•</span>
                 <span style={{ fontSize: '11px', color: '#334155' }}>
-                  👔 <b>Professionalism:</b> {rev.professionalismRating} / 5
+                  <b>Professionalism:</b> {rev.professionalismRating} / 5
                 </span>
               </div>
 
@@ -310,11 +310,11 @@ export default function CustomerReviews() {
                         fontWeight: 600,
                         padding: '3px 10px',
                         borderRadius: '16px',
-                        background: '#e0f2fe',
-                        color: '#0369a1'
+                        background: '#fef7ec',
+                        color: '#92400e'
                       }}
                     >
-                      ✓ {tag}
+                      {tag}
                     </span>
                   ))}
                 </div>
@@ -357,7 +357,7 @@ export default function CustomerReviews() {
                 {/* Live Average Rating Display */}
                 <div style={{ textAlign: 'center', padding: '14px', background: '#fffbeb', borderRadius: '12px', border: '1px solid #fde68a' }}>
                   <span style={{ fontSize: '11px', color: '#b45309', fontWeight: 600 }}>Calculated Overall Rating (calculateAverage)</span>
-                  <div style={{ fontSize: '32px', fontWeight: 800, color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '4px' }}>
+                  <div style={{ fontSize: '32px', fontWeight: 600, color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '4px' }}>
                     <Star size={28} fill="#d97706" color="#d97706" />
                     <span>{modalAverageRating} / 5.0</span>
                   </div>
@@ -367,7 +367,7 @@ export default function CustomerReviews() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
-                      <b style={{ fontSize: '12px', color: '#102a40', display: 'block' }}>Punctuality Rating</b>
+                      <b style={{ fontSize: '12px', color: '#171717', display: 'block' }}>Punctuality Rating</b>
                       <small style={{ fontSize: '10px', color: '#64748b' }}>On-time arrival at your location</small>
                     </div>
                     <select
@@ -385,7 +385,7 @@ export default function CustomerReviews() {
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
-                      <b style={{ fontSize: '12px', color: '#102a40', display: 'block' }}>Cleanliness & Detailing</b>
+                      <b style={{ fontSize: '12px', color: '#171717', display: 'block' }}>Cleanliness & Detailing</b>
                       <small style={{ fontSize: '10px', color: '#64748b' }}>Wash thoroughness and spotless finish</small>
                     </div>
                     <select
@@ -403,7 +403,7 @@ export default function CustomerReviews() {
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
-                      <b style={{ fontSize: '12px', color: '#102a40', display: 'block' }}>Technician Professionalism</b>
+                      <b style={{ fontSize: '12px', color: '#171717', display: 'block' }}>Technician Professionalism</b>
                       <small style={{ fontSize: '10px', color: '#64748b' }}>Politeness, care, and equipment</small>
                     </div>
                     <select
@@ -432,9 +432,9 @@ export default function CustomerReviews() {
                           key={tag}
                           onClick={() => toggleTag(tag)}
                           style={{
-                            border: `1.5px solid ${isTagSelected ? '#087cf0' : '#cbd5e1'}`,
-                            background: isTagSelected ? '#e0f2fe' : '#fff',
-                            color: isTagSelected ? '#0369a1' : '#475569',
+                            border: `1.5px solid ${isTagSelected ? '#141415' : '#cbd5e1'}`,
+                            background: isTagSelected ? '#fef7ec' : '#fff',
+                            color: isTagSelected ? '#92400e' : '#475569',
                             borderRadius: '16px',
                             padding: '5px 12px',
                             fontSize: '11px',
@@ -442,7 +442,7 @@ export default function CustomerReviews() {
                             cursor: 'pointer'
                           }}
                         >
-                          {isTagSelected ? '✓ ' : '+ '}{tag}
+                          {isTagSelected ? '' : '+ '}{tag}
                         </button>
                       )
                     })}

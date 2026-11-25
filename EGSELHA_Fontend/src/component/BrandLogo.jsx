@@ -1,9 +1,4 @@
-export default function BrandLogo({ size = 40, variant = 'blue' }) {
-  const isPurple = variant === 'purple'
-  const start = isPurple ? '#3b82f6' : '#0ea5e9'
-  const mid = isPurple ? '#2563eb' : '#087cf0'
-  const end = isPurple ? '#1d4ed8' : '#0353a4'
-
+export default function BrandLogo({ size = 36 }) {
   return (
     <svg
       width={size}
@@ -12,29 +7,25 @@ export default function BrandLogo({ size = 40, variant = 'blue' }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       style={{ display: 'block', flexShrink: 0 }}
+      aria-hidden="true"
     >
-      <defs>
-        <linearGradient id={`brand-bg-${variant}`} x1="6" y1="6" x2="58" y2="58" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor={start} />
-          <stop offset="55%" stopColor={mid} />
-          <stop offset="100%" stopColor={end} />
-        </linearGradient>
-      </defs>
-      <rect width="64" height="64" rx="18" fill={`url(#brand-bg-${variant})`} />
-      <circle cx="48" cy="15" r="3.5" fill="#bae6fd" opacity="0.9" />
-      <path d="M51 22c1.7 2.1 2.4 3.4 2.4 4.5a2.4 2.4 0 1 1-4.8 0c0-1.1.7-2.4 2.4-4.5Z" fill="#e0f2fe" />
+      <rect width="64" height="64" rx="14" fill="#1C1C1F" stroke="#2F2F34" strokeWidth="1.5" />
       <path
-        d="M18.5 35.5c.8-4 3-8.7 6.3-10.3 3.9-1.8 10.5-1.8 14.4 0 3.3 1.6 5.5 6.3 6.3 10.3l1.1 1.1c1 1 1.4 2.2 1.4 3.6v5.8a2.4 2.4 0 0 1-2.4 2.4h-2.3a2.4 2.4 0 0 1-2.4-2.4V44.8H23.1V46a2.4 2.4 0 0 1-2.4 2.4h-2.3a2.4 2.4 0 0 1-2.4-2.4v-5.8c0-1.4.4-2.6 1.4-3.6l1.1-1.1Z"
-        fill="#ffffff"
+        d="M15 39.5c.9-4.2 3.3-8.8 7-10.4 4.3-1.8 11.7-1.8 16 0 3.7 1.6 6.1 6.2 7 10.4l1.2 1.2c1 1 1.4 2.2 1.4 3.5v4.2a2 2 0 0 1-2 2h-2.4a2 2 0 0 1-2-2v-1.2H22.8v1.2a2 2 0 0 1-2 2h-2.4a2 2 0 0 1-2-2v-4.2c0-1.3.4-2.5 1.4-3.5l1.2-1.2Z"
+        fill="#F4F4F5"
       />
       <path
-        d="M23.8 34.4 26.2 28c.4-1 1.4-1.7 2.5-1.7h6.6c1.1 0 2.1.7 2.5 1.7l2.4 6.4H23.8Z"
-        fill={mid}
-        opacity="0.88"
+        d="M23.6 35.2 26.2 29c.4-1 1.4-1.6 2.5-1.6h6.6c1.1 0 2.1.6 2.5 1.6l2.6 6.2H23.6Z"
+        fill="#1C1C1F"
       />
-      <circle cx="23.2" cy="39.8" r="2.2" fill={mid} />
-      <circle cx="40.8" cy="39.8" r="2.2" fill={mid} />
-      <path d="M16 18l1.2 2.6L19.8 21.8l-2.6 1.2L16 25.6l-1.2-2.6-2.6-1.2 2.6-1.2L16 18Z" fill="#ffffff" opacity="0.95" />
+      <circle cx="23" cy="41.4" r="2.1" fill="#D49B4B" />
+      <circle cx="41" cy="41.4" r="2.1" fill="#D49B4B" />
+      <path
+        d="M18 19.5c8.5-4.5 19.5-4.5 28 0"
+        stroke="#D49B4B"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+      />
     </svg>
   )
 }

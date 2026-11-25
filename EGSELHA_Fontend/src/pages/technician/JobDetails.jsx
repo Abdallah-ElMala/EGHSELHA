@@ -412,7 +412,7 @@ export default function JobDetails() {
               {job.customer.split(' ').map((x) => x[0]).join('')}
             </div>
             <div onClick={() => setShowCustomerProfile(true)} style={{ cursor: 'pointer' }} title="Show customer profile">
-              <b style={{ color: '#087cf0' }}>{job.customer}</b>
+              <b style={{ color: '#141415' }}>{job.customer}</b>
               <small>{job.phone}</small>
             </div>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginLeft: 'auto', flexWrap: 'wrap' }}>
@@ -438,7 +438,7 @@ export default function JobDetails() {
             <div><span>Service package</span><b>{job.service} (EGP {job.basePackagePrice ?? job.price})</b></div>
             <div><span>Vehicle</span><b>{job.car} ({job.vehicleMultiplier ?? 1}×)</b></div>
             <div><span>Date &amp; time</span><b>{job.date} · {job.time}</b></div>
-            <div><span>Booking total price</span><b style={{ color: '#087cf0' }}>EGP {job.price}</b></div>
+            <div><span>Booking total price</span><b style={{ color: '#141415' }}>EGP {job.price}</b></div>
             {(job.addOnsSubtotal ?? 0) > 0 && (
               <div className="wide">
                 <span>Selected add-ons (+EGP {job.addOnsSubtotal})</span>
@@ -457,12 +457,12 @@ export default function JobDetails() {
 
           {/* Active Upsell banner if exists */}
           {activeUpsell && (
-            <div style={{ margin: '16px 0', padding: '14px', borderRadius: '10px', background: '#eff6ff', border: '1px solid #bfdbfe', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ margin: '16px 0', padding: '14px', borderRadius: '10px', background: '#f4f4f5', border: '1px solid #e4e4e7', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <AlertCircle size={20} color="#2563eb" />
+                <AlertCircle size={20} color="#141415" />
                 <div>
-                  <b style={{ color: '#1e40af' }}>On-Site Inspection Upsell (+EGP {activeUpsell.additionalPrice})</b>
-                  <p style={{ margin: 0, fontSize: '0.85rem', color: '#3b82f6' }}>{activeUpsell.technicianNote}</p>
+                  <b style={{ color: '#171717' }}>On-Site Inspection Upsell (+EGP {activeUpsell.additionalPrice})</b>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: '#b45309' }}>{activeUpsell.technicianNote}</p>
                 </div>
               </div>
               <span className={`status-pill ${activeUpsell.status.toLowerCase()}`}>
@@ -536,7 +536,7 @@ export default function JobDetails() {
                   Start washing
                 </button>
                 {!canStartWash && (
-                  <button className="btn outline" onClick={() => openCameraFor('BEFORE')} style={{ borderColor: '#087cf0', color: '#087cf0' }}>
+                  <button className="btn outline" onClick={() => openCameraFor('BEFORE')} style={{ borderColor: '#141415', color: '#141415' }}>
                     <Camera size={16} /> Capture Before ({beforePhotos.length}/{REQUIRED_QA_COUNT})
                   </button>
                 )}
@@ -558,7 +558,7 @@ export default function JobDetails() {
                   Complete job
                 </button>
                 {!canCompleteJob && (
-                  <button className="btn outline" onClick={() => openCameraFor('AFTER')} style={{ borderColor: '#087cf0', color: '#087cf0' }}>
+                  <button className="btn outline" onClick={() => openCameraFor('AFTER')} style={{ borderColor: '#141415', color: '#141415' }}>
                     <Camera size={16} /> Capture After ({afterPhotos.length}/{REQUIRED_QA_COUNT})
                   </button>
                 )}
@@ -633,8 +633,8 @@ export default function JobDetails() {
                   fontWeight: 700,
                   padding: '4px 10px',
                   borderRadius: '999px',
-                  background: '#e0f2fe',
-                  color: '#0369a1'
+                  background: '#fef7ec',
+                  color: '#92400e'
                 }}>
                   {job.distance}
                 </span>
@@ -647,8 +647,8 @@ export default function JobDetails() {
                 borderRadius: '14px',
                 overflow: 'hidden',
                 position: 'relative',
-                border: '1px solid #dbeafe',
-                background: 'linear-gradient(135deg, #eff6ff 0%, #e0f2fe 50%, #ecfeff 100%)',
+                border: '1px solid #f4f4f5',
+                background: '#141415',
                 marginBottom: '14px'
               }}
             >
@@ -660,7 +660,7 @@ export default function JobDetails() {
               >
                 <defs>
                   <pattern id="map-grid" width="28" height="28" patternUnits="userSpaceOnUse">
-                    <path d="M 28 0 L 0 0 0 28" fill="none" stroke="#bfdbfe" strokeWidth="0.8" opacity="0.6" />
+                    <path d="M 28 0 L 0 0 0 28" fill="none" stroke="#e4e4e7" strokeWidth="0.8" opacity="0.6" />
                   </pattern>
                 </defs>
                 <rect width="400" height="200" fill="url(#map-grid)" />
@@ -668,7 +668,7 @@ export default function JobDetails() {
                 <rect x="30" y="120" width="85" height="50" rx="12" fill="#bbf7d0" opacity="0.38" />
                 <path d="M -20 140 C 80 120, 140 70, 220 95 S 330 135, 420 80" fill="none" stroke="#ffffff" strokeWidth="14" strokeLinecap="round" />
                 <path d="M 90 -10 C 110 60, 145 110, 210 100 C 260 92, 300 40, 320 -10" fill="none" stroke="#ffffff" strokeWidth="10" strokeLinecap="round" />
-                <path d="M 70 155 Q 145 128 200 100" fill="none" stroke="#087cf0" strokeWidth="3.5" strokeDasharray="6 6" strokeLinecap="round" />
+                <path d="M 70 155 Q 145 128 200 100" fill="none" stroke="#141415" strokeWidth="3.5" strokeDasharray="6 6" strokeLinecap="round" />
                 <circle cx="70" cy="155" r="6" fill="#10b981" stroke="#ffffff" strokeWidth="2.5" />
               </svg>
 
@@ -686,7 +686,7 @@ export default function JobDetails() {
                   width: '54px',
                   height: '54px',
                   borderRadius: '50%',
-                  background: 'rgba(8, 124, 240, 0.18)',
+                  background: 'rgba(20, 20, 21, 0.18)',
                   display: 'grid',
                   placeItems: 'center'
                 }}>
@@ -694,11 +694,11 @@ export default function JobDetails() {
                     width: '36px',
                     height: '36px',
                     borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #0ea5e9, #087cf0)',
+                    background: '#141415',
                     color: '#fff',
                     display: 'grid',
                     placeItems: 'center',
-                    boxShadow: '0 6px 16px rgba(8, 124, 240, 0.35)',
+                    boxShadow: '0 6px 16px rgba(20, 20, 21, 0.35)',
                     border: '2.5px solid #ffffff'
                   }}>
                     <MapPin size={18} />
@@ -858,7 +858,7 @@ export default function JobDetails() {
             <div style={{ position: 'relative', background: '#020617', minHeight: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {cameraError ? (
                 <div style={{ padding: '28px 20px', textAlign: 'center', color: '#cbd5e1', fontSize: '12px' }}>
-                  <Camera size={34} color="#38bdf8" style={{ marginBottom: '10px' }} />
+                  <Camera size={34} color="#d49b4b" style={{ marginBottom: '10px' }} />
                   <p style={{ margin: '0 0 14px', lineHeight: 1.5 }}>{cameraError}</p>
                   <label
                     className="btn primary"
@@ -894,7 +894,7 @@ export default function JobDetails() {
             </div>
 
             <div style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', background: '#0f172a', borderTop: '1px solid #1e293b', flexWrap: 'wrap' }}>
-              <label style={{ fontSize: '11px', color: '#93c5fd', cursor: 'pointer', fontWeight: 600 }}>
+              <label style={{ fontSize: '11px', color: '#d49b4b', cursor: 'pointer', fontWeight: 600 }}>
                 Device Camera Fallback
                 <input
                   type="file"

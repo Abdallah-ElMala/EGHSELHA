@@ -21,8 +21,8 @@ import { useAdmin } from '../../context/AdminContext';
 
 const BOOKING_STATUS_COLORS = {
   COMPLETED: { bg: '#dcfce7', color: '#15803d' },
-  WASHING: { bg: '#e0f2fe', color: '#0369a1' },
-  ON_THE_WAY: { bg: '#dbeafe', color: '#1d4ed8' },
+  WASHING: { bg: '#fef7ec', color: '#92400e' },
+  ON_THE_WAY: { bg: '#f4f4f5', color: '#141415' },
   ARRIVED: { bg: '#ede9fe', color: '#6d28d9' },
   DISPATCHED: { bg: '#fef3c7', color: '#b45309' },
   DEPOSIT_PAID: { bg: '#fef3c7', color: '#b45309' },
@@ -131,7 +131,7 @@ export default function AdminCustomers() {
                       </td>
                       <td>
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 700 }}>
-                          <Car size={13} color="#087cf0" /> {c.vehiclesCount}
+                          <Car size={13} color="#141415" /> {c.vehiclesCount}
                         </span>
                       </td>
                       <td><b>{c.bookingsCount}</b></td>
@@ -198,14 +198,14 @@ export default function AdminCustomers() {
               overflow: 'hidden',
               display: 'flex',
               flexDirection: 'column',
-              boxShadow: '0 25px 60px rgba(7, 23, 44, 0.35)'
+              boxShadow: '0 25px 60px rgba(15, 15, 16, 0.35)'
             }}
           >
             {/* Header */}
             <div
               style={{
                 padding: '20px 24px',
-                background: 'linear-gradient(135deg, #07172c 0%, #0d2847 100%)',
+                background: '#141415',
                 color: '#fff',
                 display: 'flex',
                 alignItems: 'center',
@@ -219,9 +219,9 @@ export default function AdminCustomers() {
                     width: '52px',
                     height: '52px',
                     borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #2563eb, #38bdf8)',
+                    background: '#141415',
                     color: '#fff',
-                    fontWeight: 800,
+                    fontWeight: 600,
                     fontSize: '18px',
                     display: 'grid',
                     placeItems: 'center',
@@ -232,14 +232,14 @@ export default function AdminCustomers() {
                 </div>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800 }}>{selectedCustomer.fullName}</h3>
+                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 600 }}>{selectedCustomer.fullName}</h3>
                     <span
                       style={{
                         fontSize: '10px',
                         fontWeight: 700,
                         padding: '3px 9px',
                         borderRadius: '20px',
-                        background: 'rgba(56, 189, 248, 0.2)',
+                        background: 'rgba(212, 155, 75, 0.2)',
                         color: '#7dd3fc'
                       }}
                     >
@@ -256,7 +256,7 @@ export default function AdminCustomers() {
                           color: '#fca5a5'
                         }}
                       >
-                        ⚠ {customerDisputes.length} {customerDisputes.length === 1 ? 'Dispute' : 'Disputes'}
+                        {customerDisputes.length} {customerDisputes.length === 1 ? 'Dispute' : 'Disputes'}
                       </span>
                     )}
                   </div>
@@ -288,8 +288,8 @@ export default function AdminCustomers() {
             <div style={{ padding: '24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {/* KPI Row */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px' }}>
-                <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: '14px', padding: '14px' }}>
-                  <small style={{ fontSize: '11px', color: '#0369a1', display: 'block' }}>Registered Vehicles</small>
+                <div style={{ background: '#f4f4f5', border: '1px solid #e4e4e7', borderRadius: '14px', padding: '14px' }}>
+                  <small style={{ fontSize: '11px', color: '#92400e', display: 'block' }}>Registered Vehicles</small>
                   <b style={{ fontSize: '18px', color: '#0c4a6e', display: 'block', marginTop: '4px' }}>
                     {selectedCustomer.vehiclesCount} Cars
                   </b>
@@ -320,16 +320,16 @@ export default function AdminCustomers() {
 
               {/* Contact, Addresses & Gate Notes */}
               <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '18px' }}>
-                <h4 style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                <h4 style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: 600, color: '#0f172a', letterSpacing: '0.4px' }}>
                   Contact & Saved Locations
                 </h4>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px', fontSize: '12px', marginBottom: '12px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#334155' }}>
-                    <Phone size={14} color="#087cf0" />
+                    <Phone size={14} color="#141415" />
                     <span><b>Phone:</b> {selectedCustomer.phone || '—'}</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#334155' }}>
-                    <Mail size={14} color="#087cf0" />
+                    <Mail size={14} color="#141415" />
                     <span><b>Email:</b> {selectedCustomer.email || '—'}</span>
                   </div>
                 </div>
@@ -340,7 +340,7 @@ export default function AdminCustomers() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                       {selectedCustomer.savedAddresses.map((addr, i) => (
                         <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#334155', background: '#f8fafc', padding: '8px 10px', borderRadius: '8px' }}>
-                          <MapPin size={13} color="#087cf0" style={{ flexShrink: 0 }} />
+                          <MapPin size={13} color="#141415" style={{ flexShrink: 0 }} />
                           <span>{addr}</span>
                         </div>
                       ))}
@@ -358,8 +358,8 @@ export default function AdminCustomers() {
 
               {/* Registered Vehicles */}
               <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '18px' }}>
-                <h4 style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Car size={15} color="#087cf0" /> Registered Vehicles ({selectedCustomer.vehicles?.length || 0})
+                <h4 style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: 600, color: '#0f172a', letterSpacing: '0.4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Car size={15} color="#141415" /> Registered Vehicles ({selectedCustomer.vehicles?.length || 0})
                 </h4>
                 {!selectedCustomer.vehicles || selectedCustomer.vehicles.length === 0 ? (
                   <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>No vehicles registered in this customer's garage yet.</p>
@@ -369,7 +369,7 @@ export default function AdminCustomers() {
                       <div key={v.id} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '12px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                           <b style={{ fontSize: '13px', color: '#0f172a' }}>{v.make} {v.model}</b>
-                          <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 7px', borderRadius: '6px', background: '#e0f2fe', color: '#0369a1' }}>
+                          <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 7px', borderRadius: '6px', background: '#fef7ec', color: '#92400e' }}>
                             {v.sizeType}
                           </span>
                         </div>
@@ -387,8 +387,8 @@ export default function AdminCustomers() {
 
               {/* Trips / Bookings History */}
               <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '18px' }}>
-                <h4 style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <CalendarCheck size={15} color="#087cf0" /> Bookings & Trips History ({customerBookings.length})
+                <h4 style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: 600, color: '#0f172a', letterSpacing: '0.4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <CalendarCheck size={15} color="#141415" /> Bookings & Trips History ({customerBookings.length})
                 </h4>
                 {customerBookings.length === 0 ? (
                   <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>No bookings made by this customer yet.</p>
@@ -437,7 +437,7 @@ export default function AdminCustomers() {
 
               {/* Disputes & Issues Section */}
               <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '18px' }}>
-                <h4 style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <h4 style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: 600, color: '#0f172a', letterSpacing: '0.4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <AlertTriangle size={15} color={customerDisputes.length > 0 ? '#dc2626' : '#16a34a'} /> Disputes & Reported Issues ({customerDisputes.length})
                 </h4>
                 {customerDisputes.length === 0 ? (

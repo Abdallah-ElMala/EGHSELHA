@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   Home,
   CalendarCheck,
@@ -14,12 +14,21 @@ import {
 } from 'lucide-react'
 import { useCustomer } from '../context/CustomerContext'
 import { useAuth } from '../context/AuthContext'
-import { customerApi } from '../services/customerApi'
 import BrandLogo from '../component/BrandLogo'
 import PaymentModal from '../component/PaymentModal'
 
+const PAGE_TITLES = {
+  '/customer': 'Overview',
+  '/customer/book': 'Book a wash',
+  '/customer/bookings': 'My bookings',
+  '/customer/vehicles': 'Vehicles',
+  '/customer/reviews': 'Reviews',
+  '/customer/profile': 'Profile'
+}
+
 export default function CustomerLayout() {
   const navigate = useNavigate()
+  const { pathname } = useLocation()
   const { profile, toastMessage, notify, refreshData } = useCustomer()
   const { user, role, logout, hasRole } = useAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -28,52 +37,58 @@ export default function CustomerLayout() {
 
   const customerName = user?.fullName || profile?.fullName || 'Customer'
   const initials = customerName.split(' ').filter(Boolean).map((x) => x[0]).join('').slice(0, 2).toUpperCase()
+  const pageTitle = PAGE_TITLES[pathname] || 'Customer portal'
 
   const navItems = [
     { label: 'Home', to: '/customer', icon: Home, end: true },
-    { label: 'My Bookings', to: '/customer/bookings', icon: CalendarCheck },
+    { label: 'My bookings', to: '/customer/bookings', icon: CalendarCheck },
     { label: 'Wallet', action: () => setShowWalletModal(true), icon: Wallet },
     { label: 'Reviews', to: '/customer/reviews', icon: Star },
     { label: 'Profile', to: '/customer/profile', icon: User }
   ]
 
   return (
-    <div className="customer-app-wrapper" style={{ display: 'flex', minHeight: '100vh', background: '#f4f7fb' }}>
-      {/* Dark Left Sidebar matching Figma wireframe */}
+    <div className="customer-app-wrapper" style={{ display: 'flex', minHeight: '100vh', background: '#fafafa' }}>
+      {/* Obsidian Left Sidebar */}
       <aside
         style={{
-          background: 'linear-gradient(180deg, #07172c 0%, #0c233d 100%)',
-          color: '#d9e8f5',
+          background: '#0f0f10',
+          color: '#ededed',
           display: 'flex',
           flexDirection: 'column',
-          padding: '24px 16px',
-          boxShadow: '4px 0 20px rgba(0, 0, 0, 0.08)'
+          padding: '20px 16px',
+          borderRight: '1px solid rgba(255, 255, 255, 0.08)'
         }}
         className={`portal-sidebar ${mobileOpen ? 'mobile-open' : ''}`}
       >
         {/* Brand Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '0 8px 32px 8px' }}>
-          <BrandLogo size={40} variant="blue" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '4px 8px 28px 8px' }}>
+          <BrandLogo size={36} />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <b style={{ display: 'block', color: '#fff', fontSize: '16px', letterSpacing: '0.5px', fontFamily: 'Manrope, sans-serif' }}>
+            <b style={{ display: 'block', color: '#f4f4f5', fontSize: '15px', fontWeight: 600, letterSpacing: '0.06em', fontFamily: 'Manrope, sans-serif' }}>
               EGHSELHA
             </b>
-            <small style={{ display: 'block', fontSize: '9px', color: '#8da8be', letterSpacing: '0.8px', marginTop: '2px', textTransform: 'uppercase' }}>
-              CAR WASH ON DEMAND
+            <small style={{ display: 'block', fontSize: '11px', color: '#85858b', marginTop: '2px' }}>
+              Mobile auto detailing
             </small>
           </div>
           {mobileOpen && (
             <button
               onClick={() => setMobileOpen(false)}
-              style={{ background: 'none', border: 'none', color: '#9fb4c7', cursor: 'pointer' }}
+              style={{ background: 'none', border: 'none', color: '#a1a1a6', cursor: 'pointer' }}
+              aria-label="Close menu"
             >
-              <X size={20} />
+              <X size={18} strokeWidth={1.6} />
             </button>
           )}
         </div>
 
+        <div style={{ fontSize: '11px', color: '#737378', fontWeight: 500, padding: '0 12px 8px' }}>
+          Menu
+        </div>
+
         {/* Navigation Items */}
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
           {navItems.map((item) => {
             const Icon = item.icon
             if (item.to) {
@@ -87,20 +102,25 @@ export default function CustomerLayout() {
                   style={({ isActive }) => ({
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '12px',
-                    padding: '12px 14px',
-                    borderRadius: '10px',
-                    color: isActive ? '#fff' : '#94a9be',
-                    backgroundColor: isActive ? '#087cf0' : 'transparent',
+                    gap: '10px',
+                    padding: '9px 12px',
+                    minHeight: '36px',
+                    borderRadius: '8px',
+                    color: isActive ? '#f4f4f5' : '#a1a1a6',
+                    backgroundColor: isActive ? '#1e1e21' : 'transparent',
+                    border: isActive ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid transparent',
                     textDecoration: 'none',
-                    fontWeight: 600,
+                    fontWeight: isActive ? 500 : 400,
                     fontSize: '13px',
-                    transition: 'all 0.2s ease',
-                    boxShadow: isActive ? '0 6px 16px rgba(8, 124, 240, 0.35)' : 'none'
+                    transition: 'background-color 150ms cubic-bezier(0.22, 1, 0.36, 1), color 150ms cubic-bezier(0.22, 1, 0.36, 1)'
                   })}
                 >
-                  <Icon size={18} />
-                  <span>{item.label}</span>
+                  {({ isActive }) => (
+                    <>
+                      <Icon size={17} strokeWidth={1.6} color={isActive ? '#d49b4b' : 'currentColor'} />
+                      <span>{item.label}</span>
+                    </>
+                  )}
                 </NavLink>
               )
             }
@@ -112,36 +132,37 @@ export default function CustomerLayout() {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '12px',
-                  padding: '12px 14px',
-                  borderRadius: '10px',
-                  color: '#94a9be',
+                  gap: '10px',
+                  padding: '9px 12px',
+                  minHeight: '36px',
+                  borderRadius: '8px',
+                  color: '#a1a1a6',
                   backgroundColor: 'transparent',
-                  border: 'none',
+                  border: '1px solid transparent',
                   cursor: 'pointer',
-                  fontWeight: 600,
+                  fontWeight: 400,
                   fontSize: '13px',
                   textAlign: 'left',
-                  transition: 'all 0.2s ease'
+                  transition: 'background-color 150ms cubic-bezier(0.22, 1, 0.36, 1), color 150ms cubic-bezier(0.22, 1, 0.36, 1)'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.color = '#fff'
-                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'
+                  e.currentTarget.style.color = '#f4f4f5'
+                  e.currentTarget.style.backgroundColor = '#18181b'
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.color = '#94a9be'
+                  e.currentTarget.style.color = '#a1a1a6'
                   e.currentTarget.style.backgroundColor = 'transparent'
                 }}
               >
-                <Icon size={18} />
+                <Icon size={17} strokeWidth={1.6} />
                 <span>{item.label}</span>
               </button>
             )
           })}
         </nav>
 
-        {/* Sidebar Bottom (Logout) */}
-        <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        {/* Sidebar Bottom (Sign out) */}
+        <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <button
             className="sidebar-logout-btn"
             onClick={async () => {
@@ -149,20 +170,20 @@ export default function CustomerLayout() {
               navigate('/login')
             }}
           >
-            <LogOut size={16} />
-            <span>Logout</span>
+            <LogOut size={16} strokeWidth={1.6} />
+            <span>Sign out</span>
           </button>
         </div>
       </aside>
 
       {/* Main Panel Content Area */}
       <div className="portal-main">
-        {/* Top Header matching mockup */}
+        {/* Quiet 64px Top Header */}
         <header
           style={{
-            height: '70px',
-            backgroundColor: '#fff',
-            borderBottom: '1px solid #e9eef4',
+            height: '64px',
+            backgroundColor: '#ffffff',
+            borderBottom: '1px solid rgba(23, 23, 23, 0.08)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -178,97 +199,102 @@ export default function CustomerLayout() {
               onClick={() => setMobileOpen(true)}
               aria-label="Open menu"
             >
-              <Menu size={20} />
+              <Menu size={18} strokeWidth={1.6} />
             </button>
-            <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#0f2438', fontFamily: 'Manrope, sans-serif' }}>
-              Welcome back, {customerName.split(' ')[0]}!
+            <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 600, color: '#171717', fontFamily: 'Manrope, sans-serif' }}>
+              {pageTitle}
             </h2>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            {/* Switch to Admin portal if user is Admin */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             {(role === 'ADMIN' || hasRole?.('ADMIN')) && (
               <button
                 className="btn soft sm"
                 onClick={() => navigate('/admin')}
               >
-                Admin Panel
+                Admin console
               </button>
             )}
 
-            {/* Quick Wallet pill */}
-            <div
+            {/* Quiet Wallet Readout */}
+            <button
+              type="button"
               onClick={() => setShowWalletModal(true)}
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '7px',
-                background: '#f0fdf4',
-                border: '1px solid #bbf7d0',
-                padding: '6px 14px',
-                borderRadius: '20px',
-                cursor: 'pointer'
+                gap: '8px',
+                background: '#f4f4f5',
+                border: '1px solid rgba(23, 23, 23, 0.08)',
+                padding: '6px 12px',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontVariantNumeric: 'tabular-nums'
               }}
-              title="Click to view Wallet"
+              title="View wallet"
             >
-              <Wallet size={14} color="#16a34a" />
-              <b style={{ fontSize: '12px', color: '#15803d' }}>EGP {profile?.walletBalance?.toLocaleString() ?? 650}</b>
-            </div>
+              <Wallet size={14} strokeWidth={1.6} color="#525252" />
+              <span style={{ fontSize: '12px', fontWeight: 600, color: '#171717' }}>
+                EGP {profile?.walletBalance?.toLocaleString() ?? 650}
+              </span>
+            </button>
 
-            {/* Loyalty Points */}
+            {/* Quiet Loyalty Points */}
             <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px',
-                background: '#fffbeb',
-                border: '1px solid #fde68a',
-                padding: '6px 12px',
-                borderRadius: '20px'
+                background: '#fef7ec',
+                border: '1px solid rgba(180, 83, 9, 0.16)',
+                padding: '6px 10px',
+                borderRadius: '8px',
+                fontVariantNumeric: 'tabular-nums'
               }}
             >
-              <Star size={13} fill="#d97706" color="#d97706" />
-              <b style={{ fontSize: '11px', color: '#b45309' }}>{profile?.loyaltyPoints ?? 50} Pts</b>
+              <Star size={13} strokeWidth={1.8} fill="#b45309" color="#b45309" />
+              <span style={{ fontSize: '12px', fontWeight: 500, color: '#92400e' }}>
+                {profile?.loyaltyPoints ?? 50} pts
+              </span>
             </div>
 
-            {/* Profile widget in Top Right */}
+            {/* Profile Widget */}
             <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '10px',
-                paddingLeft: '14px',
-                borderLeft: '1px solid #e9eef4',
+                paddingLeft: '12px',
+                borderLeft: '1px solid rgba(23, 23, 23, 0.08)',
                 cursor: 'pointer'
               }}
               onClick={() => navigate('/customer/profile')}
             >
               <div
                 style={{
-                  width: '38px',
-                  height: '38px',
-                  borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #1e3a8a, #3b82f6)',
-                  color: '#fff',
-                  fontWeight: 800,
-                  fontSize: '13px',
+                  width: '34px',
+                  height: '34px',
+                  borderRadius: '8px',
+                  background: '#141415',
+                  color: '#f4f4f5',
+                  fontWeight: 600,
+                  fontSize: '12px',
                   display: 'grid',
-                  placeItems: 'center',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                  placeItems: 'center'
                 }}
               >
                 {initials}
               </div>
               <div style={{ textAlign: 'left' }}>
-                <b style={{ display: 'block', fontSize: '12px', color: '#102a40' }}>{customerName}</b>
-                <small style={{ display: 'block', fontSize: '10px', color: '#8493a2' }}>{role || 'Customer'}</small>
+                <span style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#171717' }}>{customerName}</span>
+                <small style={{ display: 'block', fontSize: '11px', color: '#737373' }}>{role || 'Customer'}</small>
               </div>
             </div>
           </div>
         </header>
 
         {/* Page Body */}
-        <main style={{ padding: '28px 36px', flex: 1, maxWidth: '1440px', width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
+        <main style={{ padding: '24px 32px', flex: 1, maxWidth: '1440px', width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
           <Outlet />
         </main>
       </div>
@@ -279,30 +305,30 @@ export default function CustomerLayout() {
           <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '440px' }}>
             <div className="modal-header">
               <div>
-                <h3>Customer Wallet</h3>
-                <p>Manage your EGHSELHA balance & payments</p>
+                <h3>Wallet</h3>
+                <p>Balance and saved payment method</p>
               </div>
-              <button onClick={() => setShowWalletModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-                <X size={18} />
+              <button onClick={() => setShowWalletModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#525252' }} aria-label="Close">
+                <X size={18} strokeWidth={1.6} />
               </button>
             </div>
-            <div className="modal-body" style={{ textAlign: 'center', padding: '32px 24px' }}>
-              <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: '#eaf4ff', color: '#087cf0', display: 'grid', placeItems: 'center', margin: '0 auto 16px' }}>
-                <Wallet size={30} />
+            <div className="modal-body" style={{ textAlign: 'center', padding: '28px 24px' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#f4f4f5', color: '#171717', display: 'grid', placeItems: 'center', margin: '0 auto 12px', border: '1px solid rgba(23,23,23,0.08)' }}>
+                <Wallet size={22} strokeWidth={1.6} />
               </div>
-              <span style={{ fontSize: '12px', color: '#6d8294' }}>Available Balance</span>
-              <h1 style={{ margin: '6px 0 20px', color: '#102a40', fontSize: '32px', fontWeight: 800 }}>
+              <span style={{ fontSize: '12px', color: '#737373' }}>Available balance</span>
+              <h1 style={{ margin: '6px 0 20px', color: '#171717', fontSize: '32px', fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>
                 EGP {profile?.walletBalance?.toLocaleString() ?? 650}
               </h1>
 
-              <div style={{ background: '#f8fafc', borderRadius: '12px', padding: '16px', textAlign: 'left', marginBottom: '20px' }}>
+              <div style={{ background: '#fafafa', border: '1px solid rgba(23,23,23,0.08)', borderRadius: '12px', padding: '16px', textAlign: 'left', marginBottom: '20px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '11px', color: '#64748b' }}>Loyalty Points</span>
-                  <b style={{ fontSize: '12px', color: '#b45309' }}>{profile?.loyaltyPoints ?? 50} Pts (Value: EGP 25)</b>
+                  <span style={{ fontSize: '12px', color: '#737373' }}>Loyalty points</span>
+                  <span style={{ fontSize: '12px', fontWeight: 600, color: '#92400e', fontVariantNumeric: 'tabular-nums' }}>{profile?.loyaltyPoints ?? 50} pts (EGP 25)</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: '11px', color: '#64748b' }}>Saved Payment Method</span>
-                  <b style={{ fontSize: '12px', color: '#1e293b' }}>Instapay / Visa •••• 4012</b>
+                  <span style={{ fontSize: '12px', color: '#737373' }}>Saved payment method</span>
+                  <span style={{ fontSize: '12px', fontWeight: 500, color: '#171717' }}>Visa •••• 4012</span>
                 </div>
               </div>
 
@@ -312,31 +338,17 @@ export default function CustomerLayout() {
                   setShowWalletModal(false)
                   setShowTopUpPaymentModal(true)
                 }}
-                style={{
-                  padding: '13px',
-                  fontSize: '13px',
-                  fontWeight: 700,
-                  borderRadius: '12px',
-                  background: 'linear-gradient(135deg, #0ea5e9, #0284c7)',
-                  color: '#fff',
-                  border: 'none',
-                  boxShadow: '0 4px 15px rgba(14, 165, 233, 0.35)',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px'
-                }}
+                style={{ minHeight: '42px', fontSize: '13px' }}
               >
-                <CreditCard size={16} />
-                <span>Top Up Wallet with Card / E-Payment</span>
+                <CreditCard size={16} strokeWidth={1.6} />
+                <span>Top up wallet</span>
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Modern Payment / Visa Modal for Wallet Topup */}
+      {/* Payment Modal for Wallet Topup */}
       <PaymentModal
         isOpen={showTopUpPaymentModal}
         onClose={() => setShowTopUpPaymentModal(false)}
@@ -350,8 +362,8 @@ export default function CustomerLayout() {
 
       {/* Global Toast */}
       {toastMessage && (
-        <div className="toast" style={{ animation: 'slideUp 0.3s ease' }}>
-          <CheckCircle2 size={16} />
+        <div className="toast">
+          <CheckCircle2 size={16} strokeWidth={1.6} />
           <span>{toastMessage}</span>
         </div>
       )}

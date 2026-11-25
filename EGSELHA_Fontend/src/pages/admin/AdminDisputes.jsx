@@ -116,8 +116,8 @@ export default function AdminDisputes() {
                       style={{
                         padding: '5px 12px',
                         fontSize: '11px',
-                        borderColor: '#087cf0',
-                        color: '#087cf0',
+                        borderColor: '#141415',
+                        color: '#141415',
                         display: 'inline-flex',
                         alignItems: 'center',
                         gap: '5px',
@@ -229,7 +229,7 @@ export default function AdminDisputes() {
             }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                  <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>
+                  <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 600, color: '#0f172a' }}>
                     Dispute Investigation · {selectedDispute.bookingNumber}
                   </h2>
                   <span className={`payment-status ${selectedDispute.status === 'OPEN' || selectedDispute.status === 'UNDER_REVIEW' ? 'pending' : 'paid'}`}>
@@ -239,10 +239,10 @@ export default function AdminDisputes() {
                     padding: '4px 10px',
                     borderRadius: '999px',
                     fontSize: '10px',
-                    fontWeight: 800,
-                    background: '#eff6ff',
-                    color: '#1d4ed8',
-                    border: '1px solid #bfdbfe',
+                    fontWeight: 600,
+                    background: '#f4f4f5',
+                    color: '#141415',
+                    border: '1px solid #e4e4e7',
                   }}>
                     Booking Status: {selectedDispute.bookingStatus}
                   </span>
@@ -273,7 +273,7 @@ export default function AdminDisputes() {
               {/* 1. Problem / Complaint & Location */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px' }}>
                 <div style={{ padding: '14px 16px', borderRadius: '12px', background: '#fef2f2', border: '1px solid #fecaca' }}>
-                  <small style={{ display: 'block', fontSize: '10px', fontWeight: 800, color: '#991b1b', textTransform: 'uppercase', marginBottom: '4px' }}>
+                  <small style={{ display: 'block', fontSize: '10px', fontWeight: 600, color: '#991b1b', marginBottom: '4px' }}>
                     Customer Issue / Complaint
                   </small>
                   <b style={{ fontSize: '13px', color: '#7f1d1d', display: 'block' }}>{selectedDispute.reason}</b>
@@ -289,8 +289,8 @@ export default function AdminDisputes() {
                 </div>
 
                 <div style={{ padding: '14px 16px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                  <small style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '10px', fontWeight: 800, color: '#475569', textTransform: 'uppercase', marginBottom: '4px' }}>
-                    <MapPin size={12} color="#087cf0" /> Service Location &amp; Booking
+                  <small style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '10px', fontWeight: 600, color: '#475569', marginBottom: '4px' }}>
+                    <MapPin size={12} color="#141415" /> Service Location &amp; Booking
                   </small>
                   <b style={{ fontSize: '13px', color: '#0f172a', display: 'block' }}>
                     {selectedDispute.address || 'No address recorded'}
@@ -303,8 +303,8 @@ export default function AdminDisputes() {
 
               {/* 2. Delay & Schedule Compliance Check */}
               <div>
-                <h3 style={{ margin: '0 0 10px', fontSize: '13px', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Timer size={15} color="#087cf0" /> Time &amp; Delay Audit
+                <h3 style={{ margin: '0 0 10px', fontSize: '13px', fontWeight: 600, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Timer size={15} color="#141415" /> Time &amp; Delay Audit
                 </h3>
                 <div style={{
                   padding: '12px 16px',
@@ -344,7 +344,7 @@ export default function AdminDisputes() {
                   <div style={{ padding: '10px 12px', borderRadius: '10px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
                     <small style={{ color: '#64748b', display: 'block' }}>Technician Arrived</small>
                     <b style={{ color: '#0f172a' }}>{formatDateTime(selectedDispute.arrivedAt)}</b>
-                    <small style={{ display: 'block', color: '#0369a1' }}>Travel: {formatDuration(selectedDispute.travelDurationMinutes)}</small>
+                    <small style={{ display: 'block', color: '#92400e' }}>Travel: {formatDuration(selectedDispute.travelDurationMinutes)}</small>
                   </div>
                   <div style={{ padding: '10px 12px', borderRadius: '10px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
                     <small style={{ color: '#64748b', display: 'block' }}>Work Started</small>
@@ -361,7 +361,7 @@ export default function AdminDisputes() {
               {/* 3. Customer Evidence Photos if submitted */}
               {selectedDispute.evidenceUrls && selectedDispute.evidenceUrls.length > 0 && (
                 <div>
-                  <h3 style={{ margin: '0 0 10px', fontSize: '13px', fontWeight: 800, color: '#0f172a' }}>
+                  <h3 style={{ margin: '0 0 10px', fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>
                     Customer Uploaded Evidence ({selectedDispute.evidenceUrls.length})
                   </h3>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '10px' }}>
@@ -382,8 +382,8 @@ export default function AdminDisputes() {
 
               {/* 4. Old (Before) vs New (After) Technician QA Photos */}
               <div>
-                <h3 style={{ margin: '0 0 10px', fontSize: '13px', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Camera size={15} color="#087cf0" /> Technician Photos Audit (Before vs After Wash)
+                <h3 style={{ margin: '0 0 10px', fontSize: '13px', fontWeight: 600, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Camera size={15} color="#141415" /> Technician Photos Audit (Before vs After Wash)
                 </h3>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '14px' }}>

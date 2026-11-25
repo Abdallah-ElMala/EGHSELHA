@@ -36,8 +36,8 @@ function haversineKm(lat1, lon1, lat2, lon2) {
 const CUSTOMER_PIN_ICON = L.divIcon({
   className: 'eghselha-customer-pin',
   html: `<div style="display:flex;flex-direction:column;align-items:center;transform:translate(-50%,-100%);">
-    <div style="background:#0f766e;color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:999px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.25);margin-bottom:3px;">Your Car</div>
-    <svg width="30" height="30" viewBox="0 0 24 24" fill="#0f766e" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 3px 6px rgba(0,0,0,0.35));">
+    <div style="background:#b45309;color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:999px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.25);margin-bottom:3px;">Your Car</div>
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="#b45309" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 3px 6px rgba(0,0,0,0.35));">
       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
       <circle cx="12" cy="10" r="3" fill="#ffffff"></circle>
     </svg>
@@ -49,8 +49,8 @@ const CUSTOMER_PIN_ICON = L.divIcon({
 const TECH_PIN_ICON = L.divIcon({
   className: 'eghselha-tech-pin',
   html: `<div style="display:flex;flex-direction:column;align-items:center;transform:translate(-50%,-100%);">
-    <div style="background:#0b6bcb;color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:999px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.25);margin-bottom:3px;">Technician</div>
-    <svg width="30" height="30" viewBox="0 0 24 24" fill="#0b6bcb" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 3px 6px rgba(0,0,0,0.35));">
+    <div style="background:#141415;color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:999px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.25);margin-bottom:3px;">Technician</div>
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="#141415" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 3px 6px rgba(0,0,0,0.35));">
       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
       <circle cx="12" cy="10" r="3" fill="#ffffff"></circle>
     </svg>
@@ -120,7 +120,7 @@ export default function LiveTrackingMap({ booking }) {
           [custLat, custLng]
         ],
         {
-          color: '#0b6bcb',
+          color: '#141415',
           weight: 3,
           dashArray: '8 6',
           opacity: 0.85
@@ -171,15 +171,15 @@ export default function LiveTrackingMap({ booking }) {
           flexWrap: 'wrap',
           padding: '10px 14px',
           borderRadius: '10px',
-          background: '#f0f9ff',
-          border: '1px solid #bae6fd'
+          background: '#f4f4f5',
+          border: '1px solid #e4e4e7'
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
           {isAtCar ? (
-            <MapPin size={16} color="#0f766e" style={{ flexShrink: 0 }} />
+            <MapPin size={16} color="#b45309" style={{ flexShrink: 0 }} />
           ) : (
-            <Navigation size={16} color="#0b6bcb" style={{ flexShrink: 0 }} />
+            <Navigation size={16} color="#141415" style={{ flexShrink: 0 }} />
           )}
           <div style={{ minWidth: 0 }}>
             <b style={{ fontSize: '12px', color: '#0f172a', display: 'block' }}>
@@ -187,7 +187,7 @@ export default function LiveTrackingMap({ booking }) {
                 ? `Technician is at your location (${booking?.address || 'Pinned Spot'})`
                 : `En route · ~${distKm.toFixed(1)} km away (~${etaMins} min ETA)`}
             </b>
-            <small style={{ fontSize: '10px', color: '#0369a1' }}>
+            <small style={{ fontSize: '10px', color: '#92400e' }}>
               GPS: {custLat.toFixed(4)}, {custLng.toFixed(4)}
             </small>
           </div>
