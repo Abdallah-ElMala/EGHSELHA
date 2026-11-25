@@ -34,10 +34,10 @@ namespace WebCarWash.Application.DTOs.Customer
         public string Address { get; set; } = string.Empty;
 
         [Range(-90.0, 90.0, ErrorMessage = "Latitude must be between -90 and 90.")]
-        public float ParkingLatitude { get; set; } = 30.0561f;
+        public float ParkingLatitude { get; set; } = 30.0226f;
 
         [Range(-180.0, 180.0, ErrorMessage = "Longitude must be between -180 and 180.")]
-        public float ParkingLongitude { get; set; } = 31.3414f;
+        public float ParkingLongitude { get; set; } = 31.0031f;
 
         public List<Guid> AddOnIds { get; set; } = new();
     }

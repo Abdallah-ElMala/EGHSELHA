@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import PageTitle from '../../component/PageTitle'
 import FieldError from '../../component/FieldError'
+import LocationPicker from '../../component/LocationPicker'
 import { useCustomer } from '../../context/CustomerContext'
 import { useAuth } from '../../context/AuthContext'
 import { customerApi } from '../../services/customerApi'
@@ -131,7 +132,7 @@ export default function CustomerProfile() {
     }
   }
 
-  // Handle Delete Vehicle (User request: Icon فيه بتمسح العربيه)
+  // Handle Delete Vehicle
   const handleDeleteVehicle = async (vehicleId, vehicleName) => {
     try {
       await customerApi.deleteVehicle(vehicleId)
@@ -145,7 +146,7 @@ export default function CustomerProfile() {
     }
   }
 
-  // Handle Delete Saved Address (User request: Icon فيه بتمسح جنب كل للكويشن)
+  // Handle Delete Saved Address
   const handleDeleteAddress = async (indexToRemove) => {
     const addressToDelete = displayedAddresses[indexToRemove]
     try {
@@ -243,7 +244,7 @@ export default function CustomerProfile() {
     }
   }
 
-  // Get Vehicle Type label (User request: يظهلو بس نوع العربيه بدون 1.0x base price)
+  // Get Vehicle Type label
   const getVehicleTypeLabel = (type) => {
     const s = String(type).toUpperCase()
     if (s === 'SUV' || type === 1) return { label: 'SUV', bg: '#e0f2fe', text: '#0369a1' }
@@ -336,7 +337,7 @@ export default function CustomerProfile() {
               </p>
             </div>
 
-            {/* EDIT TOGGLE BUTTON (User request: اعرف اعمل فيه edit لما ادوس علي زرار مكتوب عليه edit) */}
+            {/* EDIT TOGGLE BUTTON */}
             {!isEditing ? (
               <button
                 type="button"
@@ -544,7 +545,7 @@ export default function CustomerProfile() {
                       </span>
                     </div>
 
-                    {/* DELETE VEHICLE ICON (User request: Icon فيه بتمسح العربيه) */}
+                    {/* DELETE VEHICLE ICON */}
                     <button
                       type="button"
                       onClick={() => handleDeleteVehicle(v.id, carTitle)}
@@ -581,7 +582,7 @@ export default function CustomerProfile() {
                       <b style={{ color: '#102a40' }}>{v.licensePlate}</b>
                     </div>
 
-                    {/* ONLY VEHICLE TYPE (User request: مش المفروض يظهرلو Sedan 1.0x base price.. يظهلو بس نوع العربيه) */}
+                    {/* ONLY VEHICLE TYPE */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', alignItems: 'center' }}>
                       <span style={{ color: '#64748b' }}>Vehicle Type:</span>
                       <span style={{ fontSize: '11px', fontWeight: 700, padding: '3px 10px', borderRadius: '6px', background: typeInfo.bg, color: typeInfo.text }}>
@@ -638,7 +639,7 @@ export default function CustomerProfile() {
                 <p style={{ margin: '4px 0 0', fontSize: '11px', color: '#64748b', lineHeight: 1.4 }}>{addr}</p>
               </div>
 
-              {/* DELETE LOCATION ICON (User request: Icon فيه بتمسح جنب كل للكويشن) */}
+              {/* DELETE LOCATION ICON */}
               <button
                 type="button"
                 onClick={() => handleDeleteAddress(idx)}
@@ -799,7 +800,7 @@ export default function CustomerProfile() {
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g. أ ب ج 1234 or ABC 123"
+                    placeholder="e.g. ABC 1234"
                     value={licensePlate}
                     onChange={(e) => {
                       setLicensePlate(e.target.value)
@@ -880,24 +881,15 @@ export default function CustomerProfile() {
                     <span>{serverAddressError}</span>
                   </div>
                 )}
-                <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
-                  Address Details:
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '8px' }}>
+                  Select Location via GPS or Map (Sheikh Zayed &amp; 6th of October):
                 </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Sheikh Zayed, Beverly Hills, Villa 102"
+                <LocationPicker
                   value={newAddressText}
-                  onChange={(e) => {
-                    setNewAddressText(e.target.value)
+                  error={addressError}
+                  onChange={({ address }) => {
+                    setNewAddressText(address)
                     if (addressError) setAddressError('')
-                  }}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    borderRadius: '8px',
-                    border: addressError ? '1.5px solid #ef4444' : '1px solid #cbd5e1',
-                    background: addressError ? '#fffbfb' : '#fff',
-                    fontSize: '12px'
                   }}
                 />
                 <FieldError error={addressError} />

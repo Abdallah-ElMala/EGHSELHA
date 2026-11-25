@@ -14,7 +14,6 @@ import {
   ArrowRight,
   CheckCircle2,
   AlertCircle,
-  Car,
   Droplets,
   Clock,
   User,
@@ -25,7 +24,7 @@ import {
 } from 'lucide-react';
 
 export default function Login() {
-  const { login, verifyTwoFactor, googleLogin, forgotPassword, resetPassword } = useAuth();
+  const { login, verifyTwoFactor, forgotPassword, resetPassword } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -50,8 +49,8 @@ export default function Login() {
 
   const demoAccounts = [
     {
-      role: 'عميل (Customer)',
-      badge: 'عميل',
+      role: 'Customer',
+      badge: 'Customer',
       email: 'ahmed.khaled@example.com',
       pass: 'demo123',
       icon: User,
@@ -59,8 +58,8 @@ export default function Login() {
       bg: '#eaf4ff'
     },
     {
-      role: 'فني (Technician)',
-      badge: 'فني',
+      role: 'Technician',
+      badge: 'Technician',
       email: 'mostafa.ali@email.com',
       pass: 'demo123',
       icon: Wrench,
@@ -68,8 +67,8 @@ export default function Login() {
       bg: '#e6f8f0'
     },
     {
-      role: 'مدير (Admin)',
-      badge: 'مدير',
+      role: 'Admin',
+      badge: 'Admin',
       email: 'admin@eghselha.com',
       pass: 'admin123',
       icon: ShieldCheck,
@@ -81,9 +80,12 @@ export default function Login() {
   const handleDemoFill = (acc) => {
     setForm({ email: acc.email, password: acc.pass });
     setErrors({});
+    if (location.state?.from) {
+      location.state.from = null;
+    }
     setGlobalMessage({
       type: 'info',
-      text: `تم اختيار بيانات حساب ${acc.role} بنجاح.`
+      text: `Selected demo account: ${acc.role}.`
     });
   };
 
@@ -101,15 +103,15 @@ export default function Login() {
   const validate = () => {
     const errs = {};
     if (!form.email || !form.email.trim()) {
-      errs.email = 'البريد الإلكتروني مطلوب.';
+      errs.email = 'Email address is required.';
     } else if (!EMAIL_REGEX.test(form.email.trim())) {
-      errs.email = 'صيغة البريد الإلكتروني غير صحيحة.';
+      errs.email = 'Invalid email address format.';
     }
 
     if (!form.password) {
-      errs.password = 'كلمة المرور مطلوبة.';
+      errs.password = 'Password is required.';
     } else if (form.password.length < 6) {
-      errs.password = 'كلمة المرور يجب أن تكون 6 أحرف على الأقل.';
+      errs.password = 'Password must be at least 6 characters.';
     }
 
     setErrors(errs);
@@ -118,15 +120,36 @@ export default function Login() {
 
   const redirectAfterLogin = (role) => {
     const from = location.state?.from?.pathname;
-    if (from && from !== '/login') {
-      navigate(from, { replace: true });
+    const r = (role || '').toUpperCase();
+
+    if (r === 'ADMIN') {
+      if (from && from.startsWith('/admin')) {
+        navigate(from, { replace: true });
+      } else {
+        navigate('/admin', { replace: true });
+      }
       return;
     }
 
-    const r = (role || '').toUpperCase();
-    if (r === 'ADMIN') navigate('/admin', { replace: true });
-    else if (r === 'TECHNICIAN') navigate('/technician', { replace: true });
-    else navigate('/customer', { replace: true });
+    if (r === 'TECHNICIAN') {
+      if (from && from.startsWith('/technician')) {
+        navigate(from, { replace: true });
+      } else {
+        navigate('/technician', { replace: true });
+      }
+      return;
+    }
+
+    if (r === 'CUSTOMER') {
+      if (from && from.startsWith('/customer')) {
+        navigate(from, { replace: true });
+      } else {
+        navigate('/customer', { replace: true });
+      }
+      return;
+    }
+
+    navigate('/', { replace: true });
   };
 
   const handleSubmit = async (e) => {
@@ -144,7 +167,7 @@ export default function Login() {
         setTwoFactorEmail(form.email.trim());
         setGlobalMessage({
           type: 'info',
-          text: 'تم إرسال رمز التحقق بخطوتين (2FA) إلى بريدك الإلكتروني.'
+          text: 'A two-factor authentication code (2FA) has been sent to your email.'
         });
         setLoading(false);
         return;
@@ -158,7 +181,7 @@ export default function Login() {
       }
       setGlobalMessage({
         type: 'error',
-        text: err.message || 'بيانات الدخول غير صحيحة، يرجى التحقق من البريد وكلمة المرور.'
+        text: err.message || 'Invalid credentials. Please verify your email and password.'
       });
     } finally {
       setLoading(false);
@@ -168,7 +191,7 @@ export default function Login() {
   const handleVerify2FA = async (e) => {
     e.preventDefault();
     if (!twoFactorCode || twoFactorCode.trim().length !== 6) {
-      setErrors({ twoFactorCode: 'يرجى إدخال رمز التحقق المكون من 6 أرقام.' });
+      setErrors({ twoFactorCode: 'Please enter the 6-digit verification code.' });
       return;
     }
 
@@ -177,20 +200,7 @@ export default function Login() {
       const res = await verifyTwoFactor(twoFactorEmail, twoFactorCode.trim());
       redirectAfterLogin(res.user?.role);
     } catch (err) {
-      setErrors({ twoFactorCode: err.message || 'رمز التحقق غير صحيح أو انتهت صلاحيته.' });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGoogleLogin = async () => {
-    setLoading(true);
-    setGlobalMessage(null);
-    try {
-      const res = await googleLogin('mock-google-token-demo-' + Date.now());
-      redirectAfterLogin(res.user?.role);
-    } catch (err) {
-      setGlobalMessage({ type: 'error', text: err.message || 'فشل تسجيل الدخول بواسطة Google.' });
+      setErrors({ twoFactorCode: err.message || 'Invalid or expired verification code.' });
     } finally {
       setLoading(false);
     }
@@ -199,7 +209,7 @@ export default function Login() {
   const handleSendForgotEmail = async (e) => {
     e.preventDefault();
     if (!forgotEmail || !EMAIL_REGEX.test(forgotEmail.trim())) {
-      setForgotMessage({ type: 'error', text: 'يرجى إدخال بريد إلكتروني صحيح.' });
+      setForgotMessage({ type: 'error', text: 'Please enter a valid email address.' });
       return;
     }
     setLoading(true);
@@ -208,10 +218,10 @@ export default function Login() {
       setForgotStep(2);
       setForgotMessage({
         type: 'success',
-        text: 'تم إرسال رمز استعادة كلمة المرور إلى بريدك الإلكتروني.'
+        text: 'Password reset code has been sent to your email.'
       });
     } catch (err) {
-      setForgotMessage({ type: 'error', text: err.message || 'حدث خطأ أثناء إرسال البريد.' });
+      setForgotMessage({ type: 'error', text: err.message || 'An error occurred while sending the email.' });
     } finally {
       setLoading(false);
     }
@@ -220,7 +230,7 @@ export default function Login() {
   const handleResetPassword = async (e) => {
     e.preventDefault();
     if (!resetToken || !newPassword || newPassword !== confirmPassword) {
-      setForgotMessage({ type: 'error', text: 'يرجى التأكد من ملء جميع الحقول وتطابق كلمتي المرور.' });
+      setForgotMessage({ type: 'error', text: 'Please ensure all fields are filled and passwords match.' });
       return;
     }
     setLoading(true);
@@ -233,7 +243,7 @@ export default function Login() {
       });
       setForgotMessage({
         type: 'success',
-        text: 'تمت إعادة تعيين كلمة المرور بنجاح! يمكنك الآن تسجيل الدخول بها.'
+        text: 'Password reset successful! You can now log in.'
       });
       setTimeout(() => {
         setShowForgotModal(false);
@@ -241,7 +251,7 @@ export default function Login() {
         setForm((prev) => ({ ...prev, email: forgotEmail, password: '' }));
       }, 1800);
     } catch (err) {
-      setForgotMessage({ type: 'error', text: err.message || 'فشلت إعادة تعيين كلمة المرور.' });
+      setForgotMessage({ type: 'error', text: err.message || 'Password reset failed.' });
     } finally {
       setLoading(false);
     }
@@ -308,7 +318,7 @@ export default function Login() {
               <BrandLogo size={46} variant="blue" />
               <div>
                 <b style={{ display: 'block', fontSize: '20px', letterSpacing: '0.5px', fontFamily: 'Manrope, sans-serif', color: '#fff' }}>
-                  إغسـلـهـا · EGHSELHA
+                  EGHSELHA
                 </b>
                 <small style={{ display: 'block', fontSize: '11px', color: '#60b4ff', fontWeight: 600, letterSpacing: '0.8px', marginTop: '2px' }}>
                   DOORSTEP MOBILE CAR WASH
@@ -332,7 +342,7 @@ export default function Login() {
               }}
             >
               <Sparkles size={14} />
-              <span>غسيل سيارات متنقل أينما كنت في القاهرة</span>
+              <span>Mobile Car Detailing Anywhere Across Cairo</span>
             </div>
 
             <h1
@@ -344,77 +354,12 @@ export default function Login() {
                 letterSpacing: '-0.5px'
               }}
             >
-              سيارتك بتلمع عند باب بيتك بأعلى معايير الاحترافية
+              Showroom Shine at Your Doorstep with Premium Quality
             </h1>
 
             <p style={{ fontSize: '13px', lineHeight: 1.7, color: '#9fb4c7', margin: 0, maxWidth: '440px' }}>
-              سجّل دخولك الآن للوصول إلى حجوزاتك، وتتبع الفني مباشرة على الخريطة، وإدارة محفظتك ومركباتك بسهولة وسرعة وأمان.
+              Sign in to manage bookings, track assigned technicians live on GPS, and access your garage and wallet with confidence.
             </p>
-          </div>
-
-          {/* Feature Highlights Grid */}
-          <div style={{ margin: '36px 0', display: 'grid', gap: '14px' }}>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '14px',
-                background: 'rgba(255, 255, 255, 0.04)',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                padding: '12px 16px',
-                borderRadius: '14px'
-              }}
-            >
-              <div
-                style={{
-                  width: '38px',
-                  height: '38px',
-                  borderRadius: '10px',
-                  background: 'rgba(8, 124, 240, 0.2)',
-                  color: '#60b4ff',
-                  display: 'grid',
-                  placeItems: 'center',
-                  flexShrink: 0
-                }}
-              >
-                <Car size={20} />
-              </div>
-              <div>
-                <b style={{ fontSize: '13px', color: '#fff', display: 'block' }}>غسيل عند باب بيتك</b>
-                <small style={{ fontSize: '11px', color: '#8fa5bc' }}>فانات خدمة مجهزة بالكامل بالماء والكهرباء</small>
-              </div>
-            </div>
-
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '14px',
-                background: 'rgba(255, 255, 255, 0.04)',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                padding: '12px 16px',
-                borderRadius: '14px'
-              }}
-            >
-              <div
-                style={{
-                  width: '38px',
-                  height: '38px',
-                  borderRadius: '10px',
-                  background: 'rgba(16, 185, 129, 0.2)',
-                  color: '#6ee7b7',
-                  display: 'grid',
-                  placeItems: 'center',
-                  flexShrink: 0
-                }}
-              >
-                <ShieldCheck size={20} />
-              </div>
-              <div>
-                <b style={{ fontSize: '13px', color: '#fff', display: 'block' }}>توثيق وأمان مشدد</b>
-                <small style={{ fontSize: '11px', color: '#8fa5bc' }}>تشفير JWT مع حماية Refresh Token والتحقق بخطوتين</small>
-              </div>
-            </div>
           </div>
 
           {/* Bottom Brand Meta */}
@@ -430,7 +375,7 @@ export default function Login() {
             }}
           >
             <span>© 2026 EGHSELHA Platform</span>
-            <span>القاهرة · التجمع · الشيخ زايد · المعادي</span>
+            <span>Cairo · New Cairo · Sheikh Zayed · Maadi</span>
           </div>
         </div>
 
@@ -459,7 +404,7 @@ export default function Login() {
                 marginBottom: '14px'
               }}
             >
-              ← العودة إلى الصفحة الرئيسية (Home)
+              ← Back to Home
             </Link>
             <h2
               style={{
@@ -469,10 +414,10 @@ export default function Login() {
                 letterSpacing: '-0.4px'
               }}
             >
-              تسجيل الدخول إلى حسابك
+              Sign In to Your Account
             </h2>
             <p style={{ fontSize: '12px', color: '#8493a2', margin: 0 }}>
-              أدخل بريدك الإلكتروني وكلمة المرور للمتابعة
+              Enter your email and password to continue
             </p>
           </div>
 
@@ -496,7 +441,7 @@ export default function Login() {
             >
               <span style={{ fontSize: '11px', fontWeight: 700, color: '#475569', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Sparkles size={14} color="#087cf0" />
-                حسابات تجريبية سريعة (نقرة واحدة):
+                Quick Demo Accounts (1-Click):
               </span>
             </div>
 
@@ -591,16 +536,16 @@ export default function Login() {
                 >
                   <ShieldCheck size={24} />
                 </div>
-                <b style={{ fontSize: '14px', color: '#166534', display: 'block' }}>التحقق بخطوتين (2FA)</b>
+                <b style={{ fontSize: '14px', color: '#166534', display: 'block' }}>Two-Factor Authentication (2FA)</b>
                 <small style={{ fontSize: '11px', color: '#15803d', display: 'block', marginTop: '4px' }}>
-                  أدخل الرمز المكون من 6 أرقام المرسل إلى: <br />
+                  Enter the 6-digit verification code sent to: <br />
                   <span style={{ fontWeight: 700, fontFamily: 'monospace' }}>{twoFactorEmail}</span>
                 </small>
               </div>
 
               <div>
                 <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
-                  رمز التحقق (6 أرقام)
+                  Verification Code (6 Digits)
                 </label>
                 <input
                   type="text"
@@ -643,7 +588,7 @@ export default function Login() {
                   cursor: 'pointer'
                 }}
               >
-                {loading ? 'جاري التحقق...' : 'تأكيد الرمز وتسجيل الدخول'}
+                {loading ? 'Verifying...' : 'Confirm Code & Log In'}
               </button>
 
               <button
@@ -659,7 +604,7 @@ export default function Login() {
                   marginTop: '4px'
                 }}
               >
-                ← العودة إلى تسجيل الدخول العادي
+                ← Back to standard login
               </button>
             </form>
           ) : (
@@ -677,7 +622,7 @@ export default function Login() {
                   }}
                 >
                   <Mail size={14} color="#64748b" />
-                  البريد الإلكتروني
+                  Email Address
                 </label>
                 <input
                   type="email"
@@ -720,7 +665,7 @@ export default function Login() {
                     }}
                   >
                     <KeyRound size={14} color="#64748b" />
-                    كلمة المرور
+                    Password
                   </label>
                   <button
                     type="button"
@@ -738,7 +683,7 @@ export default function Login() {
                       padding: 0
                     }}
                   >
-                    نسيت كلمة المرور؟
+                    Forgot Password?
                   </button>
                 </div>
                 <input
@@ -795,68 +740,9 @@ export default function Login() {
                 ) : (
                   <>
                     <LogIn size={16} />
-                    <span>تسجيل الدخول</span>
+                    <span>Sign In</span>
                   </>
                 )}
-              </button>
-
-              {/* Divider */}
-              <div style={{ display: 'flex', alignItems: 'center', margin: '8px 0', gap: '12px' }}>
-                <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
-                <span style={{ fontSize: '11px', color: '#94a3b8' }}>أو عبر</span>
-                <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
-              </div>
-
-              {/* Google OAuth Login Button */}
-              <button
-                type="button"
-                onClick={handleGoogleLogin}
-                disabled={loading}
-                style={{
-                  width: '100%',
-                  padding: '11px 14px',
-                  borderRadius: '12px',
-                  border: '1px solid #cbd5e1',
-                  background: '#ffffff',
-                  color: '#334155',
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '10px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.02)'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#f8fafc';
-                  e.currentTarget.style.borderColor = '#94a3b8';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#ffffff';
-                  e.currentTarget.style.borderColor = '#cbd5e1';
-                }}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24">
-                  <path
-                    fill="#4285F4"
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                  />
-                  <path
-                    fill="#34A853"
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                  />
-                  <path
-                    fill="#FBBC05"
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                  />
-                  <path
-                    fill="#EA4335"
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                  />
-                </svg>
-                <span>المتابعة باستخدام Google</span>
               </button>
             </form>
           )}
@@ -872,7 +758,7 @@ export default function Login() {
               color: '#64748b'
             }}
           >
-            ليس لديك حساب بعد؟{' '}
+            Don't have an account yet?{' '}
             <Link
               to="/register"
               style={{
@@ -884,8 +770,8 @@ export default function Login() {
                 gap: '4px'
               }}
             >
-              <span>إنشاء حساب جديد</span>
-              <ArrowRight size={14} style={{ transform: 'rotate(180deg)' }} />
+              <span>Create an account</span>
+              <ArrowRight size={14} />
             </Link>
           </div>
         </div>
@@ -897,11 +783,11 @@ export default function Login() {
           <div className="modal-card">
             <div className="modal-header">
               <div>
-                <h3>استعادة كلمة المرور</h3>
+                <h3>Reset Password</h3>
                 <p>
                   {forgotStep === 1
-                    ? 'أدخل بريدك الإلكتروني المسجل وسنرسل لك رمز الاستعادة.'
-                    : 'أدخل الرمز المرسل إلى بريدك مع كلمة المرور الجديدة.'}
+                    ? 'Enter your registered email and we will send you a verification code.'
+                    : 'Enter the code sent to your email along with your new password.'}
                 </p>
               </div>
               <button
@@ -934,7 +820,7 @@ export default function Login() {
                 <form onSubmit={handleSendForgotEmail} style={{ display: 'grid', gap: '14px' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
-                      البريد الإلكتروني
+                      Email Address
                     </label>
                     <input
                       type="email"
@@ -960,7 +846,7 @@ export default function Login() {
                       className="btn outline"
                       onClick={() => setShowForgotModal(false)}
                     >
-                      إلغاء
+                      Cancel
                     </button>
                     <button
                       type="submit"
@@ -968,7 +854,7 @@ export default function Login() {
                       className="btn primary"
                       style={{ background: '#087cf0' }}
                     >
-                      {loading ? 'جاري الإرسال...' : 'إرسال رمز الاستعادة'}
+                      {loading ? 'Sending...' : 'Send Reset Code'}
                     </button>
                   </div>
                 </form>
@@ -976,7 +862,7 @@ export default function Login() {
                 <form onSubmit={handleResetPassword} style={{ display: 'grid', gap: '12px' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
-                      رمز التحقق المرسل
+                      Verification Code
                     </label>
                     <input
                       type="text"
@@ -998,7 +884,7 @@ export default function Login() {
                   </div>
                   <div>
                     <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
-                      كلمة المرور الجديدة
+                      New Password
                     </label>
                     <input
                       type="password"
@@ -1020,7 +906,7 @@ export default function Login() {
                   </div>
                   <div>
                     <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
-                      تأكيد كلمة المرور
+                      Confirm Password
                     </label>
                     <input
                       type="password"
@@ -1046,7 +932,7 @@ export default function Login() {
                       className="btn outline"
                       onClick={() => setShowForgotModal(false)}
                     >
-                      إلغاء
+                      Cancel
                     </button>
                     <button
                       type="submit"
@@ -1054,7 +940,7 @@ export default function Login() {
                       className="btn primary"
                       style={{ background: '#087cf0' }}
                     >
-                      {loading ? 'جاري الحفظ...' : 'حفظ كلمة المرور الجديدة'}
+                      {loading ? 'Saving...' : 'Save New Password'}
                     </button>
                   </div>
                 </form>

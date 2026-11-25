@@ -151,9 +151,8 @@ export default function AdminDisputes() {
                     />
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                       <button
-                        className="btn primary"
+                        className="btn success"
                         disabled={busyId === d.id}
-                        style={{ background: '#16a34a', borderColor: '#16a34a' }}
                         onClick={() => handleResolve(d, 'REFUNDED')}
                       >
                         <RotateCcw size={14} /> Issue Wallet Refund (EGP {d.totalPrice})
@@ -173,9 +172,8 @@ export default function AdminDisputes() {
                         Mark Under Review
                       </button>
                       <button
-                        className="btn outline"
+                        className="btn danger"
                         disabled={busyId === d.id}
-                        style={{ color: '#dc2626', borderColor: '#fca5a5' }}
                         onClick={() => handleResolve(d, 'REJECTED')}
                       >
                         <XCircle size={14} /> Reject Dispute

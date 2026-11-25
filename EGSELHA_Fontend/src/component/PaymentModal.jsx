@@ -33,8 +33,6 @@ export default function PaymentModal({
   onSuccess = () => {},
   notify = () => {}
 }) {
-  if (!isOpen) return null
-
   const isTopUp = mode === 'topup'
   const targetAmount = isTopUp ? null : 200
 
@@ -64,6 +62,8 @@ export default function PaymentModal({
   const [errorMsg, setErrorMsg] = useState(null)
   const [receipt, setReceipt] = useState(null)
 
+  if (!isOpen) return null
+
   const effectiveAmount = isTopUp
     ? isCustom
       ? Number(customAmount) || 0
@@ -88,13 +88,13 @@ export default function PaymentModal({
     setErrorMsg(null)
 
     if (isTopUp && (!effectiveAmount || effectiveAmount <= 0)) {
-      setErrorMsg('يرجى تحديد مبلغ صالح للشحن (أكبر من 0 جنيه).')
+      setErrorMsg('Please select or enter a valid amount (greater than 0 EGP).')
       return
     }
 
     if (!isTopUp && selectedMethod === PAYMENT_METHODS.WALLET) {
       if (currentBalance < 200) {
-        setErrorMsg(`رصيد محفظتك (${currentBalance} ج.م) غير كافٍ لسداد العربون (200 ج.م). يرجى اختيار الدفع بالفيزا أو شحن المحفظة.`)
+        setErrorMsg(`Your wallet balance (${currentBalance} EGP) is insufficient for the deposit (200 EGP). Please use card or top up your wallet.`)
         return
       }
     }
@@ -116,24 +116,24 @@ export default function PaymentModal({
         await customerApi.topUpWallet(effectiveAmount)
         setReceipt({
           ...gatewayRes,
-          title: 'تم شحن المحفظة بنجاح!',
-          description: `تم إيداع مبلغ ${effectiveAmount.toLocaleString()} ج.م في رصيدك لدى إغسلها عبر ${gatewayRes.gateway}.`
+          title: 'Wallet Topped Up Successfully!',
+          description: `${effectiveAmount.toLocaleString()} EGP has been deposited to your EGHSELHA balance via ${gatewayRes.gateway}.`
         })
-        notify(`تم شحن المحفظة بنجاح بمبلغ ${effectiveAmount.toLocaleString()} ج.م`)
+        notify(`Wallet successfully topped up with ${effectiveAmount.toLocaleString()} EGP`)
         onSuccess()
       } else {
         // Pay deposit for booking
         await customerApi.payDeposit(booking.id, selectedMethod)
         setReceipt({
           ...gatewayRes,
-          title: 'تم دفع العربون وتأكيد الحجز!',
-          description: `تم سداد عربون الحجز #${booking.bookingNumber} بنجاح. سيتم توجيه أقرب فني مجهز فوراً.`
+          title: 'Deposit Paid & Booking Confirmed!',
+          description: `Deposit for booking #${booking.bookingNumber} has been paid successfully. The nearest certified technician is being dispatched.`
         })
-        notify(`تم تأكيد الحجز #${booking.bookingNumber} وسداد العربون بنجاح`)
+        notify(`Booking #${booking.bookingNumber} confirmed and deposit paid successfully`)
         onSuccess()
       }
     } catch (err) {
-      setErrorMsg(err?.message || 'تعذر إتمام عملية الدفع. يرجى مراجعة بيانات البطاقة والمحاولة مجدداً.')
+      setErrorMsg(err?.message || 'Payment failed. Please verify your payment details and try again.')
     } finally {
       setProcessing(false)
     }
@@ -198,12 +198,12 @@ export default function PaymentModal({
             </div>
             <div>
               <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, fontFamily: 'Manrope, sans-serif' }}>
-                {isTopUp ? 'شحن رصيد المحفظة (Wallet Top-Up)' : 'سداد عربون الحجز (Pay Deposit)'}
+                {isTopUp ? 'Wallet Top-Up' : 'Pay Booking Deposit'}
               </h3>
               <p style={{ margin: '2px 0 0', fontSize: '11px', color: '#93c5fd' }}>
                 {isTopUp
-                  ? 'بوابة دفع آمنة ومشفرة · فيزا، ماستركارد، ومحافظ إلكترونية'
-                  : `حجز رقم: ${booking?.bookingNumber || 'BK-NEW'} · عربون إجباري 200 ج.م`}
+                  ? 'Secure & encrypted payment · Visa, Mastercard, and Mobile Wallets'
+                  : `Booking #${booking?.bookingNumber || 'BK-NEW'} · Required Deposit: 200 EGP`}
               </p>
             </div>
           </div>
@@ -266,27 +266,27 @@ export default function PaymentModal({
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                  <span style={{ fontSize: '12px', color: '#64748b' }}>المبلغ المدفوع:</span>
+                  <span style={{ fontSize: '12px', color: '#64748b' }}>Amount Paid:</span>
                   <b style={{ fontSize: '15px', color: '#0f172a' }}>
                     {receipt.amount.toLocaleString()} {receipt.currency}
                   </b>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                  <span style={{ fontSize: '12px', color: '#64748b' }}>رقم المعاملة (Ref):</span>
+                  <span style={{ fontSize: '12px', color: '#64748b' }}>Transaction Ref:</span>
                   <code style={{ fontSize: '12px', color: '#0284c7', background: '#e0f2fe', padding: '2px 6px', borderRadius: '4px' }}>
                     {receipt.transactionId}
                   </code>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                  <span style={{ fontSize: '12px', color: '#64748b' }}>بوابة الدفع:</span>
+                  <span style={{ fontSize: '12px', color: '#64748b' }}>Payment Gateway:</span>
                   <span style={{ fontSize: '12px', color: '#16a34a', fontWeight: 700 }}>
                     {receipt.gateway}
                   </span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: '12px', color: '#64748b' }}>الحالة:</span>
+                  <span style={{ fontSize: '12px', color: '#64748b' }}>Status:</span>
                   <span style={{ fontSize: '11px', background: '#dcfce7', color: '#15803d', padding: '2px 8px', borderRadius: '9999px', fontWeight: 800 }}>
-                    ناجحة ومؤكدة بنكياً ✓
+                    Success & Bank Verified ✓
                   </span>
                 </div>
               </div>
@@ -296,7 +296,7 @@ export default function PaymentModal({
                 className="landing-btn-signup"
                 style={{ width: '100%', padding: '12px', fontSize: '14px', borderRadius: '12px' }}
               >
-                تم والعودة للتطبيق
+                Done & Return to App
               </button>
             </div>
           ) : (
@@ -306,7 +306,7 @@ export default function PaymentModal({
               {isTopUp && (
                 <div style={{ marginBottom: '22px' }}>
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '10px' }}>
-                    اختر مبلغ الشحن (EGP):
+                    Select Top-up Amount (EGP):
                   </label>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px', marginBottom: '10px' }}>
                     {TOPUP_PRESETS.map((amt) => (
@@ -338,7 +338,7 @@ export default function PaymentModal({
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <input
                       type="number"
-                      placeholder="أو اكتب مبلغاً آخر (مثال: 350)"
+                      placeholder="Or enter custom amount (e.g. 350)"
                       value={customAmount}
                       onChange={(e) => {
                         setCustomAmount(e.target.value)
@@ -361,7 +361,7 @@ export default function PaymentModal({
               {/* Payment Methods Tabs */}
               <div style={{ marginBottom: '20px' }}>
                 <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '10px' }}>
-                  طريقة السداد:
+                  Payment Method:
                 </label>
                 <div style={{ display: 'grid', gridTemplateColumns: isTopUp ? '1fr 1fr 1fr' : 'repeat(4, 1fr)', gap: '8px' }}>
                   {/* Option 1: Credit Card */}
@@ -384,7 +384,7 @@ export default function PaymentModal({
                     }}
                   >
                     <CreditCard size={18} />
-                    <span>فيزا / ماستركارد</span>
+                    <span>Visa / Mastercard</span>
                   </button>
 
                   {/* Option 2: Instapay */}
@@ -407,7 +407,7 @@ export default function PaymentModal({
                     }}
                   >
                     <Building2 size={18} />
-                    <span>إنستاباي (Instapay)</span>
+                    <span>Instapay</span>
                   </button>
 
                   {/* Option 3: Mobile Wallet */}
@@ -430,7 +430,7 @@ export default function PaymentModal({
                     }}
                   >
                     <Smartphone size={18} />
-                    <span>فودافون كاش</span>
+                    <span>Vodafone Cash</span>
                   </button>
 
                   {/* Option 4: In-app Wallet (For Deposit only) */}
@@ -454,7 +454,7 @@ export default function PaymentModal({
                       }}
                     >
                       <Wallet size={18} />
-                      <span>رصيد محفظتي</span>
+                      <span>Wallet Balance</span>
                     </button>
                   )}
                 </div>
@@ -514,7 +514,7 @@ export default function PaymentModal({
 
                   {/* Quick Fill Test Card */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                    <span style={{ fontSize: '12px', color: '#64748b' }}>أدخل بيانات البطاقة البنكية:</span>
+                    <span style={{ fontSize: '12px', color: '#64748b' }}>Enter Card Details:</span>
                     <button
                       type="button"
                       onClick={fillTestCard}
@@ -533,7 +533,7 @@ export default function PaymentModal({
                       }}
                     >
                       <Sparkles size={12} />
-                      <span>ملء ببطاقة تجريبية (Test Card)</span>
+                      <span>Fill Test Card</span>
                     </button>
                   </div>
 
@@ -542,7 +542,7 @@ export default function PaymentModal({
                     <div>
                       <input
                         type="text"
-                        placeholder="رقم البطاقة (16 رقم)"
+                        placeholder="Card Number (16 digits)"
                         value={cardForm.cardNumber}
                         maxLength={19}
                         onChange={(e) => setCardForm({ ...cardForm, cardNumber: formatCardNumber(e.target.value) })}
@@ -562,7 +562,7 @@ export default function PaymentModal({
                     <div>
                       <input
                         type="text"
-                        placeholder="اسم حامل البطاقة (باللغة الإنجليزية كما على البطاقة)"
+                        placeholder="Cardholder Name (as on card)"
                         value={cardForm.cardHolder}
                         onChange={(e) => setCardForm({ ...cardForm, cardHolder: e.target.value.toUpperCase() })}
                         style={{
@@ -580,7 +580,7 @@ export default function PaymentModal({
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                       <input
                         type="text"
-                        placeholder="تاريخ الانتهاء (MM/YY)"
+                        placeholder="Expiry Date (MM/YY)"
                         maxLength={5}
                         value={cardForm.expiry}
                         onChange={(e) => setCardForm({ ...cardForm, expiry: formatExpiry(e.target.value) })}
@@ -596,7 +596,7 @@ export default function PaymentModal({
                       />
                       <input
                         type="password"
-                        placeholder="رمز الأمان (CVV 3 أرقام)"
+                        placeholder="CVV (3 digits)"
                         maxLength={4}
                         value={cardForm.cvv}
                         onChange={(e) => setCardForm({ ...cardForm, cvv: e.target.value.replace(/\D/g, '') })}
@@ -620,19 +620,19 @@ export default function PaymentModal({
                 <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '16px', marginBottom: '16px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#0369a1', marginBottom: '8px' }}>
                     <Building2 size={18} />
-                    <b style={{ fontSize: '13px' }}>الدفع الفوري عبر شبكة إنستاباي (Instapay)</b>
+                    <b style={{ fontSize: '13px' }}>Instant Transfer via Instapay</b>
                   </div>
                   <p style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.5, margin: '0 0 12px' }}>
-                    قم بتحويل المبلغ المطلوب عبر تطبيق إنستاباي إلى العنوان التالي:
+                    Transfer the requested amount via Instapay to the following address:
                   </p>
                   <div style={{ background: '#fff', border: '1px dashed #0284c7', borderRadius: '8px', padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                    <span style={{ fontSize: '12px', color: '#64748b' }}>عنوان الدفع اللحظي (IPA):</span>
+                    <span style={{ fontSize: '12px', color: '#64748b' }}>Instant Payment Address (IPA):</span>
                     <strong style={{ fontSize: '14px', color: '#0284c7' }}>eghselha@instapay</strong>
                   </div>
                   <div>
                     <input
                       type="text"
-                      placeholder="رقم مرجع التحويل من إنستاباي (اختياري للتأكيد الفوري)"
+                      placeholder="Instapay Reference Number (optional for instant confirmation)"
                       value={instapayRef}
                       onChange={(e) => setInstapayRef(e.target.value)}
                       style={{
@@ -653,19 +653,19 @@ export default function PaymentModal({
                 <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '16px', marginBottom: '16px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#b91c1c', marginBottom: '8px' }}>
                     <Smartphone size={18} />
-                    <b style={{ fontSize: '13px' }}>الدفع عبر المحافظ الإلكترونية (فودافون كاش / أورنج / وي)</b>
+                    <b style={{ fontSize: '13px' }}>Mobile Wallets (Vodafone Cash / Orange / WE)</b>
                   </div>
                   <p style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.5, margin: '0 0 12px' }}>
-                    حول المبلغ المطلوب إلى رقم محفظة إغسلها الرسمية:
+                    Transfer the required amount to EGHSELHA official wallet:
                   </p>
                   <div style={{ background: '#fff', border: '1px dashed #ef4444', borderRadius: '8px', padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                    <span style={{ fontSize: '12px', color: '#64748b' }}>رقم المحفظة:</span>
+                    <span style={{ fontSize: '12px', color: '#64748b' }}>Wallet Number:</span>
                     <strong style={{ fontSize: '15px', color: '#b91c1c', letterSpacing: '1px' }}>0101 234 5678</strong>
                   </div>
                   <div>
                     <input
                       type="tel"
-                      placeholder="رقم هاتفك الذي قمت بالتحويل منه"
+                      placeholder="Your mobile wallet number used for transfer"
                       value={walletPhone}
                       onChange={(e) => setWalletPhone(e.target.value)}
                       style={{
@@ -686,13 +686,13 @@ export default function PaymentModal({
                 <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '14px', padding: '16px', marginBottom: '16px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
-                      <span style={{ fontSize: '12px', color: '#15803d' }}>رصيد محفظتك المتاح:</span>
+                      <span style={{ fontSize: '12px', color: '#15803d' }}>Available Wallet Balance:</span>
                       <h4 style={{ fontSize: '18px', fontWeight: 800, color: '#166534', margin: '4px 0 0' }}>
                         {currentBalance.toLocaleString()} EGP
                       </h4>
                     </div>
                     <span style={{ fontSize: '11px', background: '#dcfce7', color: '#15803d', padding: '4px 10px', borderRadius: '20px', fontWeight: 700 }}>
-                      خصم فوري 200 ج.م
+                      Instant deduction: 200 EGP
                     </span>
                   </div>
                 </div>
@@ -730,15 +730,15 @@ export default function PaymentModal({
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#64748b', marginBottom: '6px' }}>
-                  <span>المبلغ المطلوب:</span>
+                  <span>Required Amount:</span>
                   <span style={{ fontWeight: 600 }}>{effectiveAmount.toLocaleString()} EGP</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#64748b', marginBottom: '6px' }}>
-                  <span>رسوم البوابة (Gateway Fee):</span>
-                  <span style={{ color: '#16a34a', fontWeight: 700 }}>0.00 EGP (مجاناً)</span>
+                  <span>Gateway Fee:</span>
+                  <span style={{ color: '#16a34a', fontWeight: 700 }}>0.00 EGP (Free)</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: '#0f172a', fontWeight: 800, paddingTop: '8px', borderTop: '1px solid #e2e8f0' }}>
-                  <span>إجمالي الخصم:</span>
+                  <span>Total Charged:</span>
                   <span style={{ color: '#0284c7' }}>{effectiveAmount.toLocaleString()} EGP</span>
                 </div>
               </div>
@@ -764,15 +764,15 @@ export default function PaymentModal({
                 {processing ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>جاري الاتصال بالبنك والتحقق الآمن (3DS)...</span>
+                    <span>Connecting to bank & verifying 3D Secure...</span>
                   </>
                 ) : (
                   <>
                     <Lock size={15} />
                     <span>
                       {isTopUp
-                        ? `تأكيد ودفع ${effectiveAmount.toLocaleString()} ج.م بالفيزا`
-                        : `سداد العربون (${effectiveAmount} ج.م) وتأكيد الحجز`}
+                        ? `Confirm & Pay ${effectiveAmount.toLocaleString()} EGP`
+                        : `Pay Deposit (${effectiveAmount} EGP) & Confirm`}
                     </span>
                     <ArrowRight size={16} />
                   </>
@@ -781,7 +781,7 @@ export default function PaymentModal({
 
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginTop: '12px', color: '#94a3b8', fontSize: '11px' }}>
                 <ShieldCheck size={14} color="#16a34a" />
-                <span>دفع مشفر بأمان 256-bit SSL وفق معايير البنك المركزي المصري PCI-DSS</span>
+                <span>256-bit SSL Encrypted & PCI-DSS Compliant</span>
               </div>
             </form>
           )}

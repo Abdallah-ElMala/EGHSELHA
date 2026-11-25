@@ -19,11 +19,14 @@ import {
   CreditCard,
   ThumbsUp,
   ChevronRight,
-  ShieldAlert
+  ShieldAlert,
+  Eye
 } from 'lucide-react'
 import { useCustomer } from '../../context/CustomerContext'
 import { useAuth } from '../../context/AuthContext'
 import { customerApi } from '../../services/customerApi'
+import TechnicianPublicProfileModal from '../../component/TechnicianPublicProfileModal'
+import LiveTrackingMap from '../../component/LiveTrackingMap'
 
 const PACKAGES = [
   {
@@ -107,6 +110,7 @@ export default function CustomerHome() {
 
   // Live tracking modal
   const [showLiveTracking, setShowLiveTracking] = useState(false)
+  const [showTechProfile, setShowTechProfile] = useState(false)
 
   const handleHeroQuickBook = () => {
     navigate('/customer/book')
@@ -172,14 +176,36 @@ export default function CustomerHome() {
                 {activeWash.serviceName || activeWash.packageName || 'Premium Wash'} in progress
               </b>
               <small style={{ fontSize: '11px', color: '#cbd5e1' }}>
-                Technician: <b>{activeWash.technicianName || 'Mohamed Ali'}</b> · ETA: ~8 mins away
+                Technician:{' '}
+                <b
+                  onClick={() => activeWash.technicianName && setShowTechProfile(true)}
+                  style={{ cursor: activeWash.technicianName ? 'pointer' : 'default', textDecoration: activeWash.technicianName ? 'underline' : 'none', color: '#60b4ff' }}
+                >
+                  {activeWash.technicianName || 'Assigned Technician'}
+                </b>
+                {' '}· ETA: ~8 mins away
               </small>
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            {activeWash.technicianName && (
+              <button
+                onClick={() => setShowTechProfile(true)}
+                className="btn outline"
+                style={{
+                  background: 'rgba(8, 124, 240, 0.2)',
+                  borderColor: 'rgba(96, 180, 255, 0.45)',
+                  color: '#fff',
+                  fontSize: '11px',
+                  padding: '9px 14px'
+                }}
+              >
+                <Eye size={14} /> Show Tech Profile
+              </button>
+            )}
             <button
-              onClick={() => notify(`Calling technician... (+20 101 234 5678)`)}
+              onClick={() => notify(`Calling technician... (${activeWash.technicianPhone || '+20 101 234 5678'})`)}
               className="btn outline"
               style={{
                 background: 'rgba(255,255,255,0.1)',
@@ -715,32 +741,7 @@ export default function CustomerHome() {
               </button>
             </div>
             <div className="modal-body">
-              <div style={{ height: '230px', borderRadius: '12px', overflow: 'hidden', position: 'relative', background: '#dce8dc', border: '1px solid #c8d8c8', marginBottom: '16px' }}>
-                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '90%' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(8, 124, 240, 0.25)', display: 'grid', placeItems: 'center', animation: 'pulse 1.5s infinite' }}>
-                    <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#087cf0', color: '#fff', display: 'grid', placeItems: 'center' }}>
-                      <MapPin size={16} />
-                    </div>
-                  </div>
-                  <b style={{ fontSize: '11px', background: '#fff', padding: '4px 10px', borderRadius: '6px', marginTop: '6px', color: '#1e293b', boxShadow: '0 2px 6px rgba(0,0,0,0.1)', textAlign: 'center' }}>
-                    {activeWash.technicianLatitude && activeWash.technicianLongitude
-                      ? `Live GPS: ${Number(activeWash.technicianLatitude).toFixed(4)}, ${Number(activeWash.technicianLongitude).toFixed(4)}`
-                      : `Address: ${activeWash.address || 'Cairo'}`}
-                  </b>
-                  <a
-                    href={
-                      activeWash.technicianLatitude && activeWash.technicianLongitude
-                        ? `https://www.google.com/maps?q=${activeWash.technicianLatitude},${activeWash.technicianLongitude}`
-                        : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(activeWash.address || 'Cairo')}`
-                    }
-                    target="_blank"
-                    rel="noreferrer"
-                    style={{ fontSize: '11px', fontWeight: 700, color: '#087cf0', background: '#fff', padding: '4px 10px', borderRadius: '999px', marginTop: '6px', textDecoration: 'none', boxShadow: '0 2px 6px rgba(0,0,0,0.08)' }}
-                  >
-                    Open Live Pin in Google Maps
-                  </a>
-                </div>
-              </div>
+              <LiveTrackingMap booking={activeWash} />
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px', background: '#f8fafc', borderRadius: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -775,11 +776,28 @@ export default function CustomerHome() {
               </div>
             </div>
             <div className="modal-footer">
-              <button className="btn outline" onClick={() => setShowLiveTracking(false)}>Close Tracker</button>
+              {activeWash.technicianName && (
+                <button
+                  className="btn soft sm"
+                  onClick={() => {
+                    setShowLiveTracking(false)
+                    setShowTechProfile(true)
+                  }}
+                >
+                  <Eye size={14} /> Show Tech Profile
+                </button>
+              )}
+              <button className="btn outline sm" onClick={() => setShowLiveTracking(false)}>Close Tracker</button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Read-Only Technician Public Profile Modal */}
+      <TechnicianPublicProfileModal
+        booking={showTechProfile ? activeWash : null}
+        onClose={() => setShowTechProfile(false)}
+      />
     </div>
   )
 }

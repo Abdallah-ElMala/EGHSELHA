@@ -73,16 +73,14 @@ export default function AdminPayouts() {
                         {isPending ? (
                           <div style={{ display: 'flex', gap: '6px' }}>
                             <button
-                              className="btn primary"
-                              style={{ padding: '6px 10px', fontSize: '10px', background: '#16a34a', borderColor: '#16a34a' }}
+                              className="btn success sm"
                               disabled={busyId === p.id}
                               onClick={() => handleProcess(p, true)}
                             >
                               <CheckCircle2 size={13} /> Approve
                             </button>
                             <button
-                              className="btn outline"
-                              style={{ padding: '6px 10px', fontSize: '10px', color: '#dc2626', borderColor: '#fca5a5' }}
+                              className="btn danger sm"
                               disabled={busyId === p.id}
                               onClick={() => handleProcess(p, false)}
                             >

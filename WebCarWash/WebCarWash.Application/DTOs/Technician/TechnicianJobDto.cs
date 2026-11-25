@@ -3,14 +3,34 @@ using System.Collections.Generic;
 
 namespace WebCarWash.Application.DTOs.Technician
 {
+    public class TechnicianCustomerVehicleDto
+    {
+        public string Make { get; set; } = string.Empty;
+        public string Model { get; set; } = string.Empty;
+        public int Year { get; set; }
+        public string Color { get; set; } = string.Empty;
+        public string LicensePlate { get; set; } = string.Empty;
+        public string SizeType { get; set; } = string.Empty;
+    }
+
     public class TechnicianJobDto
     {
         public string Id { get; set; } = string.Empty;
         public string BookingNumber { get; set; } = string.Empty;
+        public Guid CustomerId { get; set; }
         public string Customer { get; set; } = string.Empty;
         public string Phone { get; set; } = string.Empty;
+        public string CustomerEmail { get; set; } = string.Empty;
+        public string? CustomerGateNotes { get; set; }
+        public int CustomerTotalBookings { get; set; }
+        public List<string> CustomerSavedAddresses { get; set; } = new();
+        public List<TechnicianCustomerVehicleDto> CustomerVehicles { get; set; } = new();
         public string Service { get; set; } = string.Empty;
         public string Car { get; set; } = string.Empty;
+        public string LicensePlate { get; set; } = string.Empty;
+        public string CarColor { get; set; } = string.Empty;
+        public int CarYear { get; set; }
+        public string CarSizeType { get; set; } = string.Empty;
         public string Date { get; set; } = string.Empty;
         public string Time { get; set; } = string.Empty;
         public float Price { get; set; }

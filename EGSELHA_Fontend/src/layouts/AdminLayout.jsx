@@ -12,6 +12,7 @@ import {
   CheckCircle2,
   X,
   Menu,
+  LogOut,
 } from 'lucide-react';
 import { useAdmin } from '../context/AdminContext';
 import { useAuth } from '../context/AuthContext';
@@ -125,25 +126,14 @@ export default function AdminLayout() {
 
         <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <button
+            className="sidebar-logout-btn"
             onClick={async () => {
               await logout();
               navigate('/login');
             }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              padding: '10px 12px',
-              borderRadius: '10px',
-              background: 'rgba(239, 68, 68, 0.15)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              color: '#f87171',
-              fontSize: '11px',
-              fontWeight: 700,
-              cursor: 'pointer',
-            }}
           >
-            <span>تسجيل الخروج (Logout)</span>
+            <LogOut size={16} />
+            <span>Logout</span>
           </button>
         </div>
       </aside>

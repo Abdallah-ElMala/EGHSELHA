@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import PageTitle from '../../component/PageTitle'
 import FieldError from '../../component/FieldError'
+import LocationPicker from '../../component/LocationPicker'
 import { useCustomer } from '../../context/CustomerContext'
 import { customerApi } from '../../services/customerApi'
 import { validateBooking, extractApiErrors } from '../../utils/validation'
@@ -89,9 +90,14 @@ export default function CustomerBookWash() {
   const [packages, setPackages] = useState(PACKAGES)
   const [addonsCatalog, setAddonsCatalog] = useState(CATALOG_ADDONS)
   const [zones, setZones] = useState([
+    { id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0001', zoneName: 'Sheikh Zayed - Central (Arkan / Districts 1-16)', baseDistanceSurcharge: 15, peakSurgeMultiplier: 1.0 },
+    { id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0002', zoneName: 'Sheikh Zayed - Beverly Hills & New Zayed', baseDistanceSurcharge: 20, peakSurgeMultiplier: 1.0 },
+    { id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0003', zoneName: '6th of October - El Hosary & Districts 1-12', baseDistanceSurcharge: 15, peakSurgeMultiplier: 1.0 },
+    { id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0004', zoneName: '6th of October - Mall of Arabia & Palm Hills', baseDistanceSurcharge: 20, peakSurgeMultiplier: 1.0 },
+    { id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0005', zoneName: '6th of October - Mall of Egypt & Dreamland', baseDistanceSurcharge: 25, peakSurgeMultiplier: 1.0 },
     { id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', zoneName: 'East Cairo - Nasr City', baseDistanceSurcharge: 20, peakSurgeMultiplier: 1.0 }
   ])
-  const [selectedZoneId, setSelectedZoneId] = useState('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
+  const [selectedZoneId, setSelectedZoneId] = useState('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0001')
 
   const [selectedVehicleId, setSelectedVehicleId] = useState(urlVehicle || vehicles[0]?.id || '')
   const [selectedPackageId, setSelectedPackageId] = useState(urlPackage || PACKAGES[1].id)
@@ -123,7 +129,13 @@ export default function CustomerBookWash() {
           )
         }
         if (cat?.zones?.length) {
-          const normalizedZones = cat.zones.map((z) => ({ ...z, id: z.id.toLowerCase() }))
+          const normalizedZones = cat.zones
+            .map((z) => ({ ...z, id: z.id.toLowerCase() }))
+            .sort((a, b) => {
+              const aWest = /zayed|october/i.test(a.zoneName) ? 0 : 1
+              const bWest = /zayed|october/i.test(b.zoneName) ? 0 : 1
+              return aWest - bWest || a.zoneName.localeCompare(b.zoneName)
+            })
           setZones(normalizedZones)
           setSelectedZoneId((curr) =>
             normalizedZones.some((z) => z.id === curr) ? curr : normalizedZones[0].id
@@ -164,12 +176,11 @@ export default function CustomerBookWash() {
   const [hasWater, setHasWater] = useState(true)
 
   // Location / Address
-  const savedList = profile?.savedAddresses?.length > 0
-    ? profile.savedAddresses
-    : ['Nasr City, Abbas El Akkad, Cairo', 'New Cairo, 5th Settlement', 'Heliopolis, Korba, Cairo']
-  const [selectedSavedAddress, setSelectedSavedAddress] = useState(savedList[0] || 'Nasr City, Abbas El Akkad, Cairo')
+  const savedList = profile?.savedAddresses || []
+  const [selectedSavedAddress, setSelectedSavedAddress] = useState(savedList[0] || '')
   const [customAddress, setCustomAddress] = useState('')
-  const [useCustomAddress, setUseCustomAddress] = useState(false)
+  const [pickedCoords, setPickedCoords] = useState({ lat: 30.0226, lng: 31.0031 })
+  const [useCustomAddress, setUseCustomAddress] = useState(savedList.length === 0)
   const [saveNewAddress, setSaveNewAddress] = useState(false)
 
   const [submitting, setSubmitting] = useState(false)
@@ -270,8 +281,8 @@ export default function CustomerBookWash() {
         hasWaterAccess: hasWater,
         bookingType: Number(bookingType),
         scheduledAt: bookingType === 0 ? new Date().toISOString() : `${scheduledDate}T${scheduledTime.includes('PM') ? '14:00:00' : '10:00:00'}Z`,
-        parkingLatitude: 30.0561,
-        parkingLongitude: 31.3414,
+        parkingLatitude: pickedCoords.lat || 30.0226,
+        parkingLongitude: pickedCoords.lng || 31.0031,
         addOnIds: selectedAddonIds
       }
 
@@ -571,31 +582,52 @@ export default function CustomerBookWash() {
                     style={{ fontSize: '11px', padding: '6px 12px' }}
                     onClick={() => setUseCustomAddress(true)}
                   >
-                    + Enter New Address
+                    + Pick Location (GPS / Map)
                   </button>
                 </div>
 
                 {!useCustomAddress ? (
-                  <select
-                    value={selectedSavedAddress}
-                    onChange={(e) => setSelectedSavedAddress(e.target.value)}
-                    style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '12px' }}
-                  >
-                    {savedList.map((addr, idx) => (
-                      <option key={idx} value={addr}>{addr}</option>
-                    ))}
-                  </select>
+                  savedList.length > 0 ? (
+                    <select
+                      value={selectedSavedAddress}
+                      onChange={(e) => setSelectedSavedAddress(e.target.value)}
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '12px' }}
+                    >
+                      {savedList.map((addr, idx) => (
+                        <option key={idx} value={addr}>{addr}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div style={{ padding: '10px 12px', borderRadius: '8px', border: '1px dashed #cbd5e1', background: '#f8fafc', fontSize: '12px', color: '#64748b' }}>
+                      No saved addresses yet. Click <strong>+ Pick Location (GPS / Map)</strong> to locate your spot in Sheikh Zayed or 6th of October.
+                    </div>
+                  )
                 ) : (
-                  <div>
-                    <input
-                      type="text"
-                      placeholder="e.g. Villa 42, District 1, New Cairo"
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <LocationPicker
                       value={customAddress}
-                      onChange={(e) => {
-                        setCustomAddress(e.target.value)
+                      latitude={pickedCoords.lat}
+                      longitude={pickedCoords.lng}
+                      error={bookingErrors.address}
+                      onChange={({ address, latitude, longitude }) => {
+                        setCustomAddress(address)
+                        setPickedCoords({ lat: latitude, lng: longitude })
                         if (bookingErrors.address) setBookingErrors({ ...bookingErrors, address: '' })
+                        // Auto-match closest Sheikh Zayed / 6th of October coverage zone
+                        const targetZoneId =
+                          latitude >= 30.045
+                            ? 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0002' // Sheikh Zayed - Beverly Hills & New Zayed
+                            : latitude >= 30.012 && longitude >= 30.965
+                              ? 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0001' // Sheikh Zayed - Central
+                              : longitude <= 30.965 && latitude < 30.012
+                                ? 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0003' // 6th of October - El Hosary & Districts
+                                : latitude >= 29.985
+                                  ? 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0004' // 6th of October - Mall of Arabia & Palm Hills
+                                  : 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0005' // 6th of October - Mall of Egypt & Dreamland
+                        if (zones.some((z) => z.id === targetZoneId)) {
+                          setSelectedZoneId(targetZoneId)
+                        }
                       }}
-                      style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: bookingErrors.address ? '1.5px solid #ef4444' : '1px solid #cbd5e1', fontSize: '12px', marginBottom: '6px' }}
                     />
                     <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: '#64748b' }}>
                       <input

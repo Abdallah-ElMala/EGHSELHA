@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Car, Plus, ShieldCheck, CheckCircle2, MapPin, Trash2, Camera, X, AlertCircle } from 'lucide-react'
 import PageTitle from '../../component/PageTitle'
 import FieldError from '../../component/FieldError'
+import LocationPicker from '../../component/LocationPicker'
 import { useCustomer } from '../../context/CustomerContext'
 import { customerApi } from '../../services/customerApi'
 import { validateVehicle, validateSavedAddress, extractApiErrors } from '../../utils/validation'
@@ -521,7 +522,7 @@ export default function CustomerVehicles() {
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g. أ ب ج 1234 or ABC 1234"
+                    placeholder="e.g. ABC 1234"
                     value={licensePlate}
                     onChange={(e) => {
                       setLicensePlate(e.target.value)
@@ -603,24 +604,15 @@ export default function CustomerVehicles() {
                     <span>{serverAddressError}</span>
                   </div>
                 )}
-                <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
-                  Address Details *
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '8px' }}>
+                  Select Location via GPS or Map (Sheikh Zayed &amp; 6th of October) *
                 </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Sheikh Zayed, Beverly Hills, Villa 102"
+                <LocationPicker
                   value={newAddressText}
-                  onChange={(e) => {
-                    setNewAddressText(e.target.value)
+                  error={addressError}
+                  onChange={({ address }) => {
+                    setNewAddressText(address)
                     if (addressError) setAddressError('')
-                  }}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    borderRadius: '8px',
-                    border: addressError ? '1.5px solid #ef4444' : '1px solid #cbd5e1',
-                    background: addressError ? '#fffbfb' : '#fff',
-                    fontSize: '12px'
                   }}
                 />
                 <FieldError error={addressError} />

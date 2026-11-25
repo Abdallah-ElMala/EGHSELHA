@@ -246,8 +246,12 @@ namespace WebCarWash.Infrastructure.Services
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Could not save customer to database, using memory fallback.");
-                _fallbackUsers[normalizedEmail] = customer;
+                _logger.LogError(ex, "Could not save customer {Email} to database.", normalizedEmail);
+                return new AuthResponseDto
+                {
+                    Success = false,
+                    Message = "Could not save account to database. Please make sure SQL Server is running and try again."
+                };
             }
 
             // Send Welcome & Confirmation Email
@@ -296,6 +300,13 @@ namespace WebCarWash.Infrastructure.Services
             technician.CreatedAt = DateTime.UtcNow;
             technician.IsEmailConfirmed = false;
             technician.EmailConfirmationToken = Guid.NewGuid().ToString("N");
+            technician.IsOnline = true;
+            technician.Rating = 5.0f;
+            technician.AcceptanceRate = 100f;
+            if (string.IsNullOrWhiteSpace(technician.ServiceArea))
+            {
+                technician.ServiceArea = "Cairo";
+            }
 
             var userDto = _mapper.Map<AuthUserDto>(technician);
             var (token, expiresAt) = _jwtTokenGenerator.GenerateToken(userDto);
@@ -309,13 +320,26 @@ namespace WebCarWash.Infrastructure.Services
             {
                 var zone = await _unitOfWork.ServiceZones.FirstOrDefaultAsync(z => z.Status == ZoneStatus.ACTIVE);
                 technician.ServiceZoneId = zone?.Id;
+                technician.TechnicianApplication = new TechnicianApplication
+                {
+                    TechnicianId = technician.Id,
+                    HasPressureWasher = true,
+                    HasVacuumExtractor = true,
+                    HasWaterTankGenerator = true,
+                    HasVehicle = true,
+                    Status = "Approved"
+                };
                 await _unitOfWork.Technicians.AddAsync(technician);
                 await _unitOfWork.CompleteAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Could not save technician to database, using memory fallback.");
-                _fallbackUsers[normalizedEmail] = technician;
+                _logger.LogError(ex, "Could not save technician {Email} to database.", normalizedEmail);
+                return new AuthResponseDto
+                {
+                    Success = false,
+                    Message = "Could not save technician account to database. Please make sure SQL Server is running and try again."
+                };
             }
 
             return new AuthResponseDto

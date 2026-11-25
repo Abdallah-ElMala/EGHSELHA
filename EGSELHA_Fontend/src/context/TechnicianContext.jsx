@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
-import { technicianApi } from '../services/technicianApi.js' // استيراد الملف السابق
+import { technicianApi } from '../services/technicianApi.js'
 
 const TechnicianContext = createContext(null)
 export const useTech = () => useContext(TechnicianContext)
@@ -50,7 +50,7 @@ export function TechnicianProvider({ children }) {
     }
   }
 
-  // تحميل الحجوزات والملف الشخصي عند فتح التطبيق + مزامنة تلقائية
+  // Load bookings and profile on startup + auto polling sync
   useEffect(() => {
     async function loadInitialData() {
       setLoading(true)
@@ -67,7 +67,7 @@ export function TechnicianProvider({ children }) {
     return () => clearInterval(interval)
   }, [])
 
-  // قبول أو رفض عرض عمل وربطه بالـ API وتحديث قائمة الوظائف
+  // Accept or decline job offer, sync with API and refresh job list
   const acceptOffer = async (offerId) => {
     const res = await technicianApi.respondToJobOffer(offerId, true)
     await refreshData()
@@ -80,7 +80,7 @@ export function TechnicianProvider({ children }) {
     return res
   }
 
-  // دالة تحديث الحالة وربطها بالـ API
+  // Update status function and sync with API
   const updateStatus = async (id, status) => {
     try {
       await technicianApi.updateJobStatus(id, status)
@@ -91,7 +91,7 @@ export function TechnicianProvider({ children }) {
         'In Progress': 'WASHING',
         'Completed': 'COMPLETED'
       }
-      // تحديث الحالة محلياً في الواجهة
+      // Update state locally in UI
       setJobs((prev) =>
         prev.map((j) =>
           j.id === id
@@ -107,7 +107,7 @@ export function TechnicianProvider({ children }) {
     }
   }
 
-  // دالة تحديث الملف الشخصي وربطها بالـ API
+  // Update profile function and sync with API
   const updateProfile = async (newProfileData) => {
     try {
       await technicianApi.updateProfile(newProfileData)
@@ -116,7 +116,7 @@ export function TechnicianProvider({ children }) {
       return true
     } catch (err) {
       console.error('Profile update error:', err)
-      notify('Failed to save profile changes.')
+      notify(err?.message || 'Failed to save profile changes.')
       return false
     }
   }

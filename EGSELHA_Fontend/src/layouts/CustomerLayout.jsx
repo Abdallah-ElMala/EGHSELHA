@@ -9,7 +9,8 @@ import {
   LogOut,
   X,
   Menu,
-  CheckCircle2
+  CheckCircle2,
+  CreditCard
 } from 'lucide-react'
 import { useCustomer } from '../context/CustomerContext'
 import { useAuth } from '../context/AuthContext'
@@ -141,29 +142,15 @@ export default function CustomerLayout() {
 
         {/* Sidebar Bottom (Logout) */}
         <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-
           <button
+            className="sidebar-logout-btn"
             onClick={async () => {
               await logout()
               navigate('/login')
             }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              padding: '12px 14px',
-              borderRadius: '10px',
-              color: '#f87171',
-              background: 'rgba(239, 68, 68, 0.08)',
-              border: '1px solid rgba(239, 68, 68, 0.2)',
-              cursor: 'pointer',
-              fontWeight: 600,
-              fontSize: '13px',
-              transition: 'all 0.2s'
-            }}
           >
             <LogOut size={16} />
-            <span>تسجيل الخروج (Logout)</span>
+            <span>Logout</span>
           </button>
         </div>
       </aside>
@@ -199,6 +186,16 @@ export default function CustomerLayout() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            {/* Switch to Admin portal if user is Admin */}
+            {(role === 'ADMIN' || hasRole?.('ADMIN')) && (
+              <button
+                className="btn soft sm"
+                onClick={() => navigate('/admin')}
+              >
+                Admin Panel
+              </button>
+            )}
+
             {/* Quick Wallet pill */}
             <div
               onClick={() => setShowWalletModal(true)}
@@ -264,7 +261,7 @@ export default function CustomerLayout() {
               </div>
               <div style={{ textAlign: 'left' }}>
                 <b style={{ display: 'block', fontSize: '12px', color: '#102a40' }}>{customerName}</b>
-                <small style={{ display: 'block', fontSize: '10px', color: '#8493a2' }}>Customer</small>
+                <small style={{ display: 'block', fontSize: '10px', color: '#8493a2' }}>{role || 'Customer'}</small>
               </div>
             </div>
           </div>
@@ -332,7 +329,7 @@ export default function CustomerLayout() {
                 }}
               >
                 <CreditCard size={16} />
-                <span>شحن المحفظة بالفيزا / الدفع الإلكتروني</span>
+                <span>Top Up Wallet with Card / E-Payment</span>
               </button>
             </div>
           </div>

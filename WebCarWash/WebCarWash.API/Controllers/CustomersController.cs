@@ -108,9 +108,16 @@ namespace WebCarWash.API.Controllers
             [FromBody] AddVehicleDto dto,
             [FromHeader(Name = "X-Customer-Id")] Guid? customerId)
         {
-            var effectiveId = GetEffectiveCustomerId(customerId);
-            var vehicle = await _customerService.AddVehicleAsync(effectiveId, dto);
-            return Ok(vehicle);
+            try
+            {
+                var effectiveId = GetEffectiveCustomerId(customerId);
+                var vehicle = await _customerService.AddVehicleAsync(effectiveId, dto);
+                return Ok(vehicle);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { success = false, message = ex.Message });
+            }
         }
 
         /// <summary>

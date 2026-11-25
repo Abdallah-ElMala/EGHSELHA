@@ -12,11 +12,13 @@ import {
   PlusCircle,
   CheckCircle,
   X,
-  Lock
+  Lock,
+  Eye
 } from 'lucide-react'
 import PageTitle from '../../component/PageTitle'
 import Status from '../../component/Status'
 import FieldError from '../../component/FieldError'
+import CustomerPublicProfileModal from '../../component/CustomerPublicProfileModal'
 import { useTech } from '../../context/TechnicianContext'
 import { technicianApi } from '../../services/technicianApi'
 import { resolveAssetUrl } from '../../services/apiClient'
@@ -70,6 +72,7 @@ export default function JobDetails() {
   const [activeUpsell, setActiveUpsell] = useState(null)
   const [upsellErrors, setUpsellErrors] = useState({})
   const [serverUpsellError, setServerUpsellError] = useState('')
+  const [showCustomerProfile, setShowCustomerProfile] = useState(false)
   const [nowMs, setNowMs] = useState(() => Date.now())
 
   useEffect(() => {
@@ -185,8 +188,8 @@ export default function JobDetails() {
   }
 
   const getCoordinates = async () => {
-    let lat = 30.0561
-    let lng = 31.3414
+    let lat = job?.latitude && Math.abs(job.latitude) > 0.1 ? job.latitude : 30.0226
+    let lng = job?.longitude && Math.abs(job.longitude) > 0.1 ? job.longitude : 31.0031
     if (navigator.geolocation) {
       try {
         const pos = await new Promise((resolve, reject) =>
@@ -400,15 +403,35 @@ export default function JobDetails() {
           })()}
 
           <div className="detail-customer">
-            <div className="customer-avatar large">{job.customer.split(' ').map((x) => x[0]).join('')}</div>
-            <div><b>{job.customer}</b><small>{job.phone}</small></div>
-            <a
-              className="soft-btn"
-              href={`tel:${(job.phone || '').replace(/\s+/g, '')}`}
-              style={{ textDecoration: 'none' }}
+            <div
+              className="customer-avatar large"
+              onClick={() => setShowCustomerProfile(true)}
+              style={{ cursor: 'pointer' }}
+              title="Show customer profile"
             >
-              <Phone size={15} /> Call
-            </a>
+              {job.customer.split(' ').map((x) => x[0]).join('')}
+            </div>
+            <div onClick={() => setShowCustomerProfile(true)} style={{ cursor: 'pointer' }} title="Show customer profile">
+              <b style={{ color: '#087cf0' }}>{job.customer}</b>
+              <small>{job.phone}</small>
+            </div>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginLeft: 'auto', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                className="soft-btn"
+                onClick={() => setShowCustomerProfile(true)}
+                style={{ cursor: 'pointer' }}
+              >
+                <Eye size={15} /> Show Profile
+              </button>
+              <a
+                className="soft-btn"
+                href={`tel:${(job.phone || '').replace(/\s+/g, '')}`}
+                style={{ textDecoration: 'none' }}
+              >
+                <Phone size={15} /> Call
+              </a>
+            </div>
           </div>
 
           <div className="detail-sections">
@@ -474,7 +497,15 @@ export default function JobDetails() {
 
           <div className="action-row" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
             {job.status === 'Upcoming' && (
-              <button className="btn primary" onClick={() => handleStatusUpdate('On The Way')}>
+              <button
+                className="btn primary"
+                onClick={() => {
+                  if (!window.confirm('Confirm Start Navigation? Once you are On The Way to the customer, you will no longer be able to cancel this trip.')) {
+                    return
+                  }
+                  handleStatusUpdate('On The Way')
+                }}
+              >
                 Start navigation <Navigation size={16} />
               </button>
             )}
@@ -541,11 +572,11 @@ export default function JobDetails() {
               <span className="completed-note"><CheckCircle2 /> This job is completed.</span>
             )}
 
-            {['Upcoming', 'On The Way', 'Arrived'].includes(job.status) && job.bookingStatus !== 'CANCELLED' && (
+            {job.status === 'Upcoming' && job.bookingStatus !== 'CANCELLED' && (
               <button
                 type="button"
-                className="btn outline"
-                style={{ marginLeft: 'auto', borderColor: '#fecaca', color: '#dc2626', background: '#fef2f2' }}
+                className="btn danger"
+                style={{ marginLeft: 'auto' }}
                 onClick={async () => {
                   if (!window.confirm(`Cancel trip ${job.bookingNumber || job.id}? The booking will be marked as Cancelled by Technician.`)) {
                     return
@@ -964,6 +995,12 @@ export default function JobDetails() {
           </div>
         </div>
       )}
+
+      {/* Read-Only Customer Profile Modal */}
+      <CustomerPublicProfileModal
+        customerData={showCustomerProfile ? job : null}
+        onClose={() => setShowCustomerProfile(false)}
+      />
     </>
   )
 }

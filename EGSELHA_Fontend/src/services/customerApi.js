@@ -4,17 +4,17 @@ import { API_ORIGIN, apiRequest } from './apiClient';
 const BASE_URL = `${API_ORIGIN}/api/Customers`;
 
 export const customerApi = {
-  // جلب الكتالوج الحي (الباقات، الإضافات، مناطق الخدمة)
+  // Fetch live catalog (packages, add-ons, service areas)
   getCatalog: async () => {
     return await apiRequest(`${BASE_URL}/catalog`);
   },
 
-  // 1. جلب بيانات العميل والرصيد ونقاط الولاء والعناوين
+  // 1. Fetch customer profile, balance, loyalty points, and addresses
   getProfile: async () => {
     return await apiRequest(`${BASE_URL}/profile`);
   },
 
-  // تحديث بيانات العميل الشخصية (الاسم، الهاتف، البريد)
+  // Update customer personal info (name, phone, email)
   updateProfile: async (profileData) => {
     return await apiRequest(`${BASE_URL}/profile`, {
       method: 'PUT',
@@ -23,7 +23,7 @@ export const customerApi = {
     });
   },
 
-  // 2. تسجيل سيارة جديدة (addVehicle)
+  // 2. Register new vehicle (addVehicle)
   addVehicle: async (vehicleData) => {
     return await apiRequest(`${BASE_URL}/vehicles`, {
       method: 'POST',
@@ -32,19 +32,19 @@ export const customerApi = {
     });
   },
 
-  // حذف سيارة من الجراج
+  // Delete vehicle from garage
   deleteVehicle: async (vehicleId) => {
     return await apiRequest(`${BASE_URL}/vehicles/${encodeURIComponent(vehicleId)}`, {
       method: 'DELETE',
     });
   },
 
-  // جلب سيارات العميل المسجلة
+  // Get customer registered vehicles
   getVehicles: async () => {
     return await apiRequest(`${BASE_URL}/vehicles`);
   },
 
-  // 3. إنشاء حجز جديد لغسيل السيارة (createBooking)
+  // 3. Create new wash booking (createBooking)
   createBooking: async (bookingParams) => {
     return await apiRequest(`${BASE_URL}/bookings`, {
       method: 'POST',
@@ -53,24 +53,24 @@ export const customerApi = {
     });
   },
 
-  // جلب حجوزات العميل
+  // Get customer bookings
   getBookings: async () => {
     return await apiRequest(`${BASE_URL}/bookings`);
   },
 
-  // جلب تفاصيل حجز
+  // Get booking details
   getBookingDetails: async (bookingId) => {
     return await apiRequest(`${BASE_URL}/bookings/${encodeURIComponent(bookingId)}`);
   },
 
-  // إلغاء أو حذف حجز
+  // Cancel or delete booking
   cancelBooking: async (bookingId) => {
     return await apiRequest(`${BASE_URL}/bookings/${encodeURIComponent(bookingId)}`, {
       method: 'DELETE',
     });
   },
 
-  // شحن رصيد المحفظة في قاعدة البيانات
+  // Top up wallet balance
   topUpWallet: async (amount = 500) => {
     return await apiRequest(`${BASE_URL}/wallet/topup`, {
       method: 'POST',
@@ -79,7 +79,7 @@ export const customerApi = {
     });
   },
 
-  // 4. دفع العربون الإجباري 200 جنيه لتأكيد الحجز (payDeposit)
+  // 4. Pay mandatory 200 EGP deposit to confirm booking (payDeposit)
   payDeposit: async (bookingId, paymentMethod = 1) => {
     return await apiRequest(`${BASE_URL}/bookings/${encodeURIComponent(bookingId)}/deposit`, {
       method: 'POST',
@@ -88,48 +88,49 @@ export const customerApi = {
     });
   },
 
-  // 5. قبول أو رفض الترقية/التكلفة الإضافية المقترحة من الفني (approveUpsell)
+  // 5. Accept or decline upsell / additional service proposed by technician (approveUpsell)
   approveUpsell: async (upsellId, decision) => {
-    return await apiRequest(`${BASE_URL}/upsells/${encodeURIComponent(upsellId)}/decision`, {
+    return await apiRequest(`${BASE_URL}/bookings/${encodeURIComponent(upsellId)}/upsell`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ decision }),
     });
   },
 
-  // 6. تقييم الخدمة وإرسال إكرامية (submitReview)
+  // 6. Review service and add tip (submitReview)
   submitReview: async (bookingId, reviewData) => {
-    return await apiRequest(`${BASE_URL}/bookings/${encodeURIComponent(bookingId)}/reviews`, {
+    return await apiRequest(`${BASE_URL}/bookings/${encodeURIComponent(bookingId)}/review`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(reviewData),
     });
   },
 
-  // جلب جميع تقييمات العميل
+  // Get all customer reviews
   getReviews: async () => {
     return await apiRequest(`${BASE_URL}/reviews`);
   },
 
-  // 7. فتح شكوى رسمية خلال 12 ساعة من انتهاء الغسيل (fileDispute)
+  // 7. File official dispute within 12h of completion (fileDispute)
   fileDispute: async (bookingId, disputeData) => {
-    return await apiRequest(`${BASE_URL}/bookings/${encodeURIComponent(bookingId)}/disputes`, {
+    return await apiRequest(`${BASE_URL}/bookings/${encodeURIComponent(bookingId)}/dispute`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(disputeData),
     });
   },
 
-  // إضافة عنوان مفضل
+  // Add saved address
   addSavedAddress: async (address) => {
+    const payload = typeof address === 'string' ? { address } : address;
     return await apiRequest(`${BASE_URL}/addresses`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(address),
+      body: JSON.stringify(payload),
     });
   },
 
-  // حذف عنوان مفضل
+  // Delete saved address
   deleteAddress: async (address) => {
     return await apiRequest(`${BASE_URL}/addresses`, {
       method: 'DELETE',

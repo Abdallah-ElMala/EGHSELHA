@@ -50,8 +50,10 @@ namespace WebCarWash.Application.Common.Mappings
             // 6. Technician -> AdminTechnicianDto
             CreateMap<Technician, AdminTechnicianDto>()
                 .ForMember(dest => dest.ServiceArea, opt => opt.MapFrom(src => string.IsNullOrWhiteSpace(src.ServiceArea) ? "Cairo" : src.ServiceArea))
+                .ForMember(dest => dest.VerifiedEquipment, opt => opt.MapFrom(src => src.VerifiedEquipment ?? new List<string>()))
                 .ForMember(dest => dest.CompletedJobsCount, opt => opt.MapFrom(src => src.Bookings != null ? src.Bookings.Count(b => b.Status == BookingStatus.COMPLETED) : 0))
                 .ForMember(dest => dest.ActiveJobsCount, opt => opt.MapFrom(src => src.Bookings != null ? src.Bookings.Count(b => b.Status != BookingStatus.COMPLETED && b.Status != BookingStatus.CANCELLED) : 0))
+                .ForMember(dest => dest.TotalRevenue, opt => opt.MapFrom(src => src.Bookings != null ? src.Bookings.Where(b => b.Status == BookingStatus.COMPLETED).Sum(b => b.TotalPrice) : 0f))
                 .ForMember(dest => dest.ApplicationStatus, opt => opt.MapFrom(src => src.TechnicianApplication != null ? src.TechnicianApplication.Status : "Approved"))
                 .ForMember(dest => dest.HasPressureWasher, opt => opt.MapFrom(src => src.TechnicianApplication == null || src.TechnicianApplication.HasPressureWasher))
                 .ForMember(dest => dest.HasVacuumExtractor, opt => opt.MapFrom(src => src.TechnicianApplication == null || src.TechnicianApplication.HasVacuumExtractor))
@@ -83,12 +85,18 @@ namespace WebCarWash.Application.Common.Mappings
             CreateMap<Payout, AdminPayoutDto>()
                 .ForMember(dest => dest.TechnicianName, opt => opt.MapFrom(src => src.Technician != null ? src.Technician.FullName : "Technician"));
 
-            // 9. Customer -> AdminCustomerDto
+            // 9. Vehicle -> AdminCustomerVehicleDto
+            CreateMap<Vehicle, AdminCustomerVehicleDto>()
+                .ForMember(dest => dest.SizeType, opt => opt.MapFrom(src => src.SizeType.ToString()));
+
+            // 10. Customer -> AdminCustomerDto
             CreateMap<Customer, AdminCustomerDto>()
                 .ForMember(dest => dest.VehiclesCount, opt => opt.MapFrom(src => src.Vehicles != null ? src.Vehicles.Count : 0))
                 .ForMember(dest => dest.BookingsCount, opt => opt.MapFrom(src => src.Bookings != null ? src.Bookings.Count : 0))
+                .ForMember(dest => dest.DisputesCount, opt => opt.MapFrom(src => src.Disputes != null ? src.Disputes.Count : 0))
                 .ForMember(dest => dest.TotalSpent, opt => opt.MapFrom(src => src.Bookings != null ? src.Bookings.Where(b => b.Status != BookingStatus.CANCELLED).Sum(b => b.TotalPrice) : 0f))
-                .ForMember(dest => dest.SavedAddresses, opt => opt.MapFrom(src => src.SavedAddresses ?? new List<string>()));
+                .ForMember(dest => dest.SavedAddresses, opt => opt.MapFrom(src => src.SavedAddresses ?? new List<string>()))
+                .ForMember(dest => dest.Vehicles, opt => opt.MapFrom(src => src.Vehicles ?? Enumerable.Empty<Vehicle>()));
         }
     }
 }

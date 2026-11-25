@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CalendarDays, Search, SlidersHorizontal, BriefcaseBusiness, CarFront, MapPin, Clock3, ChevronRight, BellRing, Check, X, RefreshCw } from 'lucide-react'
+import { CalendarDays, Search, SlidersHorizontal, BriefcaseBusiness, CarFront, MapPin, Clock3, ChevronRight, BellRing, Check, X, RefreshCw, Eye } from 'lucide-react'
 import PageTitle from '../../component/PageTitle'
 import Status from '../../component/Status'
+import CustomerPublicProfileModal from '../../component/CustomerPublicProfileModal'
 import { useTech } from '../../context/TechnicianContext'
 import { jobPath } from '../../data/jobs'
 
@@ -14,6 +15,7 @@ export default function Jobs() {
   const [filter, setFilter] = useState('All')
   const [searchQuery, setSearchQuery] = useState('')
   const [refreshing, setRefreshing] = useState(false)
+  const [profileModalCustomer, setProfileModalCustomer] = useState(null)
 
   useEffect(() => {
     refreshData()
@@ -120,13 +122,18 @@ export default function Jobs() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '8px' }}>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <button
+                  className="btn soft"
+                  onClick={() => setProfileModalCustomer(offer)}
+                >
+                  <Eye size={15} /> Customer Profile
+                </button>
                 <button className="btn outline" onClick={() => handlePass(offer)}>
                   <X size={15} /> Pass
                 </button>
                 <button
-                  className="btn primary"
-                  style={{ backgroundColor: '#16a34a', borderColor: '#16a34a' }}
+                  className="btn success"
                   onClick={() => handleAccept(offer)}
                 >
                   <Check size={15} /> Accept Job
@@ -174,19 +181,41 @@ export default function Jobs() {
                   )}
                 </div>
                 <span>
-                  {j.id} · {j.customer} · {j.car}
+                  {j.id} ·{' '}
+                  <b
+                    onClick={() => setProfileModalCustomer(j)}
+                    style={{ color: '#087cf0', cursor: 'pointer', textDecoration: 'underline' }}
+                    title="Click to show customer profile"
+                  >
+                    {j.customer}
+                  </b>
+                  {' '}· {j.car}
                   {j.addOnNames?.length > 0 ? ` · +${j.addOnNames.length} Add-On${j.addOnNames.length > 1 ? 's' : ''}` : ''}
                 </span>
                 <small><MapPin size={13} />{j.address} <Clock3 size={13} />{j.time}</small>
               </div>
               <div className="job-price"><b>EGP {j.price}</b><small>{j.date}</small></div>
-              <button className="btn outline" onClick={() => navigate(jobPath(j.id))}>
-                View details <ChevronRight size={15} />
-              </button>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <button
+                  className="btn soft sm"
+                  onClick={() => setProfileModalCustomer(j)}
+                >
+                  <Eye size={14} /> Show Profile
+                </button>
+                <button className="btn outline sm" onClick={() => navigate(jobPath(j.id))}>
+                  View details <ChevronRight size={15} />
+                </button>
+              </div>
             </div>
           ))
         )}
       </div>
+
+      {/* Read-Only Customer Profile Modal */}
+      <CustomerPublicProfileModal
+        customerData={profileModalCustomer}
+        onClose={() => setProfileModalCustomer(null)}
+      />
     </>
   )
 }

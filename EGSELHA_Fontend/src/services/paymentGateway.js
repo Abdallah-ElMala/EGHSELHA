@@ -100,13 +100,13 @@ export async function processPaymentTransaction({
     if (cardData) {
       const cleaned = (cardData.cardNumber || '').replace(/\s+/g, '')
       if (cleaned.length < 15) {
-        throw new Error('رقم البطاقة غير مكتمل، يجب أن يتكون من 16 رقم.')
+        throw new Error('Incomplete card number, must be 16 digits.')
       }
       if (!cardData.expiry || !cardData.expiry.includes('/')) {
-        throw new Error('تاريخ انتهاء البطاقة غير صحيح (MM/YY).')
+        throw new Error('Invalid card expiration date (MM/YY).')
       }
       if (!cardData.cvv || cardData.cvv.length < 3) {
-        throw new Error('رمز الأمان CVV غير صحيح (3 أرقام).')
+        throw new Error('Invalid CVV security code (3 digits).')
       }
     }
 

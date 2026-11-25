@@ -55,24 +55,24 @@ export default function Register() {
   const validate = () => {
     const errs = {};
     if (!form.fullName || !form.fullName.trim() || form.fullName.trim().length < 3) {
-      errs.fullName = 'الاسم بالكامل يجب أن يكون 3 أحرف على الأقل.';
+      errs.fullName = 'Full name must be at least 3 characters.';
     }
 
     if (!form.email || !form.email.trim() || !EMAIL_REGEX.test(form.email.trim())) {
-      errs.email = 'يرجى إدخال بريد إلكتروني صالح.';
+      errs.email = 'Please enter a valid email address.';
     }
 
     if (!form.phone || !form.phone.trim() || !EGYPTIAN_PHONE_REGEX.test(form.phone.trim())) {
-      errs.phone = 'رقم الهاتف المصري غير صحيح (مثال: 01012345678).';
+      errs.phone = 'Invalid Egyptian phone number (e.g. 01012345678).';
     }
 
     if (!form.password || form.password.length < 6) {
-      errs.password = 'كلمة المرور يجب أن تكون 6 أحرف على الأقل.';
+      errs.password = 'Password must be at least 6 characters.';
     }
 
     if (activeTab === 'technician') {
       if (!form.nationalId || !/^[0-9]{14}$/.test(form.nationalId.trim())) {
-        errs.nationalId = 'الرقم القومي للفني يجب أن يتكون من 14 رقماً.';
+        errs.nationalId = 'Technician national ID must be 14 digits.';
       }
     }
 
@@ -111,7 +111,7 @@ export default function Register() {
       if (Object.keys(apiErrors).length > 0) {
         setErrors(apiErrors);
       }
-      setGlobalError(err.message || 'حدث خطأ أثناء إنشاء الحساب. يرجى مراجعة البيانات.');
+      setGlobalError(err.message || 'An error occurred while creating the account. Please review your details.');
     } finally {
       setLoading(false);
     }
@@ -128,7 +128,7 @@ export default function Register() {
         padding: '24px 16px',
         fontFamily: "'DM Sans', 'Manrope', -apple-system, sans-serif"
       }}
-      dir="rtl"
+      dir="ltr"
     >
       <div
         style={{
@@ -162,7 +162,7 @@ export default function Register() {
               <BrandLogo size={46} variant="blue" />
               <div>
                 <b style={{ display: 'block', fontSize: '20px', letterSpacing: '0.5px', fontFamily: 'Manrope, sans-serif', color: '#fff' }}>
-                  إغسـلـهـا · EGHSELHA
+                  EGHSELHA
                 </b>
                 <small style={{ display: 'block', fontSize: '11px', color: '#60b4ff', fontWeight: 600, letterSpacing: '0.8px', marginTop: '2px' }}>
                   DOORSTEP MOBILE CAR WASH
@@ -186,7 +186,7 @@ export default function Register() {
               }}
             >
               <Sparkles size={14} />
-              <span>انضم إلى آلاف العملاء والفنيين في القاهرة</span>
+              <span>Join thousands of customers and technicians in Cairo</span>
             </div>
 
             <h1
@@ -198,76 +198,12 @@ export default function Register() {
                 letterSpacing: '-0.5px'
               }}
             >
-              ابدأ تجربتك المميزة مع إغسلها اليوم
+              Get Started with EGHSELHA Today
             </h1>
 
             <p style={{ fontSize: '13px', lineHeight: 1.7, color: '#9fb4c7', margin: 0, maxWidth: '440px' }}>
-              سواء كنت تبحث عن غسيل فاخر لسيارتك عند باب منزلك، أو ترغب في الانضمام كفني محترف بعوائد مجزية، فمكانك معنا.
+              Whether you're looking for premium doorstep car detailing or ready to join our certified technician fleet, we've got you covered.
             </p>
-          </div>
-
-          <div style={{ margin: '36px 0', display: 'grid', gap: '14px' }}>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '14px',
-                background: 'rgba(255, 255, 255, 0.04)',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                padding: '12px 16px',
-                borderRadius: '14px'
-              }}
-            >
-              <div
-                style={{
-                  width: '38px',
-                  height: '38px',
-                  borderRadius: '10px',
-                  background: 'rgba(8, 124, 240, 0.2)',
-                  color: '#60b4ff',
-                  display: 'grid',
-                  placeItems: 'center',
-                  flexShrink: 0
-                }}
-              >
-                <User size={20} />
-              </div>
-              <div>
-                <b style={{ fontSize: '13px', color: '#fff', display: 'block' }}>للعملاء</b>
-                <small style={{ fontSize: '11px', color: '#8fa5bc' }}>حجز فوري، باقات متنوعة، ومحفظة إلكترونية بنقاط ولاء</small>
-              </div>
-            </div>
-
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '14px',
-                background: 'rgba(255, 255, 255, 0.04)',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                padding: '12px 16px',
-                borderRadius: '14px'
-              }}
-            >
-              <div
-                style={{
-                  width: '38px',
-                  height: '38px',
-                  borderRadius: '10px',
-                  background: 'rgba(16, 185, 129, 0.2)',
-                  color: '#6ee7b7',
-                  display: 'grid',
-                  placeItems: 'center',
-                  flexShrink: 0
-                }}
-              >
-                <Wrench size={20} />
-              </div>
-              <div>
-                <b style={{ fontSize: '13px', color: '#fff', display: 'block' }}>للفنيين</b>
-                <small style={{ fontSize: '11px', color: '#8fa5bc' }}>مهام يومية مستمرة، تسوية أرباح سريعة، ومعدات متقدمة</small>
-              </div>
-            </div>
           </div>
 
           <div
@@ -282,7 +218,7 @@ export default function Register() {
             }}
           >
             <span>© 2026 EGHSELHA Platform</span>
-            <span>بوابتك لخدمة غسيل سيارات ذكية</span>
+            <span>Your smart mobile car detailing platform</span>
           </div>
         </div>
 
@@ -310,7 +246,7 @@ export default function Register() {
                 marginBottom: '14px'
               }}
             >
-              ← العودة إلى الصفحة الرئيسية (Home)
+              ← Back to Home
             </Link>
             <h2
               style={{
@@ -320,10 +256,10 @@ export default function Register() {
                 letterSpacing: '-0.4px'
               }}
             >
-              إنشاء حساب جديد
+              Create Account
             </h2>
             <p style={{ fontSize: '12px', color: '#8493a2', margin: 0 }}>
-              اختر نوع الحساب وأدخل بياناتك للبدء فوراً
+              Choose account type and enter your details to get started
             </p>
           </div>
 
@@ -362,7 +298,7 @@ export default function Register() {
               }}
             >
               <User size={15} />
-              <span>تسجيل كعميل</span>
+              <span>Customer</span>
             </button>
             <button
               type="button"
@@ -389,7 +325,7 @@ export default function Register() {
               }}
             >
               <Wrench size={15} />
-              <span>انضمام كفني</span>
+              <span>Technician</span>
             </button>
           </div>
 
@@ -417,13 +353,13 @@ export default function Register() {
             <div>
               <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '5px' }}>
                 <User size={14} color="#64748b" />
-                الاسم بالكامل
+                Full Name
               </label>
               <input
                 type="text"
                 value={form.fullName}
                 onChange={(e) => handleInputChange('fullName', e.target.value)}
-                placeholder="أحمد علي"
+                placeholder="Ahmed Ali"
                 style={{
                   width: '100%',
                   padding: '11px 14px',
@@ -442,7 +378,7 @@ export default function Register() {
             <div>
               <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '5px' }}>
                 <Mail size={14} color="#64748b" />
-                البريد الإلكتروني
+                Email Address
               </label>
               <input
                 type="email"
@@ -468,7 +404,7 @@ export default function Register() {
             <div>
               <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '5px' }}>
                 <Phone size={14} color="#64748b" />
-                رقم الهاتف المحمول
+                Phone Number
               </label>
               <input
                 type="tel"
@@ -495,7 +431,7 @@ export default function Register() {
               <div>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '5px' }}>
                   <IdCard size={14} color="#64748b" />
-                  الرقم القومي (14 رقماً)
+                  National ID (14 digits)
                 </label>
                 <input
                   type="text"
@@ -523,7 +459,7 @@ export default function Register() {
             <div>
               <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '5px' }}>
                 <KeyRound size={14} color="#64748b" />
-                كلمة المرور
+                Password
               </label>
               <input
                 type="password"
@@ -572,7 +508,7 @@ export default function Register() {
               ) : (
                 <>
                   <UserPlus size={16} />
-                  <span>{activeTab === 'customer' ? 'تسجيل حساب عميل جديد' : 'تقديم طلب الانضمام كفني'}</span>
+                  <span>{activeTab === 'customer' ? 'Create Customer Account' : 'Submit Technician Application'}</span>
                 </>
               )}
             </button>
@@ -588,7 +524,7 @@ export default function Register() {
               color: '#64748b'
             }}
           >
-            لديك حساب بالفعل؟{' '}
+            Already have an account?{' '}
             <Link
               to="/login"
               style={{
@@ -600,8 +536,8 @@ export default function Register() {
                 gap: '4px'
               }}
             >
-              <span>تسجيل الدخول</span>
-              <ArrowRight size={14} style={{ transform: 'rotate(180deg)' }} />
+              <span>Sign In</span>
+              <ArrowRight size={14} />
             </Link>
           </div>
         </div>

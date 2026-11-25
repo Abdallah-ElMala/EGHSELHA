@@ -121,18 +121,19 @@ namespace WebCarWash.Infrastructure.Services
         public async Task<CustomerVehicleDto> AddVehicleAsync(Guid customerId, AddVehicleDto dto)
         {
             var customer = await _unitOfWork.Customers.GetByIdAsync(customerId);
+            if (customer == null)
+            {
+                throw new UnauthorizedAccessException("Customer account not found in database. Please logout and sign in or register again.");
+            }
 
             var vehicle = _mapper.Map<Vehicle>(dto);
             vehicle.CustomerId = customerId;
             vehicle.Year = dto.Year > 0 ? dto.Year : DateTime.UtcNow.Year;
             vehicle.GetSizeMultiplier();
 
-            if (customer != null)
-            {
-                customer.AddVehicle(vehicle);
-                await _unitOfWork.Vehicles.AddAsync(vehicle);
-                await _unitOfWork.CompleteAsync();
-            }
+            customer.AddVehicle(vehicle);
+            await _unitOfWork.Vehicles.AddAsync(vehicle);
+            await _unitOfWork.CompleteAsync();
 
             return _mapper.Map<CustomerVehicleDto>(vehicle);
         }
@@ -279,6 +280,9 @@ namespace WebCarWash.Infrastructure.Services
                 .Include(b => b.ServicePackage)
                 .Include(b => b.Vehicle)
                 .Include(b => b.Technician)
+                    .ThenInclude(t => t!.TechnicianApplication)
+                .Include(b => b.Technician)
+                    .ThenInclude(t => t!.Bookings)
                 .Include(b => b.InspectionUpsell)
                 .Include(b => b.Review)
                 .Include(b => b.Dispute)
@@ -297,6 +301,9 @@ namespace WebCarWash.Infrastructure.Services
                 .Include(b => b.ServicePackage)
                 .Include(b => b.Vehicle)
                 .Include(b => b.Technician)
+                    .ThenInclude(t => t!.TechnicianApplication)
+                .Include(b => b.Technician)
+                    .ThenInclude(t => t!.Bookings)
                 .Include(b => b.InspectionUpsell)
                 .Include(b => b.Review)
                 .Include(b => b.Dispute)
@@ -451,20 +458,24 @@ namespace WebCarWash.Infrastructure.Services
 
                     if (!hasActiveOffer)
                     {
-                        var tech = await _unitOfWork.Technicians.Query()
-                            .Where(t => t.IsOnline && t.ServiceZoneId == booking.ServiceZoneId)
-                            .FirstOrDefaultAsync()
-                            ?? await _unitOfWork.Technicians.Query().Where(t => t.IsOnline).FirstOrDefaultAsync()
-                            ?? await _unitOfWork.Technicians.FirstOrDefaultAsync(t => true);
+                        var candidateTechs = await _unitOfWork.Technicians.Query()
+                            .Where(t => t.IsOnline)
+                            .ToListAsync();
 
-                        if (tech != null)
+                        if (!candidateTechs.Any())
+                        {
+                            candidateTechs = await _unitOfWork.Technicians.Query().ToListAsync();
+                        }
+
+                        var payoutAmount = (float)Math.Round(booking.TotalPrice * 0.7f, MidpointRounding.AwayFromZero);
+                        foreach (var tech in candidateTechs)
                         {
                             var jobOffer = new JobOffer
                             {
                                 BookingId = booking.Id,
                                 TechnicianId = tech.Id,
                                 Status = JobOfferStatus.OFFERED,
-                                PayoutAmount = (float)Math.Round(booking.TotalPrice * 0.7f, MidpointRounding.AwayFromZero),
+                                PayoutAmount = payoutAmount,
                                 OfferedAt = DateTime.UtcNow,
                                 ExpiresAt = DateTime.UtcNow.AddMinutes(30)
                             };
@@ -734,6 +745,29 @@ namespace WebCarWash.Infrastructure.Services
             dto.CanCancel = canCancel;
             dto.CancelSecondsRemaining = remainingSec;
             dto.IsLockedIn = !canCancel && b.Status != BookingStatus.CANCELLED && b.Status != BookingStatus.COMPLETED;
+
+            if (b.Technician != null)
+            {
+                dto.TechnicianId = b.Technician.Id;
+                dto.TechnicianName = b.Technician.FullName;
+                dto.TechnicianPhone = b.Technician.Phone;
+                dto.TechnicianRating = b.Technician.Rating;
+                dto.TechnicianServiceArea = string.IsNullOrWhiteSpace(b.Technician.ServiceArea) ? "Cairo" : b.Technician.ServiceArea;
+                dto.TechnicianBio = b.Technician.ShortBio;
+                dto.TechnicianVehicleType = b.Technician.VehicleType;
+                dto.TechnicianVehicleName = b.Technician.VehicleName;
+                dto.TechnicianVehiclePlate = b.Technician.VehiclePlate;
+                dto.TechnicianVanLevel = b.Technician.VanLevel;
+                dto.TechnicianWorkingDays = b.Technician.WorkingDays;
+                dto.TechnicianWorkingHours = b.Technician.WorkingHours;
+                dto.TechnicianIsOnline = b.Technician.IsOnline;
+                dto.TechnicianCompletedJobsCount = b.Technician.Bookings?.Count(bk => bk.Status == BookingStatus.COMPLETED) ?? 0;
+                dto.TechnicianVerifiedEquipment = b.Technician.VerifiedEquipment ?? new List<string>();
+                dto.TechnicianHasPressureWasher = b.Technician.TechnicianApplication == null || b.Technician.TechnicianApplication.HasPressureWasher;
+                dto.TechnicianHasVacuumExtractor = b.Technician.TechnicianApplication == null || b.Technician.TechnicianApplication.HasVacuumExtractor;
+                dto.TechnicianHasWaterTankGenerator = b.Technician.TechnicianApplication == null || b.Technician.TechnicianApplication.HasWaterTankGenerator;
+                dto.TechnicianHasVehicle = b.Technician.TechnicianApplication == null || b.Technician.TechnicianApplication.HasVehicle;
+            }
 
             return dto;
         }

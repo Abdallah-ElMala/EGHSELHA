@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { X, HelpCircle, ChevronRight, LogOut, LayoutDashboard, BriefcaseBusiness, UserRound, Wallet, Settings } from 'lucide-react'
+import { X, LogOut, LayoutDashboard, BriefcaseBusiness, UserRound, Wallet } from 'lucide-react'
 import { useTech } from '../context/TechnicianContext'
 import { useAuth } from '../context/AuthContext'
 import BrandLogo from './BrandLogo'
@@ -9,12 +9,11 @@ const navItems = [
   { label: 'My Jobs', to: '/technician/jobs', icon: BriefcaseBusiness },
   { label: 'Profile', to: '/technician/profile', icon: UserRound },
   { label: 'Earnings', to: '/technician/earnings', icon: Wallet },
-  { label: 'Settings', to: '/technician/settings', icon: Settings },
 ]
 
 export default function Sidebar({ open, onClose }) {
   const navigate = useNavigate()
-  const { notify, offers } = useTech()
+  const { offers } = useTech()
   const { logout, hasRole, user } = useAuth()
 
   const handleLogout = async () => {
@@ -51,16 +50,9 @@ export default function Sidebar({ open, onClose }) {
       </nav>
 
       <div className="sidebar-bottom">
-        <div className="help-card">
-          <div className="help-icon"><HelpCircle size={18} /></div>
-          <b>Need help?</b>
-          <p>Contact our support team anytime.</p>
-          <button onClick={() => notify('Support: support@eghselha.com')}>
-            Get support <ChevronRight size={14} />
-          </button>
-        </div>
-        <button className="nav-item logout" onClick={handleLogout}>
-          <LogOut size={18} /><span>تسجيل الخروج (Logout)</span>
+        <button className="sidebar-logout-btn" onClick={handleLogout}>
+          <LogOut size={16} />
+          <span>Logout</span>
         </button>
         <div className="side-version">EGHSELHA TECH PORTAL <span>v1.0.0</span></div>
       </div>

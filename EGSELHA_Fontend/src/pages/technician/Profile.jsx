@@ -16,6 +16,16 @@ import {
 } from 'lucide-react'
 import PageTitle from '../../component/PageTitle'
 import { useTech } from '../../context/TechnicianContext'
+import { customerApi } from '../../services/customerApi'
+
+const DEFAULT_SERVICE_ZONES = [
+  'Sheikh Zayed - Central (Arkan / Districts 1-16)',
+  'Sheikh Zayed - Beverly Hills & New Zayed',
+  '6th of October - El Hosary & Districts 1-12',
+  '6th of October - Mall of Arabia & Palm Hills',
+  '6th of October - Mall of Egypt & Dreamland',
+  'East Cairo - Nasr City'
+]
 
 function calculateAge(dobStr) {
   if (!dobStr) return null
@@ -47,6 +57,7 @@ export default function Profile() {
 
   const [isEditing, setIsEditing] = useState(false)
   const [savingProfile, setSavingProfile] = useState(false)
+  const [serviceZones, setServiceZones] = useState(DEFAULT_SERVICE_ZONES)
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -54,6 +65,24 @@ export default function Profile() {
     area: '',
     dateOfBirth: '1995-01-01'
   })
+
+  useEffect(() => {
+    customerApi.getCatalog()
+      .then((cat) => {
+        if (cat?.zones?.length) {
+          const names = cat.zones
+            .map((z) => z.zoneName)
+            .filter(Boolean)
+            .sort((a, b) => {
+              const aWest = /zayed|october/i.test(a) ? 0 : 1
+              const bWest = /zayed|october/i.test(b) ? 0 : 1
+              return aWest - bWest || a.localeCompare(b)
+            })
+          if (names.length > 0) setServiceZones(names)
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   // Equipment & Tools state
   const [editingTools, setEditingTools] = useState(false)
@@ -116,9 +145,10 @@ export default function Profile() {
         area: formData.area.trim(),
         dateOfBirth: formData.dateOfBirth
       }
-      setProfile(updated)
-      await updateProfile(updated)
-      setIsEditing(false)
+      const ok = await updateProfile(updated)
+      if (ok) {
+        setIsEditing(false)
+      }
     } finally {
       setSavingProfile(false)
     }
@@ -430,13 +460,25 @@ export default function Profile() {
 
             <label className="field wide">
               Service area
-              <input
+              <select
                 name="area"
                 disabled={!isEditing}
                 value={formData.area}
                 onChange={change}
-                style={getFieldStyle(isEditing)}
-              />
+                style={{
+                  ...getFieldStyle(isEditing),
+                  cursor: isEditing ? 'pointer' : 'not-allowed'
+                }}
+              >
+                {formData.area && !serviceZones.includes(formData.area) && (
+                  <option value={formData.area}>{formData.area}</option>
+                )}
+                {serviceZones.map((zoneName) => (
+                  <option key={zoneName} value={zoneName}>
+                    {zoneName}
+                  </option>
+                ))}
+              </select>
             </label>
 
             <label className="field wide">
@@ -744,7 +786,7 @@ export default function Profile() {
                 disabled={!editingVehicle}
                 value={vehicleDraft.vehiclePlate}
                 onChange={changeVehicle}
-                placeholder="e.g. س ص ع 4821"
+                placeholder="e.g. ABC 4821"
                 style={getFieldStyle(editingVehicle)}
               />
             </label>

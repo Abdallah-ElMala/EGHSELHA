@@ -8,8 +8,15 @@ namespace WebCarWash.Application.DTOs.Technician
         public Guid BookingId { get; set; }
         public string BookingNumber { get; set; } = string.Empty;
         public string CustomerName { get; set; } = string.Empty;
+        public string CustomerPhone { get; set; } = string.Empty;
+        public string CustomerEmail { get; set; } = string.Empty;
+        public string? CustomerGateNotes { get; set; }
+        public int CustomerTotalBookings { get; set; }
+        public List<string> CustomerSavedAddresses { get; set; } = new();
+        public List<TechnicianCustomerVehicleDto> CustomerVehicles { get; set; } = new();
         public string ServiceName { get; set; } = string.Empty;
         public string VehicleModel { get; set; } = string.Empty;
+        public string LicensePlate { get; set; } = string.Empty;
         public string CustomerAddress { get; set; } = string.Empty;
         public string DistanceText { get; set; } = "3.2 km";
         public float TotalPrice { get; set; }

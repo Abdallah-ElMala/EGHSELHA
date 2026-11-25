@@ -595,3 +595,143 @@
   }
 }
 
+/* ============================================================
+   UNIFIED COHESIVE BUTTON SYSTEM (Technician, Customer, Admin)
+   Calm, balanced colors — zero harsh red borders or loud fills
+   ============================================================ */
+.btn {
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 9px 15px;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font: 600 12px 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.15s ease, box-shadow 0.18s ease;
+  white-space: nowrap;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn.sm {
+  min-height: 32px;
+  padding: 6px 12px;
+  font-size: 11px;
+  border-radius: 8px;
+}
+
+.btn.primary {
+  background: #0b6bcb;
+  border-color: #0b6bcb;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(11, 107, 203, 0.22);
+}
+
+.btn.primary:hover:not(:disabled) {
+  background: #0859ab;
+  border-color: #0859ab;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(11, 107, 203, 0.28);
+}
+
+.btn.outline {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #334155;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.btn.outline:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.btn.soft,
+.soft-btn {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #1e293b;
+  border-radius: 10px;
+  padding: 8px 14px;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font: 600 12px 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  cursor: pointer;
+  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.btn.soft:hover:not(:disabled),
+.soft-btn:hover:not(:disabled) {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+.btn.success {
+  background: #0f766e;
+  border-color: #0f766e;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(15, 118, 110, 0.2);
+}
+
+.btn.success:hover:not(:disabled) {
+  background: #115e59;
+  border-color: #115e59;
+  transform: translateY(-1px);
+}
+
+.btn.danger {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+  color: #9f1239;
+}
+
+.btn.danger:hover:not(:disabled) {
+  background: #ffe4e6;
+  border-color: #fecdd3;
+  color: #881337;
+}
+
+.btn.full {
+  width: 100%;
+}
+
+.sidebar-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  font: 600 13px 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.sidebar-logout-btn:hover {
+  background: rgba(244, 63, 94, 0.14);
+  border-color: rgba(244, 63, 94, 0.28);
+  color: #fda4af;
+}
+
+

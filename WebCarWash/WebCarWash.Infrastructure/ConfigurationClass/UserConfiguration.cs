@@ -17,7 +17,7 @@ namespace WebCarWash.Infrastructure.ConfigrationClass
             builder.HasKey(u => u.Id);
             builder.Property(u => u.FullName).IsRequired().HasMaxLength(150);
             builder.Property(u => u.Phone).IsRequired().HasMaxLength(20);
-            builder.HasIndex(u => u.Phone).IsUnique();
+            builder.HasIndex(u => u.Phone);
             builder.Property(u => u.Email).IsRequired().HasMaxLength(150);
             builder.HasIndex(u => u.Email).IsUnique();
             builder.Property(u => u.PasswordHash).IsRequired().HasMaxLength(500);

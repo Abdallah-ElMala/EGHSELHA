@@ -199,14 +199,14 @@ export default function AdminBookings() {
                 type="button"
                 onClick={() => setCancelledFilter(sub.key)}
                 style={{
-                  padding: '5px 12px',
-                  borderRadius: '999px',
+                  padding: '6px 13px',
+                  borderRadius: '8px',
                   fontSize: '11px',
-                  fontWeight: 700,
+                  fontWeight: 600,
                   cursor: 'pointer',
-                  border: cancelledFilter === sub.key ? '1px solid #dc2626' : '1px solid #fca5a5',
-                  background: cancelledFilter === sub.key ? '#dc2626' : '#fff',
-                  color: cancelledFilter === sub.key ? '#fff' : '#991b1b',
+                  border: cancelledFilter === sub.key ? '1px solid #0b6bcb' : '1px solid #cbd5e1',
+                  background: cancelledFilter === sub.key ? '#0b6bcb' : '#ffffff',
+                  color: cancelledFilter === sub.key ? '#ffffff' : '#334155',
                 }}
               >
                 {sub.label} ({cancelledSubCounts[sub.key] ?? 0})

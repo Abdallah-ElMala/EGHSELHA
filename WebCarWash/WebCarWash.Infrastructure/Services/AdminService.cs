@@ -266,6 +266,7 @@ namespace WebCarWash.Infrastructure.Services
             var customers = await _unitOfWork.Customers.Query()
                 .Include(c => c.Vehicles)
                 .Include(c => c.Bookings)
+                .Include(c => c.Disputes)
                 .ToListAsync();
 
             return _mapper.Map<List<AdminCustomerDto>>(customers);

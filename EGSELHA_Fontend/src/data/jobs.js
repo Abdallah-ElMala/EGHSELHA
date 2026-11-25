@@ -5,5 +5,5 @@ export const initialJobs = [
   { id:'#BK-0021', customer:'Mariam Adel', service:'Ultimate Detail', car:'BMW X5', address:'Cairo, New Cairo', time:'Yesterday, 1:00 PM', date:'Nov 02', distance:'4.0 km', price:700, status:'Completed', phone:'+20 109 333 2222' },
 ]
 
-// الـ id فيه # فلازم نعمل encode عشان يشتغل في الـ URL
+// Encode ID for URL safe routing
 export const jobPath = (id) => `/technician/jobs/${encodeURIComponent(id)}`

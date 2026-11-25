@@ -16,7 +16,8 @@ import {
   Car,
   ChevronRight,
   Download,
-  AlertCircle
+  AlertCircle,
+  Eye
 } from 'lucide-react'
 import PageTitle from '../../component/PageTitle'
 import FieldError from '../../component/FieldError'
@@ -25,6 +26,7 @@ import { useAuth } from '../../context/AuthContext'
 import { customerApi } from '../../services/customerApi'
 import { validateDispute, extractApiErrors } from '../../utils/validation'
 import PaymentModal from '../../component/PaymentModal'
+import TechnicianPublicProfileModal from '../../component/TechnicianPublicProfileModal'
 
 export default function CustomerBookings() {
   const navigate = useNavigate()
@@ -106,6 +108,9 @@ export default function CustomerBookings() {
 
   // Invoice / Receipt Modal (17. Invoice specifications)
   const [invoiceModal, setInvoiceModal] = useState(null)
+
+  // Read-only Technician Profile Modal
+  const [techProfileBooking, setTechProfileBooking] = useState(null)
 
   // Calculate live average review rating
   const averageRating = useMemo(() => {
@@ -341,7 +346,13 @@ export default function CustomerBookings() {
                       <small style={{ color: '#64748b', fontSize: '11px', display: 'block', marginTop: '3px' }}>
                         Scheduled: {new Date(b.scheduledAt || Date.now()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} · {b.address}
                         {b.technicianName && (
-                          <span style={{ color: '#087cf0', fontWeight: 700 }}> · Technician: {b.technicianName}</span>
+                          <span
+                            onClick={() => setTechProfileBooking(b)}
+                            style={{ color: '#087cf0', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}
+                            title="Click to view Technician Profile"
+                          >
+                            {' '}· Technician: {b.technicianName}
+                          </span>
                         )}
                       </small>
                     </div>
@@ -412,10 +423,10 @@ export default function CustomerBookings() {
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: '8px' }}>
-                      <button className="btn outline" style={{ fontSize: '11px', padding: '6px 12px' }} onClick={() => handleApproveUpsell(b.pendingUpsellId, false)}>
+                      <button className="btn outline sm" onClick={() => handleApproveUpsell(b.pendingUpsellId, false)}>
                         Decline
                       </button>
-                      <button className="btn primary" style={{ fontSize: '11px', padding: '6px 12px', background: '#f97316', borderColor: '#ea580c' }} onClick={() => handleApproveUpsell(b.pendingUpsellId, true)}>
+                      <button className="btn primary sm" onClick={() => handleApproveUpsell(b.pendingUpsellId, true)}>
                         Approve (+EGP {b.pendingUpsellPrice || 150})
                       </button>
                     </div>
@@ -458,11 +469,20 @@ export default function CustomerBookings() {
                   </div>
 
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    {/* Show Technician Profile Button */}
+                    {b.technicianName && (
+                      <button
+                        className="btn soft sm"
+                        onClick={() => setTechProfileBooking(b)}
+                      >
+                        <Eye size={14} /> Show Tech Profile
+                      </button>
+                    )}
+
                     {/* Cancel / Delete Booking Button */}
                     {canCancelNow && (
                       <button
-                        className="btn outline"
-                        style={{ fontSize: '11px', padding: '8px 14px', color: '#dc2626', borderColor: '#fca5a5' }}
+                        className="btn danger sm"
                         disabled={cancellingId === b.id}
                         onClick={() => handleCancelBooking(b)}
                       >
@@ -478,8 +498,7 @@ export default function CustomerBookings() {
                     {/* Pay Deposit Button (Behavior 3) */}
                     {isPendingDeposit && (
                       <button
-                        className="btn primary"
-                        style={{ fontSize: '11px', padding: '8px 14px' }}
+                        className="btn primary sm"
                         onClick={() => setPayDepositModal(b)}
                       >
                         <CreditCard size={14} /> Pay 200 EGP Deposit
@@ -489,8 +508,7 @@ export default function CustomerBookings() {
                     {/* View Itemized Invoice (17. Invoice) */}
                     {isCompleted && (
                       <button
-                        className="btn outline"
-                        style={{ fontSize: '11px', padding: '8px 14px' }}
+                        className="btn outline sm"
                         onClick={() => setInvoiceModal(b)}
                       >
                         <FileText size={14} /> View Invoice
@@ -500,8 +518,7 @@ export default function CustomerBookings() {
                     {/* Submit Review (Behavior 5) */}
                     {isCompleted && !b.hasReview && (
                       <button
-                        className="btn primary"
-                        style={{ fontSize: '11px', padding: '8px 14px' }}
+                        className="btn primary sm"
                         onClick={() => setReviewModal(b)}
                       >
                         <Star size={14} /> Rate & Review (+50 Pts)
@@ -511,8 +528,7 @@ export default function CustomerBookings() {
                     {/* File Dispute (Behavior 6) */}
                     {isCompleted && !b.hasDispute && (
                       <button
-                        className="btn outline"
-                        style={{ fontSize: '11px', padding: '8px 14px', color: '#dc2626', borderColor: '#fca5a5' }}
+                        className="btn danger sm"
                         onClick={() => setDisputeModal(b)}
                       >
                         <ShieldAlert size={14} /> File Dispute
@@ -823,6 +839,12 @@ export default function CustomerBookings() {
           </div>
         </div>
       )}
+
+      {/* Read-Only Technician Public Profile Modal */}
+      <TechnicianPublicProfileModal
+        booking={techProfileBooking}
+        onClose={() => setTechProfileBooking(null)}
+      />
     </div>
   )
 }

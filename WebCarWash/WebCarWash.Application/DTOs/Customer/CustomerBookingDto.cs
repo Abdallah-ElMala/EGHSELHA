@@ -11,6 +11,8 @@ namespace WebCarWash.Application.DTOs.Customer
         public string BookingType { get; set; } = "SCHEDULED";
         public DateTime ScheduledAt { get; set; }
         public string Address { get; set; } = string.Empty;
+        public float ParkingLatitude { get; set; }
+        public float ParkingLongitude { get; set; }
         public string ServiceName { get; set; } = string.Empty;
         public string VehicleName { get; set; } = string.Empty;
         public string LicensePlate { get; set; } = string.Empty;
@@ -24,8 +26,25 @@ namespace WebCarWash.Application.DTOs.Customer
         public float DepositAmount { get; set; } = 200f;
         public float RemainingBalance { get; set; }
         public List<string> AddOnNames { get; set; } = new();
+        public Guid? TechnicianId { get; set; }
         public string? TechnicianName { get; set; }
         public string? TechnicianPhone { get; set; }
+        public float? TechnicianRating { get; set; }
+        public string? TechnicianServiceArea { get; set; }
+        public string? TechnicianBio { get; set; }
+        public string? TechnicianVehicleType { get; set; }
+        public string? TechnicianVehicleName { get; set; }
+        public string? TechnicianVehiclePlate { get; set; }
+        public string? TechnicianVanLevel { get; set; }
+        public string? TechnicianWorkingDays { get; set; }
+        public string? TechnicianWorkingHours { get; set; }
+        public int TechnicianCompletedJobsCount { get; set; }
+        public bool TechnicianIsOnline { get; set; }
+        public bool TechnicianHasPressureWasher { get; set; }
+        public bool TechnicianHasVacuumExtractor { get; set; }
+        public bool TechnicianHasWaterTankGenerator { get; set; }
+        public bool TechnicianHasVehicle { get; set; }
+        public List<string> TechnicianVerifiedEquipment { get; set; } = new();
         public float? TechnicianLatitude { get; set; }
         public float? TechnicianLongitude { get; set; }
         public bool HasPendingUpsell { get; set; }

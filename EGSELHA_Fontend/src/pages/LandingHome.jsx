@@ -22,9 +22,9 @@ import { useAuth } from '../context/AuthContext'
 import EghselhaLogo from '../component/EghselhaLogo'
 
 const CAR_BACKGROUNDS = [
-  { id: 'foam', label: 'رغوة غسيل كثيفة', icon: '🫧', src: '/washed-car-foam.jpg' },
-  { id: 'wet', label: 'مياه وقطرات لمعان', icon: '💧', src: '/wet-luxury-car.jpg' },
-  { id: 'spray', label: 'رش عالي الضغط', icon: '⚡', src: '/car-wash-spray.jpg' }
+  { id: 'foam', label: 'Dense Snow Foam', icon: '🫧', src: '/washed-car-foam.jpg' },
+  { id: 'wet', label: 'Hydrophobic Gloss', icon: '💧', src: '/wet-luxury-car.jpg' },
+  { id: 'spray', label: 'High Pressure Rinse', icon: '⚡', src: '/car-wash-spray.jpg' }
 ]
 
 const PACKAGES = [
@@ -172,20 +172,6 @@ export default function LandingHome() {
               className={`landing-nav-link ${activeNav === 'how-it-works' ? 'active' : ''}`}
             >
               How It Works
-            </a>
-            <a
-              href="#about"
-              onClick={() => setActiveNav('about')}
-              className={`landing-nav-link ${activeNav === 'about' ? 'active' : ''}`}
-            >
-              About
-            </a>
-            <a
-              href="#contact"
-              onClick={() => setActiveNav('contact')}
-              className={`landing-nav-link ${activeNav === 'contact' ? 'active' : ''}`}
-            >
-              Contact
             </a>
           </nav>
 
@@ -337,149 +323,7 @@ export default function LandingHome() {
       </section>
 
       {/* ─────────────────────────────────────────────────────────────
-          3. BOOKING PROCESS (Step by Step)
-      ───────────────────────────────────────────────────────────── */}
-      <section
-        id="how-it-works"
-        style={{
-          padding: '80px 24px',
-          background: '#070e1b',
-          borderTop: '1px solid rgba(255, 255, 255, 0.06)'
-        }}
-      >
-        <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', maxWidth: '700px', margin: '0 auto 60px' }}>
-            <div
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '6px 16px',
-                borderRadius: '9999px',
-                background: 'rgba(14, 165, 233, 0.12)',
-                border: '1px solid rgba(56, 189, 248, 0.25)',
-                color: '#38bdf8',
-                fontSize: '11px',
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '0.8px',
-                marginBottom: '14px'
-              }}
-            >
-              <Zap size={14} />
-              <span>Simple & Convenient</span>
-            </div>
-            <h2
-              style={{
-                fontFamily: 'Manrope, sans-serif',
-                fontSize: '36px',
-                fontWeight: 800,
-                color: '#ffffff',
-                margin: '0 0 12px'
-              }}
-            >
-              3. Booking Process (Step by Step)
-            </h2>
-            <p style={{ color: '#94a3b8', fontSize: '15px', lineHeight: 1.6, margin: 0 }}>
-              We bring the complete detailing shop right to your driveway. No lines, no wasted time, zero hassle.
-            </p>
-          </div>
-
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-              gap: '24px'
-            }}
-          >
-            {STEPS.map((s, idx) => (
-              <div
-                key={s.step}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.03)',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
-                  borderRadius: '20px',
-                  padding: '28px 24px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between'
-                }}
-              >
-                <div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      marginBottom: '16px'
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontFamily: 'Manrope, sans-serif',
-                        fontSize: '32px',
-                        fontWeight: 900,
-                        color: 'rgba(56, 189, 248, 0.5)'
-                      }}
-                    >
-                      {s.step}
-                    </span>
-                    <span
-                      style={{
-                        width: '32px',
-                        height: '32px',
-                        borderRadius: '50%',
-                        background: 'rgba(14, 165, 233, 0.15)',
-                        color: '#38bdf8',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '13px',
-                        fontWeight: 800
-                      }}
-                    >
-                      ✓
-                    </span>
-                  </div>
-                  <h3
-                    style={{
-                      fontFamily: 'Manrope, sans-serif',
-                      fontSize: '18px',
-                      fontWeight: 700,
-                      color: '#ffffff',
-                      margin: '0 0 8px'
-                    }}
-                  >
-                    {s.title}
-                  </h3>
-                  <p style={{ fontSize: '13px', color: '#94a3b8', lineHeight: 1.6, margin: 0 }}>
-                    {s.desc}
-                  </p>
-                </div>
-
-                <div
-                  style={{
-                    marginTop: '24px',
-                    paddingTop: '16px',
-                    borderTop: '1px solid rgba(255, 255, 255, 0.06)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    color: '#38bdf8'
-                  }}
-                >
-                  <span>Step {idx + 1} of 4</span>
-                  <ChevronRight size={14} style={{ marginLeft: '4px' }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ─────────────────────────────────────────────────────────────
-          4. SERVICES & PACKAGES
+          3. SERVICES & PACKAGES
       ───────────────────────────────────────────────────────────── */}
       <section
         id="services"
@@ -698,6 +542,131 @@ export default function LandingHome() {
                     <span>Book {pkg.name}</span>
                     <ArrowRight size={14} />
                   </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─────────────────────────────────────────────────────────────
+          4. BOOKING PROCESS
+      ───────────────────────────────────────────────────────────── */}
+      <section
+        id="how-it-works"
+        style={{
+          padding: '80px 24px',
+          background: '#070e1b',
+          borderTop: '1px solid rgba(255, 255, 255, 0.06)'
+        }}
+      >
+        <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', maxWidth: '700px', margin: '0 auto 60px' }}>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '6px 16px',
+                borderRadius: '9999px',
+                background: 'rgba(14, 165, 233, 0.12)',
+                border: '1px solid rgba(56, 189, 248, 0.25)',
+                color: '#38bdf8',
+                fontSize: '11px',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.8px',
+                marginBottom: '14px'
+              }}
+            >
+              <Zap size={14} />
+              <span>Simple & Convenient</span>
+            </div>
+            <h2
+              style={{
+                fontFamily: 'Manrope, sans-serif',
+                fontSize: '36px',
+                fontWeight: 800,
+                color: '#ffffff',
+                margin: '0 0 12px'
+              }}
+            >
+              Booking Process
+            </h2>
+            <p style={{ color: '#94a3b8', fontSize: '15px', lineHeight: 1.6, margin: 0 }}>
+              We bring the complete detailing shop right to your driveway. No lines, no wasted time, zero hassle.
+            </p>
+          </div>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+              gap: '24px'
+            }}
+          >
+            {STEPS.map((s, idx) => (
+              <div
+                key={s.step}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  borderRadius: '20px',
+                  padding: '28px 24px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between'
+                }}
+              >
+                <div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginBottom: '16px'
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontFamily: 'Manrope, sans-serif',
+                        fontSize: '32px',
+                        fontWeight: 900,
+                        color: 'rgba(56, 189, 248, 0.5)'
+                      }}
+                    >
+                      {s.step}
+                    </span>
+                  </div>
+                  <h3
+                    style={{
+                      fontFamily: 'Manrope, sans-serif',
+                      fontSize: '18px',
+                      fontWeight: 700,
+                      color: '#ffffff',
+                      margin: '0 0 8px'
+                    }}
+                  >
+                    {s.title}
+                  </h3>
+                  <p style={{ fontSize: '13px', color: '#94a3b8', lineHeight: 1.6, margin: 0 }}>
+                    {s.desc}
+                  </p>
+                </div>
+
+                <div
+                  style={{
+                    marginTop: '24px',
+                    paddingTop: '16px',
+                    borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    color: '#38bdf8'
+                  }}
+                >
+                  <span>Step {idx + 1} of 4</span>
                 </div>
               </div>
             ))}

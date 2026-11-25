@@ -7,6 +7,7 @@ namespace WebCarWash.Application.DTOs.Admin
     {
         public Guid Id { get; set; }
         public Guid BookingId { get; set; }
+        public Guid CustomerId { get; set; }
         public string BookingNumber { get; set; } = string.Empty;
         public string BookingStatus { get; set; } = string.Empty;
         public string CustomerName { get; set; } = string.Empty;

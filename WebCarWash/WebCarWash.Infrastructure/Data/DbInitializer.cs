@@ -74,6 +74,11 @@ namespace WebCarWash.Infrastructure.Data
                     ALTER TABLE [Users] ADD [TwoFactorCode] nvarchar(50) NULL;
                     ALTER TABLE [Users] ADD [TwoFactorExpiry] datetime2 NULL;
                     ALTER TABLE [Users] ADD [GoogleSubjectId] nvarchar(150) NULL;
+                END
+                IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Users_Phone' AND object_id = OBJECT_ID('dbo.Users') AND is_unique = 1)
+                BEGIN
+                    DROP INDEX [IX_Users_Phone] ON [dbo].[Users];
+                    CREATE INDEX [IX_Users_Phone] ON [dbo].[Users] ([Phone]);
                 END");
 
             await context.Database.ExecuteSqlRawAsync(@"
@@ -117,11 +122,90 @@ namespace WebCarWash.Infrastructure.Data
                 await context.SaveChangesAsync();
             }
 
-            // Always ensure catalog tables (Zone, ServicePackages, AddOns) are seeded
-            var zone = await context.ServiceZones.FirstOrDefaultAsync();
-            if (zone == null)
+            // Always ensure catalog tables (Zones, ServicePackages, AddOns) are seeded
+            var defaultZones = new List<ServiceZone>
             {
-                zone = new ServiceZone
+                new ServiceZone
+                {
+                    Id = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0001"),
+                    ZoneName = "Sheikh Zayed - Central (Arkan / Districts 1-16)",
+                    Status = ZoneStatus.ACTIVE,
+                    BaseDistanceSurcharge = 15f,
+                    PeakSurgeMultiplier = 1.0f,
+                    MaxTechnicians = 15,
+                    PolygonBoundary = new List<Point>
+                    {
+                        new(30.01f, 30.97f),
+                        new(30.06f, 30.97f),
+                        new(30.06f, 31.04f),
+                        new(30.01f, 31.04f)
+                    }
+                },
+                new ServiceZone
+                {
+                    Id = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0002"),
+                    ZoneName = "Sheikh Zayed - Beverly Hills & New Zayed",
+                    Status = ZoneStatus.ACTIVE,
+                    BaseDistanceSurcharge = 20f,
+                    PeakSurgeMultiplier = 1.0f,
+                    MaxTechnicians = 12,
+                    PolygonBoundary = new List<Point>
+                    {
+                        new(30.04f, 30.90f),
+                        new(30.12f, 30.90f),
+                        new(30.12f, 31.01f),
+                        new(30.04f, 31.01f)
+                    }
+                },
+                new ServiceZone
+                {
+                    Id = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0003"),
+                    ZoneName = "6th of October - El Hosary & Districts 1-12",
+                    Status = ZoneStatus.ACTIVE,
+                    BaseDistanceSurcharge = 15f,
+                    PeakSurgeMultiplier = 1.0f,
+                    MaxTechnicians = 15,
+                    PolygonBoundary = new List<Point>
+                    {
+                        new(29.94f, 30.89f),
+                        new(30.00f, 30.89f),
+                        new(30.00f, 30.97f),
+                        new(29.94f, 30.97f)
+                    }
+                },
+                new ServiceZone
+                {
+                    Id = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0004"),
+                    ZoneName = "6th of October - Mall of Arabia & Palm Hills",
+                    Status = ZoneStatus.ACTIVE,
+                    BaseDistanceSurcharge = 20f,
+                    PeakSurgeMultiplier = 1.0f,
+                    MaxTechnicians = 12,
+                    PolygonBoundary = new List<Point>
+                    {
+                        new(29.98f, 30.95f),
+                        new(30.03f, 30.95f),
+                        new(30.03f, 31.03f),
+                        new(29.98f, 31.03f)
+                    }
+                },
+                new ServiceZone
+                {
+                    Id = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0005"),
+                    ZoneName = "6th of October - Mall of Egypt & Dreamland",
+                    Status = ZoneStatus.ACTIVE,
+                    BaseDistanceSurcharge = 25f,
+                    PeakSurgeMultiplier = 1.0f,
+                    MaxTechnicians = 10,
+                    PolygonBoundary = new List<Point>
+                    {
+                        new(29.92f, 30.97f),
+                        new(29.99f, 30.97f),
+                        new(29.99f, 31.07f),
+                        new(29.92f, 31.07f)
+                    }
+                },
+                new ServiceZone
                 {
                     Id = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
                     ZoneName = "East Cairo - Nasr City",
@@ -135,9 +219,25 @@ namespace WebCarWash.Infrastructure.Data
                         new(30.08f, 31.32f),
                         new(30.02f, 31.49f)
                     }
-                };
-                context.ServiceZones.Add(zone);
+                }
+            };
+
+            var existingZoneIds = await context.ServiceZones.Select(z => z.Id).ToListAsync();
+            var addedZones = false;
+            foreach (var z in defaultZones)
+            {
+                if (!existingZoneIds.Contains(z.Id))
+                {
+                    context.ServiceZones.Add(z);
+                    addedZones = true;
+                }
             }
+            if (addedZones)
+            {
+                await context.SaveChangesAsync();
+            }
+            var zone = await context.ServiceZones.FirstOrDefaultAsync(z => z.Id == Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0001"))
+                       ?? defaultZones[0];
 
             ServicePackage pkgPremium;
             ServicePackage pkgDeep;

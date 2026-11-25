@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Menu, ChevronRight, Bell, Sun, Moon, LogOut } from 'lucide-react'
+import { Menu, ChevronRight, Bell, Sun, Moon } from 'lucide-react'
 import { useTech } from '../context/TechnicianContext'
 import { useAuth } from '../context/AuthContext'
 
@@ -16,7 +16,7 @@ export default function Topbar({ onMenu }) {
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const { dark, setDark, profile, unreadCount } = useTech()
-  const { user, role, logout, hasRole } = useAuth()
+  const { user, role } = useAuth()
 
   const title = titles[pathname] ?? (pathname.startsWith('/technician/jobs/') ? 'Job Details' : 'Dashboard')
   const techName = user?.fullName || profile?.name || 'Mostafa Ali'
@@ -35,18 +35,6 @@ export default function Topbar({ onMenu }) {
           <b>{techName}</b>
           <small>{role || 'Technician'}</small>
         </div>
-        <button
-          className="btn outline"
-          style={{ fontSize: '11px', padding: '6px 10px', borderColor: '#ef4444', color: '#ef4444' }}
-          onClick={async () => {
-            await logout()
-            navigate('/login')
-          }}
-          title="تسجيل الخروج"
-        >
-          <LogOut size={13} style={{ marginRight: '4px' }} />
-          خروج
-        </button>
         <button className="more-btn" onClick={() => setDark(!dark)} title="Toggle theme">
           {dark ? <Sun size={17} /> : <Moon size={17} />}
         </button>

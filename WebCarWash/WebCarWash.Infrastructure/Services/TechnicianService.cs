@@ -98,8 +98,14 @@ namespace WebCarWash.Infrastructure.Services
         public async Task<IEnumerable<TechnicianJobDto>> GetJobsAsync(Guid technicianId, string? status = null, string? search = null)
         {
             var tech = await _unitOfWork.Technicians.Query()
+                .AsNoTrackingWithIdentityResolution()
+                .AsSplitQuery()
                 .Include(t => t.Bookings)
                     .ThenInclude(b => b.Customer)
+                        .ThenInclude(c => c.Vehicles)
+                .Include(t => t.Bookings)
+                    .ThenInclude(b => b.Customer)
+                        .ThenInclude(c => c.Bookings)
                 .Include(t => t.Bookings)
                     .ThenInclude(b => b.Vehicle)
                 .Include(t => t.Bookings)
@@ -141,7 +147,12 @@ namespace WebCarWash.Infrastructure.Services
         public async Task<TechnicianJobDto?> GetJobDetailsAsync(Guid technicianId, string bookingIdOrNumber)
         {
             var booking = await _unitOfWork.Bookings.Query()
+                .AsNoTrackingWithIdentityResolution()
+                .AsSplitQuery()
                 .Include(b => b.Customer)
+                    .ThenInclude(c => c.Vehicles)
+                .Include(b => b.Customer)
+                    .ThenInclude(c => c.Bookings)
                 .Include(b => b.Vehicle)
                 .Include(b => b.ServicePackage)
                 .Include(b => b.BookingAddOns)
@@ -203,6 +214,15 @@ namespace WebCarWash.Infrastructure.Services
                 }
                 else
                 {
+                    if (mappedStatus == BookingStatus.CANCELLED &&
+                        (booking.Status == BookingStatus.ON_THE_WAY ||
+                         booking.Status == BookingStatus.ARRIVED ||
+                         booking.Status == BookingStatus.WASHING ||
+                         booking.Status == BookingStatus.COMPLETED))
+                    {
+                        return (false, "Cannot cancel the trip after starting navigation (On The Way).");
+                    }
+
                     booking.Status = mappedStatus;
                     var now = DateTime.UtcNow;
                     if (mappedStatus == BookingStatus.ON_THE_WAY) booking.OnTheWayAt ??= now;
@@ -475,11 +495,24 @@ namespace WebCarWash.Infrastructure.Services
             var tech = await _unitOfWork.Technicians.FirstOrDefaultAsync(t => t.Id == technicianId);
             if (tech != null)
             {
-                tech.FullName = dto.Name;
-                tech.Email = dto.Email;
-                tech.Phone = dto.Phone;
-                tech.ServiceArea = dto.Area;
-                tech.ShortBio = dto.Bio;
+                if (!string.IsNullOrWhiteSpace(dto.Name))
+                    tech.FullName = dto.Name.Trim();
+                if (!string.IsNullOrWhiteSpace(dto.Email))
+                    tech.Email = dto.Email.Trim();
+                if (!string.IsNullOrWhiteSpace(dto.Phone))
+                    tech.Phone = dto.Phone.Trim();
+                if (!string.IsNullOrWhiteSpace(dto.Area))
+                {
+                    var areaName = dto.Area.Trim();
+                    tech.ServiceArea = areaName;
+                    var matchedZone = await _unitOfWork.ServiceZones.FirstOrDefaultAsync(
+                        z => z.ZoneName.ToLower() == areaName.ToLower());
+                    if (matchedZone != null)
+                    {
+                        tech.ServiceZoneId = matchedZone.Id;
+                    }
+                }
+                tech.ShortBio = dto.Bio ?? tech.ShortBio;
                 if (DateTime.TryParse(dto.DateOfBirth, out var dob))
                 {
                     tech.DateOfBirth = dob.Date;
@@ -494,12 +527,12 @@ namespace WebCarWash.Infrastructure.Services
                         .Select(x => x.Trim())
                         .Distinct(StringComparer.OrdinalIgnoreCase)
                         .ToList();
-                    _unitOfWork.Technicians.Update(tech);
                 }
                 if (!string.IsNullOrEmpty(dto.PhotoPreview))
                 {
                     tech.AvatarUrl = dto.PhotoPreview;
                 }
+                _unitOfWork.Technicians.Update(tech);
                 await _unitOfWork.CompleteAsync();
             }
             return true;
@@ -600,6 +633,19 @@ namespace WebCarWash.Infrastructure.Services
             {
                 booking.Status = BookingStatus.ARRIVED;
                 booking.ArrivedAt ??= DateTime.UtcNow;
+
+                // Sync technician's live coordinates to the booking's parking spot on arrival
+                if (booking.ParkingLatitude != 0 && booking.ParkingLongitude != 0)
+                {
+                    var tech = await _unitOfWork.Technicians.FirstOrDefaultAsync(t => t.Id == technicianId);
+                    if (tech != null)
+                    {
+                        tech.CurrentLatitude = booking.ParkingLatitude;
+                        tech.CurrentLongitude = booking.ParkingLongitude;
+                        _unitOfWork.Technicians.Update(tech);
+                    }
+                }
+
                 await _unitOfWork.CompleteAsync();
                 return true;
             }
@@ -767,8 +813,14 @@ namespace WebCarWash.Infrastructure.Services
         public async Task<IEnumerable<JobOfferDto>> GetJobOffersAsync(Guid technicianId)
         {
             var offers = await _unitOfWork.JobOffers.Query()
+                .AsNoTrackingWithIdentityResolution()
+                .AsSplitQuery()
                 .Include(o => o.Booking)
                     .ThenInclude(b => b.Customer)
+                        .ThenInclude(c => c.Vehicles)
+                .Include(o => o.Booking)
+                    .ThenInclude(b => b.Customer)
+                        .ThenInclude(c => c.Bookings)
                 .Include(o => o.Booking)
                     .ThenInclude(b => b.ServicePackage)
                 .Include(o => o.Booking)
@@ -799,10 +851,25 @@ namespace WebCarWash.Infrastructure.Services
                         BookingId = o.BookingId,
                         BookingNumber = o.Booking?.BookingNumber ?? "#BK-OFFER",
                         CustomerName = o.Booking?.Customer?.FullName ?? "New Customer",
+                        CustomerPhone = o.Booking?.Customer?.Phone ?? string.Empty,
+                        CustomerEmail = o.Booking?.Customer?.Email ?? string.Empty,
+                        CustomerGateNotes = o.Booking?.Customer?.GateNotes,
+                        CustomerTotalBookings = o.Booking?.Customer?.Bookings?.Count ?? 0,
+                        CustomerSavedAddresses = o.Booking?.Customer?.SavedAddresses ?? new List<string>(),
+                        CustomerVehicles = o.Booking?.Customer?.Vehicles?.Select(v => new TechnicianCustomerVehicleDto
+                        {
+                            Make = v.Make,
+                            Model = v.Model,
+                            Year = v.Year,
+                            Color = v.Color,
+                            LicensePlate = v.LicensePlate,
+                            SizeType = v.SizeType.ToString()
+                        }).ToList() ?? new List<TechnicianCustomerVehicleDto>(),
                         CustomerAddress = o.Booking?.Address ?? "Nasr City, Cairo",
                         DistanceText = o.Booking?.DistanceText ?? "2.8 km",
                         ServiceName = o.Booking?.ServicePackage?.Name ?? "Premium Wash",
                         VehicleModel = o.Booking?.Vehicle != null ? $"{o.Booking.Vehicle.Make} {o.Booking.Vehicle.Model}" : "Sedan",
+                        LicensePlate = o.Booking?.Vehicle?.LicensePlate ?? string.Empty,
                         TotalPrice = totalPrice,
                         BasePackagePrice = o.Booking?.BasePackagePrice > 0 ? o.Booking.BasePackagePrice : (o.Booking?.ServicePackage?.BasePrice ?? totalPrice),
                         AddOnsSubtotal = o.Booking?.AddOnsSubtotal ?? 0f,
@@ -857,6 +924,16 @@ namespace WebCarWash.Infrastructure.Services
                 offer.Booking.TechnicianId = tech.Id;
                 offer.Booking.Status = BookingStatus.DISPATCHED;
                 offer.Booking.AcceptedAt = DateTime.UtcNow;
+
+                // Expire any other competing pending offers for the same booking
+                var otherOffers = await _unitOfWork.JobOffers.FindAsync(o =>
+                    o.BookingId == offer.BookingId &&
+                    o.Id != offer.Id &&
+                    o.Status == JobOfferStatus.OFFERED);
+                foreach (var other in otherOffers)
+                {
+                    other.Expire();
+                }
 
                 await _unitOfWork.Notifications.AddAsync(new Notification
                 {
@@ -913,10 +990,28 @@ namespace WebCarWash.Infrastructure.Services
             {
                 Id = b.BookingNumber,
                 BookingNumber = b.BookingNumber,
+                CustomerId = b.CustomerId,
                 Customer = b.Customer?.FullName ?? "Customer",
                 Phone = b.Customer?.Phone ?? "+20 100 123 4567",
+                CustomerEmail = b.Customer?.Email ?? string.Empty,
+                CustomerGateNotes = b.Customer?.GateNotes,
+                CustomerTotalBookings = b.Customer?.Bookings?.Count ?? 0,
+                CustomerSavedAddresses = b.Customer?.SavedAddresses ?? new List<string>(),
+                CustomerVehicles = b.Customer?.Vehicles?.Select(v => new TechnicianCustomerVehicleDto
+                {
+                    Make = v.Make,
+                    Model = v.Model,
+                    Year = v.Year,
+                    Color = v.Color,
+                    LicensePlate = v.LicensePlate,
+                    SizeType = v.SizeType.ToString()
+                }).ToList() ?? new List<TechnicianCustomerVehicleDto>(),
                 Service = b.ServicePackage?.Name ?? "Car Wash",
                 Car = b.Vehicle != null ? $"{b.Vehicle.Make} {b.Vehicle.Model}" : "Sedan",
+                LicensePlate = b.Vehicle?.LicensePlate ?? string.Empty,
+                CarColor = b.Vehicle?.Color ?? string.Empty,
+                CarYear = b.Vehicle?.Year ?? 0,
+                CarSizeType = b.Vehicle != null ? b.Vehicle.SizeType.ToString() : string.Empty,
                 Date = b.ScheduledAt.ToString("MMM dd"),
                 Time = b.ScheduledAt.ToString("hh:mm tt"),
                 Price = b.TotalPrice,
