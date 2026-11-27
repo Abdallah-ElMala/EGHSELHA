@@ -510,10 +510,11 @@ export default function CustomerProfile() {
               return (
                 <div
                   key={v.id}
+                  className="lx-card"
                   style={{
                     borderRadius: '14px',
                     padding: '18px',
-                    border: '1px solid #e2e8f0',
+                    border: '1px solid var(--hairline-light)',
                     background: '#fff',
                     display: 'flex',
                     flexDirection: 'column',
@@ -837,7 +838,7 @@ export default function CustomerProfile() {
                           padding: '10px 8px',
                           textAlign: 'center',
                           cursor: 'pointer',
-                          background: sizeType === s.id ? '#f0f7ff' : '#fff'
+                          background: sizeType === s.id ? 'var(--bronze-soft)' : '#fff'
                         }}
                       >
                         <b style={{ display: 'block', fontSize: '12px', color: sizeType === s.id ? '#141415' : '#1e293b' }}>

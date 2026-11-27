@@ -2,11 +2,10 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import BrandLogo from '../../component/BrandLogo';
+import EghselhaLogo from '../../component/EghselhaLogo';
 import FieldError from '../../component/FieldError';
 import { extractApiErrors, EMAIL_REGEX } from '../../utils/validation';
 import {
-  LogIn,
   KeyRound,
   Mail,
   ArrowLeft,
@@ -18,6 +17,30 @@ import {
   ShieldCheck,
   X
 } from 'lucide-react';
+
+const lightInputStyle = (hasError) => ({
+  width: '100%',
+  padding: '12px 14px',
+  fontSize: '14px',
+  borderRadius: '10px',
+  border: hasError ? '1px solid var(--semantic-negative)' : '1px solid var(--hairline-light-strong)',
+  background: '#ffffff',
+  outline: 'none',
+  color: 'var(--ink-primary)',
+  boxSizing: 'border-box',
+  fontFamily: 'var(--font-sans)',
+  transition: 'border-color 180ms var(--ease-luxury), box-shadow 180ms var(--ease-luxury)'
+});
+
+const fieldLabelStyle = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
+  fontSize: '12px',
+  fontWeight: 500,
+  color: 'var(--ink-secondary)',
+  marginBottom: '6px'
+};
 
 export default function Login() {
   const { login, verifyTwoFactor, forgotPassword, resetPassword } = useAuth();
@@ -49,27 +72,21 @@ export default function Login() {
       badge: 'Customer',
       email: 'ahmed.khaled@example.com',
       pass: 'demo123',
-      icon: User,
-      color: '#141415',
-      bg: '#f4f4f5'
+      icon: User
     },
     {
       role: 'Technician',
       badge: 'Technician',
       email: 'mostafa.ali@email.com',
       pass: 'demo123',
-      icon: Wrench,
-      color: '#10b981',
-      bg: '#e6f8f0'
+      icon: Wrench
     },
     {
       role: 'Admin',
       badge: 'Admin',
       email: 'admin@eghselha.com',
       pass: 'admin123',
-      icon: ShieldCheck,
-      color: '#7c3aed',
-      bg: '#f3edff'
+      icon: ShieldCheck
     }
   ];
 
@@ -119,32 +136,17 @@ export default function Login() {
     const r = (role || '').toUpperCase();
 
     if (r === 'ADMIN') {
-      if (from && from.startsWith('/admin')) {
-        navigate(from, { replace: true });
-      } else {
-        navigate('/admin', { replace: true });
-      }
+      navigate(from && from.startsWith('/admin') ? from : '/admin', { replace: true });
       return;
     }
-
     if (r === 'TECHNICIAN') {
-      if (from && from.startsWith('/technician')) {
-        navigate(from, { replace: true });
-      } else {
-        navigate('/technician', { replace: true });
-      }
+      navigate(from && from.startsWith('/technician') ? from : '/technician', { replace: true });
       return;
     }
-
     if (r === 'CUSTOMER') {
-      if (from && from.startsWith('/customer')) {
-        navigate(from, { replace: true });
-      } else {
-        navigate('/customer', { replace: true });
-      }
+      navigate(from && from.startsWith('/customer') ? from : '/customer', { replace: true });
       return;
     }
-
     navigate('/', { replace: true });
   };
 
@@ -255,177 +257,210 @@ export default function Login() {
 
   return (
     <div
+      dir="ltr"
       style={{
         minHeight: '100vh',
-        background: '#0f0f10',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '24px 16px',
-        fontFamily: "'DM Sans', 'Manrope', -apple-system, sans-serif"
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
+        background: 'var(--alabaster)',
+        color: 'var(--ink-primary)'
       }}
-      dir="ltr"
     >
-      {/* Outer Card Container — Dark Obsidian Split View */}
+      {/* LEFT HALF: Full-Bleed Cinematic Editorial Panel */}
       <div
         style={{
-          width: '100%',
-          maxWidth: '1040px',
-          background: '#19191b',
-          borderRadius: '16px',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          overflow: 'hidden',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
-          minHeight: '640px'
+          position: 'relative',
+          minHeight: '360px',
+          background: '#0a0a0c',
+          color: 'var(--ivory)',
+          padding: '40px 44px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          overflow: 'hidden'
         }}
       >
-        {/* Left Side: Obsidian Brand Showcase */}
         <div
           style={{
-            background: '#141415',
-            color: '#f4f4f5',
-            padding: '44px 40px',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            borderRight: '1px solid rgba(255, 255, 255, 0.08)'
+            position: 'absolute',
+            inset: 0,
+            backgroundImage: 'url("/wet-luxury-car.jpg")',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            zIndex: 0
           }}
-        >
-          <div>
-            <Link to="/" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '12px', marginBottom: '40px' }}>
-              <BrandLogo size={40} />
-              <div>
-                <b style={{ display: 'block', fontSize: '17px', fontWeight: 600, letterSpacing: '0.06em', fontFamily: 'Manrope, sans-serif', color: '#f4f4f5' }}>
-                  EGHSELHA
-                </b>
-                <small style={{ display: 'block', fontSize: '11px', color: '#85858b', marginTop: '2px' }}>
-                  Mobile auto detailing
-                </small>
-              </div>
-            </Link>
+        />
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background:
+              'linear-gradient(180deg, rgba(10,10,12,0.72) 0%, rgba(10,10,12,0.36) 44%, rgba(10,10,12,0.92) 100%)',
+            zIndex: 1
+          }}
+        />
 
-            <h1
-              style={{
-                font: '500 32px/1.18 Manrope, sans-serif',
-                color: '#f4f4f5',
-                margin: '0 0 16px 0',
-                letterSpacing: '-0.02em'
-              }}
-            >
-              On-demand car care at your doorstep
-            </h1>
+        <div style={{ position: 'relative', zIndex: 2 }}>
+          <Link to="/" style={{ textDecoration: 'none', display: 'inline-block' }}>
+            <EghselhaLogo size={34} showText={true} />
+          </Link>
+        </div>
 
-            <p style={{ fontSize: '14px', lineHeight: 1.65, color: '#a1a1a6', margin: 0, maxWidth: '400px' }}>
-              Sign in to manage bookings, track assigned technicians live on the map, and access your saved vehicles and wallet.
-            </p>
-          </div>
+        <div style={{ position: 'relative', zIndex: 2, maxWidth: '480px', marginTop: '48px' }}>
+          <p
+            className="lx-enter lx-d1"
+            style={{
+              fontSize: '12px',
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              color: 'var(--bronze-dark)',
+              margin: '0 0 14px 0',
+              fontWeight: 500
+            }}
+          >
+            Mobile Automotive Atelier
+          </p>
+          <h1
+            className="lx-enter lx-d2"
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(40px, 4.4vw, 60px)',
+              fontWeight: 400,
+              lineHeight: 1.02,
+              letterSpacing: '-0.02em',
+              color: 'var(--ivory)',
+              margin: '0 0 18px 0'
+            }}
+          >
+            Welcome back.
+            <br />
+            <span style={{ fontStyle: 'italic', color: 'rgba(245, 243, 238, 0.8)' }}>
+              Your driveway awaits.
+            </span>
+          </h1>
+          <p
+            className="lx-enter lx-d3"
+            style={{
+              fontSize: '14px',
+              lineHeight: 1.65,
+              color: 'rgba(245, 243, 238, 0.72)',
+              margin: '0 0 36px 0',
+              maxWidth: '400px'
+            }}
+          >
+            Sign in to manage bookings, follow your assigned technician live on the map, and access your saved vehicles and wallet.
+          </p>
 
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              paddingTop: '20px',
-              borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+              paddingTop: '18px',
+              borderTop: '1px solid rgba(245, 243, 238, 0.14)',
               fontSize: '12px',
-              color: '#737378'
+              color: 'rgba(245, 243, 238, 0.56)'
             }}
           >
             <span>© 2026 EGHSELHA</span>
             <span>On-demand mobile detailing</span>
           </div>
         </div>
+      </div>
 
-        {/* Right Side: Dark Obsidian Login Form Panel */}
-        <div
-          style={{
-            padding: '44px 40px',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            background: '#19191b'
-          }}
-        >
-          <div style={{ marginBottom: '24px' }}>
-            <Link
-              to="/"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                color: '#a1a1a6',
-                fontSize: '12px',
-                fontWeight: 500,
-                textDecoration: 'none',
-                marginBottom: '16px'
-              }}
-            >
-              <ArrowLeft size={14} strokeWidth={1.6} />
-              <span>Back to home</span>
-            </Link>
-            <h2
-              style={{
-                font: '500 24px/1.2 Manrope, sans-serif',
-                color: '#f4f4f5',
-                margin: '0 0 6px 0',
-                letterSpacing: '-0.02em'
-              }}
-            >
-              Sign in
-            </h2>
-            <p style={{ fontSize: '13px', color: '#85858b', margin: 0 }}>
-              Enter your email and password to continue
-            </p>
-          </div>
+      {/* RIGHT HALF: Warm Alabaster Editorial Form Canvas */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '48px 32px',
+          background: 'var(--alabaster)'
+        }}
+      >
+        <div className="lx-enter lx-d1" style={{ width: '100%', maxWidth: '420px' }}>
+          <Link
+            to="/"
+            className="lx-nav-link"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              color: 'var(--ink-secondary)',
+              fontSize: '13px',
+              fontWeight: 500,
+              marginBottom: '28px'
+            }}
+          >
+            <ArrowLeft size={14} strokeWidth={1.7} />
+            <span>Back to home</span>
+          </Link>
+
+          <h2
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: '42px',
+              fontWeight: 400,
+              lineHeight: 1.05,
+              letterSpacing: '-0.02em',
+              color: 'var(--ink-primary)',
+              margin: '0 0 8px 0'
+            }}
+          >
+            Sign in
+          </h2>
+          <p style={{ fontSize: '14px', color: 'var(--ink-secondary)', margin: '0 0 28px 0' }}>
+            Enter your credentials to access your portal.
+          </p>
 
           {/* Quick Demo Accounts */}
           <div
             style={{
-              background: '#141415',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              borderRadius: '12px',
+              background: 'var(--alabaster-raised)',
+              border: '1px solid var(--hairline-light)',
+              borderRadius: '14px',
               padding: '12px',
-              marginBottom: '20px'
+              marginBottom: '24px'
             }}
           >
-            <div style={{ marginBottom: '10px' }}>
-              <span style={{ fontSize: '12px', fontWeight: 500, color: '#a1a1a6' }}>
-                Demo accounts
+            <div style={{ marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)' }}>
+                Quick demo access
               </span>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
               {demoAccounts.map((acc) => {
                 const Icon = acc.icon;
+                const isActive = form.email === acc.email;
                 return (
                   <button
                     key={acc.badge}
                     type="button"
                     onClick={() => handleDemoFill(acc)}
                     style={{
-                      border: '1px solid rgba(255, 255, 255, 0.08)',
-                      background: '#232325',
-                      borderRadius: '8px',
-                      padding: '8px 10px',
+                      border: isActive ? '1px solid var(--bronze)' : '1px solid var(--hairline-light)',
+                      background: isActive ? 'var(--bronze-soft)' : '#ffffff',
+                      borderRadius: '10px',
+                      padding: '10px 8px',
                       cursor: 'pointer',
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
-                      gap: '4px',
-                      transition: 'border-color 150ms cubic-bezier(0.22, 1, 0.36, 1), background-color 150ms cubic-bezier(0.22, 1, 0.36, 1)'
+                      gap: '5px',
+                      transition: 'border-color 180ms var(--ease-luxury), background-color 180ms var(--ease-luxury), transform 180ms var(--ease-luxury)'
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = 'rgba(212, 155, 75, 0.5)';
-                      e.currentTarget.style.background = '#2a2a2e';
+                      e.currentTarget.style.borderColor = 'var(--bronze)';
+                      e.currentTarget.style.transform = 'translateY(-1px)';
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
-                      e.currentTarget.style.background = '#232325';
+                      e.currentTarget.style.borderColor = isActive ? 'var(--bronze)' : 'var(--hairline-light)';
+                      e.currentTarget.style.transform = 'translateY(0)';
                     }}
                   >
-                    <Icon size={15} strokeWidth={1.6} color="#d49b4b" />
-                    <span style={{ fontSize: '12px', fontWeight: 500, color: '#ededed' }}>
+                    <Icon size={15} strokeWidth={1.7} color={isActive ? 'var(--bronze)' : 'var(--ink-secondary)'} />
+                    <span style={{ fontSize: '12px', fontWeight: 500, color: 'var(--ink-primary)' }}>
                       {acc.badge}
                     </span>
                   </button>
@@ -439,21 +474,21 @@ export default function Login() {
             <div
               style={{
                 padding: '12px 14px',
-                borderRadius: '8px',
-                marginBottom: '16px',
-                fontSize: '12px',
+                borderRadius: '10px',
+                marginBottom: '18px',
+                fontSize: '13px',
                 display: 'flex',
                 alignItems: 'flex-start',
                 gap: '10px',
-                background: globalMessage.type === 'error' ? 'rgba(229, 72, 77, 0.12)' : 'rgba(212, 155, 75, 0.12)',
-                border: `1px solid ${globalMessage.type === 'error' ? 'rgba(229, 72, 77, 0.3)' : 'rgba(212, 155, 75, 0.3)'}`,
-                color: globalMessage.type === 'error' ? '#fca5a5' : '#e5b56c'
+                background: globalMessage.type === 'error' ? 'var(--semantic-negative-bg)' : 'var(--bronze-soft)',
+                border: `1px solid ${globalMessage.type === 'error' ? 'rgba(185, 28, 28, 0.24)' : 'rgba(166, 124, 55, 0.28)'}`,
+                color: globalMessage.type === 'error' ? 'var(--semantic-negative)' : '#7a571e'
               }}
             >
               {globalMessage.type === 'error' ? (
-                <AlertCircle size={16} style={{ flexShrink: 0, marginTop: '1px' }} />
+                <AlertCircle size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
               ) : (
-                <CheckCircle2 size={16} style={{ flexShrink: 0, marginTop: '1px' }} />
+                <CheckCircle2 size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
               )}
               <span>{globalMessage.text}</span>
             </div>
@@ -461,40 +496,40 @@ export default function Login() {
 
           {/* 2FA Form or Standard Login Form */}
           {twoFactorActive ? (
-            <form onSubmit={handleVerify2FA} style={{ display: 'grid', gap: '16px' }}>
+            <form onSubmit={handleVerify2FA} style={{ display: 'grid', gap: '18px' }}>
               <div
                 style={{
-                  background: '#141415',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
-                  borderRadius: '12px',
-                  padding: '16px',
+                  background: '#ffffff',
+                  border: '1px solid var(--hairline-light)',
+                  borderRadius: '14px',
+                  padding: '20px',
                   textAlign: 'center'
                 }}
               >
                 <div
                   style={{
-                    width: '40px',
-                    height: '40px',
+                    width: '42px',
+                    height: '42px',
                     borderRadius: '10px',
-                    background: '#232325',
-                    color: '#d49b4b',
+                    background: 'var(--bronze-soft)',
+                    color: 'var(--bronze)',
                     display: 'grid',
                     placeItems: 'center',
                     margin: '0 auto 10px auto'
                   }}
                 >
-                  <ShieldCheck size={20} strokeWidth={1.6} />
+                  <ShieldCheck size={20} strokeWidth={1.7} />
                 </div>
-                <b style={{ fontSize: '14px', color: '#f4f4f5', display: 'block', fontWeight: 600 }}>Two-factor verification</b>
-                <small style={{ fontSize: '12px', color: '#a1a1a6', display: 'block', marginTop: '4px' }}>
-                  Enter the 6-digit code sent to <span style={{ color: '#ededed', fontFamily: 'monospace' }}>{twoFactorEmail}</span>
+                <b style={{ fontSize: '15px', color: 'var(--ink-primary)', display: 'block', fontWeight: 600 }}>
+                  Two-factor verification
+                </b>
+                <small style={{ fontSize: '13px', color: 'var(--ink-secondary)', display: 'block', marginTop: '4px' }}>
+                  Enter the 6-digit code sent to <span className="mono-num" style={{ color: 'var(--ink-primary)' }}>{twoFactorEmail}</span>
                 </small>
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, color: '#a1a1a6', marginBottom: '6px' }}>
-                  Verification code
-                </label>
+                <label style={fieldLabelStyle}>Verification code</label>
                 <input
                   type="text"
                   maxLength={6}
@@ -503,19 +538,12 @@ export default function Login() {
                   placeholder="123456"
                   autoFocus
                   style={{
-                    width: '100%',
-                    padding: '12px',
+                    ...lightInputStyle(errors.twoFactorCode),
                     textAlign: 'center',
                     letterSpacing: '8px',
                     fontSize: '20px',
-                    fontFamily: 'monospace',
-                    fontWeight: 600,
-                    borderRadius: '8px',
-                    border: errors.twoFactorCode ? '1px solid #e5484d' : '1px solid rgba(255, 255, 255, 0.12)',
-                    outline: 'none',
-                    background: '#232325',
-                    color: '#f4f4f5',
-                    boxSizing: 'border-box'
+                    fontFamily: 'var(--font-mono)',
+                    fontWeight: 600
                   }}
                 />
                 <FieldError error={errors.twoFactorCode} />
@@ -524,20 +552,22 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={loading}
+                className="lx-btn lx-glass-btn lx-glass-obsidian"
                 style={{
                   width: '100%',
-                  minHeight: '42px',
-                  padding: '10px 16px',
-                  fontSize: '13px',
+                  minHeight: '48px',
+                  borderRadius: '999px',
+                  fontSize: '14px',
                   fontWeight: 600,
-                  borderRadius: '8px',
-                  background: '#f4f4f5',
-                  border: '1px solid #f4f4f5',
-                  color: '#141415',
-                  cursor: 'pointer'
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  opacity: loading ? 0.6 : 1
                 }}
               >
-                {loading ? 'Verifying…' : 'Confirm code & sign in'}
+                <span>{loading ? 'Verifying…' : 'Confirm code & sign in'}</span>
+                {!loading && <ArrowRight size={15} strokeWidth={1.9} className="lx-arrow" />}
               </button>
 
               <button
@@ -546,8 +576,8 @@ export default function Login() {
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: '#a1a1a6',
-                  fontSize: '12px',
+                  color: 'var(--ink-secondary)',
+                  fontSize: '13px',
                   cursor: 'pointer',
                   textAlign: 'center'
                 }}
@@ -556,20 +586,10 @@ export default function Login() {
               </button>
             </form>
           ) : (
-            <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '16px' }}>
+            <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '18px' }}>
               <div>
-                <label
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    fontSize: '12px',
-                    fontWeight: 500,
-                    color: '#a1a1a6',
-                    marginBottom: '6px'
-                  }}
-                >
-                  <Mail size={14} strokeWidth={1.6} color="#85858b" />
+                <label style={fieldLabelStyle}>
+                  <Mail size={14} strokeWidth={1.6} color="var(--ink-muted)" />
                   Email address
                 </label>
                 <input
@@ -578,23 +598,18 @@ export default function Login() {
                   onChange={(e) => handleInputChange('email', e.target.value)}
                   placeholder="name@example.com"
                   dir="ltr"
-                  style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    fontSize: '13px',
-                    borderRadius: '8px',
-                    border: errors.email ? '1px solid #e5484d' : '1px solid rgba(255, 255, 255, 0.12)',
-                    background: '#232325',
-                    outline: 'none',
-                    color: '#f4f4f5',
-                    boxSizing: 'border-box',
-                    transition: 'border-color 150ms cubic-bezier(0.22, 1, 0.36, 1)'
-                  }}
+                  style={lightInputStyle(errors.email)}
                   onFocus={(e) => {
-                    if (!errors.email) e.target.style.borderColor = '#d49b4b';
+                    if (!errors.email) {
+                      e.target.style.borderColor = 'var(--bronze)';
+                      e.target.style.boxShadow = '0 0 0 3px rgba(166, 124, 55, 0.12)';
+                    }
                   }}
                   onBlur={(e) => {
-                    if (!errors.email) e.target.style.borderColor = 'rgba(255, 255, 255, 0.12)';
+                    if (!errors.email) {
+                      e.target.style.borderColor = 'var(--hairline-light-strong)';
+                      e.target.style.boxShadow = 'none';
+                    }
                   }}
                 />
                 <FieldError error={errors.email} />
@@ -602,17 +617,8 @@ export default function Login() {
 
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                  <label
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      fontSize: '12px',
-                      fontWeight: 500,
-                      color: '#a1a1a6'
-                    }}
-                  >
-                    <KeyRound size={14} strokeWidth={1.6} color="#85858b" />
+                  <label style={{ ...fieldLabelStyle, marginBottom: 0 }}>
+                    <KeyRound size={14} strokeWidth={1.6} color="var(--ink-muted)" />
                     Password
                   </label>
                   <button
@@ -624,7 +630,7 @@ export default function Login() {
                     style={{
                       background: 'none',
                       border: 'none',
-                      color: '#d49b4b',
+                      color: 'var(--bronze)',
                       fontSize: '12px',
                       fontWeight: 500,
                       cursor: 'pointer',
@@ -640,23 +646,18 @@ export default function Login() {
                   onChange={(e) => handleInputChange('password', e.target.value)}
                   placeholder="••••••••"
                   dir="ltr"
-                  style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    fontSize: '13px',
-                    borderRadius: '8px',
-                    border: errors.password ? '1px solid #e5484d' : '1px solid rgba(255, 255, 255, 0.12)',
-                    background: '#232325',
-                    outline: 'none',
-                    color: '#f4f4f5',
-                    boxSizing: 'border-box',
-                    transition: 'border-color 150ms cubic-bezier(0.22, 1, 0.36, 1)'
-                  }}
+                  style={lightInputStyle(errors.password)}
                   onFocus={(e) => {
-                    if (!errors.password) e.target.style.borderColor = '#d49b4b';
+                    if (!errors.password) {
+                      e.target.style.borderColor = 'var(--bronze)';
+                      e.target.style.boxShadow = '0 0 0 3px rgba(166, 124, 55, 0.12)';
+                    }
                   }}
                   onBlur={(e) => {
-                    if (!errors.password) e.target.style.borderColor = 'rgba(255, 255, 255, 0.12)';
+                    if (!errors.password) {
+                      e.target.style.borderColor = 'var(--hairline-light-strong)';
+                      e.target.style.boxShadow = 'none';
+                    }
                   }}
                 />
                 <FieldError error={errors.password} />
@@ -665,32 +666,37 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={loading}
+                className="lx-btn lx-glass-btn lx-glass-obsidian"
                 style={{
                   width: '100%',
-                  minHeight: '42px',
-                  padding: '10px 16px',
-                  fontSize: '13px',
+                  minHeight: '48px',
+                  borderRadius: '999px',
+                  fontSize: '14px',
                   fontWeight: 600,
-                  borderRadius: '8px',
-                  background: '#f4f4f5',
-                  border: '1px solid #f4f4f5',
-                  color: '#141415',
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  opacity: loading ? 0.6 : 1,
-                  marginTop: '4px',
-                  display: 'flex',
+                  marginTop: '6px',
+                  display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px',
-                  transition: 'background-color 150ms cubic-bezier(0.22, 1, 0.36, 1)'
+                  opacity: loading ? 0.65 : 1,
+                  cursor: loading ? 'not-allowed' : 'pointer'
                 }}
               >
                 {loading ? (
-                  <div style={{ width: '16px', height: '16px', border: '2px solid #141415', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                  <div
+                    style={{
+                      width: '16px',
+                      height: '16px',
+                      border: '2px solid var(--ivory)',
+                      borderTopColor: 'transparent',
+                      borderRadius: '50%',
+                      animation: 'spin 0.8s linear infinite'
+                    }}
+                  />
                 ) : (
                   <>
-                    <LogIn size={15} strokeWidth={1.8} />
                     <span>Sign in</span>
+                    <ArrowRight size={15} strokeWidth={1.9} className="lx-arrow" />
                   </>
                 )}
               </button>
@@ -700,41 +706,84 @@ export default function Login() {
           {/* Footer Register Link */}
           <div
             style={{
-              marginTop: '24px',
-              paddingTop: '18px',
-              borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+              marginTop: '28px',
+              paddingTop: '20px',
+              borderTop: '1px solid var(--hairline-light)',
               textAlign: 'center',
-              fontSize: '13px',
-              color: '#85858b'
+              fontSize: '14px',
+              color: 'var(--ink-secondary)'
             }}
           >
-            Don't have an account yet?{' '}
+            New to EGHSELHA?{' '}
             <Link
               to="/register"
+              className="lx-nav-link"
               style={{
-                color: '#d49b4b',
+                color: 'var(--ink-primary)',
                 fontWeight: 600,
-                textDecoration: 'none',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '4px'
               }}
             >
               <span>Create an account</span>
-              <ArrowRight size={14} strokeWidth={1.6} />
+              <ArrowRight size={14} strokeWidth={1.7} />
             </Link>
           </div>
         </div>
       </div>
 
-      {/* Forgot Password Modal (Matching EGHSELHA App.css modal-overlay & modal-card) */}
+      {/* Forgot Password Modal */}
       {showForgotModal && (
-        <div className="modal-overlay">
-          <div className="modal-card">
-            <div className="modal-header">
+        <div
+          onClick={() => setShowForgotModal(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 100,
+            background: 'rgba(14, 14, 16, 0.72)',
+            backdropFilter: 'blur(10px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px'
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: '100%',
+              maxWidth: '440px',
+              background: 'var(--alabaster)',
+              borderRadius: '16px',
+              border: '1px solid var(--hairline-light-strong)',
+              overflow: 'hidden',
+              boxShadow: '0 24px 60px rgba(0, 0, 0, 0.35)'
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                justifyContent: 'space-between',
+                gap: '12px',
+                padding: '24px 24px 16px',
+                borderBottom: '1px solid var(--hairline-light)'
+              }}
+            >
               <div>
-                <h3>Reset Password</h3>
-                <p>
+                <h3
+                  style={{
+                    fontFamily: 'var(--font-display)',
+                    fontSize: '28px',
+                    fontWeight: 400,
+                    margin: '0 0 6px 0',
+                    color: 'var(--ink-primary)'
+                  }}
+                >
+                  Reset password
+                </h3>
+                <p style={{ fontSize: '13px', color: 'var(--ink-secondary)', margin: 0, lineHeight: 1.5 }}>
                   {forgotStep === 1
                     ? 'Enter your registered email and we will send you a verification code.'
                     : 'Enter the code sent to your email along with your new password.'}
@@ -743,23 +792,24 @@ export default function Login() {
               <button
                 type="button"
                 onClick={() => setShowForgotModal(false)}
-                style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
+                aria-label="Close"
+                style={{ background: 'none', border: 'none', color: 'var(--ink-muted)', cursor: 'pointer', padding: '4px' }}
               >
-                <X size={20} />
+                <X size={18} strokeWidth={1.7} />
               </button>
             </div>
 
-            <div className="modal-body">
+            <div style={{ padding: '22px 24px 24px' }}>
               {forgotMessage && (
                 <div
                   style={{
                     padding: '10px 14px',
                     borderRadius: '10px',
                     marginBottom: '16px',
-                    fontSize: '11px',
-                    background: forgotMessage.type === 'error' ? '#fef2f2' : '#eff6ff',
-                    border: `1px solid ${forgotMessage.type === 'error' ? '#fecaca' : '#bfdbfe'}`,
-                    color: forgotMessage.type === 'error' ? '#b91c1c' : '#141415'
+                    fontSize: '13px',
+                    background: forgotMessage.type === 'error' ? 'var(--semantic-negative-bg)' : 'var(--bronze-soft)',
+                    border: `1px solid ${forgotMessage.type === 'error' ? 'rgba(185, 28, 28, 0.24)' : 'rgba(166, 124, 55, 0.28)'}`,
+                    color: forgotMessage.type === 'error' ? 'var(--semantic-negative)' : '#7a571e'
                   }}
                 >
                   {forgotMessage.text}
@@ -767,11 +817,9 @@ export default function Login() {
               )}
 
               {forgotStep === 1 ? (
-                <form onSubmit={handleSendForgotEmail} style={{ display: 'grid', gap: '14px' }}>
+                <form onSubmit={handleSendForgotEmail} style={{ display: 'grid', gap: '16px' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
-                      Email Address
-                    </label>
+                    <label style={fieldLabelStyle}>Email address</label>
                     <input
                       type="email"
                       value={forgotEmail}
@@ -779,21 +827,14 @@ export default function Login() {
                       placeholder="name@example.com"
                       dir="ltr"
                       required
-                      style={{
-                        width: '100%',
-                        padding: '11px 13px',
-                        fontSize: '13px',
-                        borderRadius: '10px',
-                        border: '1px solid #cbd5e1',
-                        outline: 'none',
-                        boxSizing: 'border-box'
-                      }}
+                      style={lightInputStyle(false)}
                     />
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '6px' }}>
                     <button
                       type="button"
                       className="btn outline"
+                      style={{ borderRadius: '999px' }}
                       onClick={() => setShowForgotModal(false)}
                     >
                       Cancel
@@ -801,19 +842,23 @@ export default function Login() {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="btn primary"
-                      style={{ background: '#141415' }}
+                      className="lx-btn lx-glass-btn lx-glass-obsidian"
+                      style={{
+                        minHeight: '40px',
+                        padding: '0 22px',
+                        borderRadius: '999px',
+                        fontSize: '13px',
+                        fontWeight: 600
+                      }}
                     >
-                      {loading ? 'Sending...' : 'Send Reset Code'}
+                      <span>{loading ? 'Sending…' : 'Send reset code'}</span>
                     </button>
                   </div>
                 </form>
               ) : (
-                <form onSubmit={handleResetPassword} style={{ display: 'grid', gap: '12px' }}>
+                <form onSubmit={handleResetPassword} style={{ display: 'grid', gap: '14px' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
-                      Verification Code
-                    </label>
+                    <label style={fieldLabelStyle}>Verification code</label>
                     <input
                       type="text"
                       value={resetToken}
@@ -821,21 +866,11 @@ export default function Login() {
                       placeholder="123456"
                       dir="ltr"
                       required
-                      style={{
-                        width: '100%',
-                        padding: '10px 12px',
-                        fontSize: '13px',
-                        borderRadius: '10px',
-                        border: '1px solid #cbd5e1',
-                        outline: 'none',
-                        boxSizing: 'border-box'
-                      }}
+                      style={lightInputStyle(false)}
                     />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
-                      New Password
-                    </label>
+                    <label style={fieldLabelStyle}>New password</label>
                     <input
                       type="password"
                       value={newPassword}
@@ -843,21 +878,11 @@ export default function Login() {
                       placeholder="••••••••"
                       dir="ltr"
                       required
-                      style={{
-                        width: '100%',
-                        padding: '10px 12px',
-                        fontSize: '13px',
-                        borderRadius: '10px',
-                        border: '1px solid #cbd5e1',
-                        outline: 'none',
-                        boxSizing: 'border-box'
-                      }}
+                      style={lightInputStyle(false)}
                     />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
-                      Confirm Password
-                    </label>
+                    <label style={fieldLabelStyle}>Confirm password</label>
                     <input
                       type="password"
                       value={confirmPassword}
@@ -865,21 +890,14 @@ export default function Login() {
                       placeholder="••••••••"
                       dir="ltr"
                       required
-                      style={{
-                        width: '100%',
-                        padding: '10px 12px',
-                        fontSize: '13px',
-                        borderRadius: '10px',
-                        border: '1px solid #cbd5e1',
-                        outline: 'none',
-                        boxSizing: 'border-box'
-                      }}
+                      style={lightInputStyle(false)}
                     />
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '8px' }}>
                     <button
                       type="button"
                       className="btn outline"
+                      style={{ borderRadius: '999px' }}
                       onClick={() => setShowForgotModal(false)}
                     >
                       Cancel
@@ -887,10 +905,16 @@ export default function Login() {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="btn primary"
-                      style={{ background: '#141415' }}
+                      className="lx-btn lx-glass-btn lx-glass-obsidian"
+                      style={{
+                        minHeight: '40px',
+                        padding: '0 22px',
+                        borderRadius: '999px',
+                        fontSize: '13px',
+                        fontWeight: 600
+                      }}
                     >
-                      {loading ? 'Saving...' : 'Save New Password'}
+                      <span>{loading ? 'Saving…' : 'Save new password'}</span>
                     </button>
                   </div>
                 </form>

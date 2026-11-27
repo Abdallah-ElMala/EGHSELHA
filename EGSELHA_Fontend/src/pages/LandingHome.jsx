@@ -1,131 +1,110 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import {
-  Calendar,
-  UserCheck,
-  ShieldCheck,
-  Play,
-  ArrowRight,
-  Sparkles,
-  Droplets,
-  Clock,
-  MapPin,
-  Star,
-  ChevronRight,
-  X,
-  Menu,
-  Award,
-  Zap,
-  Check
-} from 'lucide-react'
+import { ArrowUpRight, ArrowRight, Play, X, Check } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import EghselhaLogo from '../component/EghselhaLogo'
-
-const CAR_BACKGROUNDS = [
-  { id: 'foam', label: 'Snow Foam', src: '/washed-car-foam.jpg' },
-  { id: 'wet', label: 'Hydrophobic Gloss', src: '/wet-luxury-car.jpg' },
-  { id: 'spray', label: 'High-Pressure Rinse', src: '/car-wash-spray.jpg' }
-]
+import Reveal from '../component/ui/Reveal'
 
 const PACKAGES = [
   {
     id: 'basic-wash',
+    index: '01',
     name: 'Basic Wash',
-    badge: 'Exterior',
+    subtitle: 'Routine exterior maintenance',
     price: 200,
     duration: '30 min',
-    desc: 'Exterior pressure wash, snow foam bath, tire dressing and streak-free windows.',
-    highlights: ['Snow foam wash', 'High-pressure rinse', 'Tire gloss dressing', 'Exterior glass'],
-    isPopular: false
+    photo: '/car-wash-spray.jpg',
+    desc: 'A thorough exterior reset — snow foam pre-soak, pH-neutral hand wash, high-pressure rinse, tire dressing, and streak-free exterior glass.',
+    highlights: ['Snow foam pre-soak', 'High-pressure rinse', 'Satin tire dressing', 'Exterior glass finish']
   },
   {
     id: 'premium-wash',
+    index: '02',
     name: 'Premium Wash',
-    badge: 'Most selected',
+    subtitle: 'Full interior & exterior care',
     price: 350,
     duration: '60 min',
-    desc: 'Full cabin vacuum, dashboard dressing, snow foam bath and spray wax sealant.',
+    photo: '/washed-car-foam.jpg',
+    desc: 'Our most requested visit. Complete cabin vacuuming and trim conditioning paired with a hand snow-foam bath and protective spray wax.',
     highlights: [
-      'Interior cabin vacuum',
-      'Dashboard & trim care',
-      'Hand foam wash',
-      'Spray wax sealant',
-      'Cabin deodorizer'
+      'Deep cabin vacuum & mat care',
+      'Dashboard & console conditioning',
+      'Hand snow-foam wash',
+      'Hydrophobic spray wax sealant',
+      'Subtle cabin deodorizer'
     ],
-    isPopular: true
+    featured: true
   },
   {
     id: 'deep-clean',
+    index: '03',
     name: 'Deep Clean',
-    badge: 'Full detailing',
+    subtitle: 'Steam extraction & leather care',
     price: 500,
     duration: '90 min',
-    desc: 'Steam upholstery detailing, carpet extraction and AC antibacterial sanitation.',
+    photo: '/car-wash-detailing.jpg',
+    desc: 'Designed for cabins that need a full reset — hot steam upholstery extraction, leather nourishment, antibacterial AC sanitation, and engine bay wipe.',
     highlights: [
-      'Interior steam extraction',
-      'Carpet & mat shampoo',
-      'Leather conditioning',
-      'AC vent disinfection',
-      'Engine bay wipe'
-    ],
-    isPopular: false
+      'Hot steam seat & carpet extraction',
+      'Matte leather nourishment',
+      'Antibacterial AC vent sanitation',
+      'Engine bay detailing wipe',
+      'Full exterior foam & wax'
+    ]
   },
   {
     id: 'ultimate-detail',
+    index: '04',
     name: 'Ultimate Detail',
-    badge: 'Ceramic & polish',
+    subtitle: 'Paint correction & 6-month ceramic',
     price: 700,
     duration: '140 min',
-    desc: 'Clay bar paint decontamination, machine polish and 6-month ceramic protection.',
+    photo: '/wet-luxury-car.jpg',
+    desc: 'Showroom-level restoration at your driveway — clay bar paint decontamination, single-stage machine gloss polish, and 6-month ceramic protection.',
     highlights: [
-      'Clay bar paint treatment',
-      'Machine gloss polish',
-      '6-month ceramic coat',
-      'Complete interior restore',
-      'Headlight clarity'
-    ],
-    isPopular: false
+      'Clay bar paint decontamination',
+      'Machine gloss enhancement polish',
+      '6-month ceramic paint sealant',
+      'Complete interior restoration',
+      'Headlight clarity treatment'
+    ]
   }
 ]
 
-const STEPS = [
+const CRAFT_PILLARS = [
   {
-    step: '01',
-    title: 'Choose Service & Vehicle',
-    desc: 'Select from our quick wash or full detailing packages tailored to your car type.'
+    num: '01',
+    title: 'Pin your spot',
+    body: 'Drop a pin on your home driveway or office parking lot and pick a window that fits your day.'
   },
   {
-    step: '02',
-    title: 'Pick Date & Location',
-    desc: 'Choose on-demand immediate arrival or schedule a convenient slot at your home or office.'
+    num: '02',
+    title: 'Self-contained arrival',
+    body: 'Our mobile detailing unit arrives with its own filtered water, silent power, and pH-neutral products.'
   },
   {
-    step: '03',
-    title: 'Technician Arrives',
-    desc: 'Our certified mobile van arrives fully equipped with its own clean water and power.'
+    num: '03',
+    title: 'Tracked & photographed',
+    body: 'Follow your technician live on the map and review before-and-after inspection photos in the app.'
   },
   {
-    step: '04',
-    title: 'Inspect & Drive Happy',
-    desc: 'Enjoy your showroom-clean car. Pay seamlessly via card, digital wallet, or cash.'
+    num: '04',
+    title: 'Settle effortlessly',
+    body: 'Pay by card, in-app wallet, or cash only once you inspect the finish in person.'
   }
 ]
 
 export default function LandingHome() {
   const navigate = useNavigate()
   const { user, role, logout } = useAuth()
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [showVideoModal, setShowVideoModal] = useState(false)
-  const [activeNav, setActiveNav] = useState('home')
-  const [activeBg, setActiveBg] = useState(CAR_BACKGROUNDS[0])
+  const [selectedPkgId, setSelectedPkgId] = useState('premium-wash')
+  const [showFilm, setShowFilm] = useState(false)
+
+  const activePkg = PACKAGES.find((p) => p.id === selectedPkgId) || PACKAGES[1]
 
   const handleBookNow = (pkgId = null) => {
     if (user) {
-      if (pkgId) {
-        navigate(`/customer/book?package=${encodeURIComponent(pkgId)}`)
-      } else {
-        navigate('/customer/book')
-      }
+      navigate(pkgId ? `/customer/book?package=${encodeURIComponent(pkgId)}` : '/customer/book')
     } else {
       navigate('/login?redirect=/customer/book')
     }
@@ -139,493 +118,819 @@ export default function LandingHome() {
   }
 
   return (
-    <div className="landing-root">
-      {/* ─────────────────────────────────────────────────────────────
-          1. TOP NAVBAR (Matches reference photo)
-      ───────────────────────────────────────────────────────────── */}
-      <header className="landing-header">
-        <div className="landing-header-inner">
-          {/* Left Brand Logo */}
-          <Link to="/" style={{ textDecoration: 'none' }}>
-            <EghselhaLogo size={42} showText={true} />
-          </Link>
+    <div style={{ background: 'var(--alabaster)', color: 'var(--ink-primary)', minHeight: '100vh' }}>
+      {/* =================================================================
+          1. FULL-BLEED CINEMATIC HERO (100vh — Zero Boxed Frame)
+         ================================================================= */}
+      <section
+        id="home"
+        style={{
+          position: 'relative',
+          minHeight: '100vh',
+          background: '#0a0a0c',
+          color: 'var(--ivory)',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          overflow: 'hidden'
+        }}
+      >
+        {/* Full-bleed edge-to-edge photography */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            backgroundImage: 'url("/washed-car-foam.jpg")',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center 42%',
+            transform: 'scale(1.02)',
+            zIndex: 0
+          }}
+        />
+        {/* Quiet Editorial Dark Vignette for Effortless Readability */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background:
+              'linear-gradient(180deg, rgba(10,10,12,0.72) 0%, rgba(10,10,12,0.34) 42%, rgba(10,10,12,0.92) 100%)',
+            zIndex: 1
+          }}
+        />
 
-          {/* Center Links */}
-          <nav className="landing-nav">
-            <a
-              href="#home"
-              onClick={() => setActiveNav('home')}
-              className={`landing-nav-link ${activeNav === 'home' ? 'active' : ''}`}
-            >
-              Home
-            </a>
-            <a
-              href="#services"
-              onClick={() => setActiveNav('services')}
-              className={`landing-nav-link ${activeNav === 'services' ? 'active' : ''}`}
-            >
-              Services
-            </a>
-            <a
-              href="#how-it-works"
-              onClick={() => setActiveNav('how-it-works')}
-              className={`landing-nav-link ${activeNav === 'how-it-works' ? 'active' : ''}`}
-            >
-              How It Works
-            </a>
-          </nav>
+        {/* Minimalist Floating Editorial Navbar */}
+        <header style={{ position: 'relative', zIndex: 10 }}>
+          <div
+            style={{
+              maxWidth: '1320px',
+              margin: '0 auto',
+              padding: '24px 32px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '24px'
+            }}
+          >
+            <Link to="/" style={{ textDecoration: 'none' }}>
+              <EghselhaLogo size={34} showText={true} />
+            </Link>
 
-          {/* Right Action Buttons */}
-          <div className="landing-auth-group">
-            {user ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ fontSize: '12px', color: '#cbd5e1' }} className="hidden lg:inline">
-                  Welcome, <b>{user.fullName?.split(' ')[0]}</b>
+            <nav className="landing-nav" style={{ display: 'flex', alignItems: 'center', gap: '36px' }}>
+              <a href="#craft" className="lx-nav-link" style={{ color: 'rgba(245,243,238,0.82)', fontSize: '14px' }}>
+                The craft
+              </a>
+              <a href="#services" className="lx-nav-link" style={{ color: 'rgba(245,243,238,0.82)', fontSize: '14px' }}>
+                Services
+              </a>
+              <a href="#how-it-works" className="lx-nav-link" style={{ color: 'rgba(245,243,238,0.82)', fontSize: '14px' }}>
+                How it works
+              </a>
+            </nav>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+              {user ? (
+                <>
+                  <button
+                    onClick={() => navigate(getDashboardPath())}
+                    className="lx-btn lx-glass-btn lx-glass-ivory"
+                    style={{
+                      borderRadius: '999px',
+                      padding: '0 22px',
+                      minHeight: '38px',
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <span>Dashboard</span>
+                  </button>
+                  <button
+                    onClick={logout}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: 'rgba(245,243,238,0.72)',
+                      fontSize: '13px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Sign out
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    className="lx-nav-link"
+                    style={{ color: 'rgba(245,243,238,0.88)', fontSize: '14px', fontWeight: 400 }}
+                  >
+                    Sign in
+                  </Link>
+                  <button
+                    onClick={() => handleBookNow()}
+                    className="lx-btn lx-glass-btn lx-glass-ivory"
+                    style={{
+                      borderRadius: '999px',
+                      padding: '0 22px',
+                      minHeight: '38px',
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <span>Reserve</span>
+                    <ArrowUpRight size={14} strokeWidth={1.9} className="lx-arrow" />
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </header>
+
+        {/* Bottom-Anchored Editorial Hero Content */}
+        <div
+          style={{
+            position: 'relative',
+            zIndex: 10,
+            maxWidth: '1320px',
+            width: '100%',
+            margin: '0 auto',
+            padding: '0 32px 56px',
+            boxSizing: 'border-box'
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'flex-end',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '36px'
+            }}
+          >
+            <div style={{ maxWidth: '760px' }}>
+              <p
+                className="lx-enter lx-d1"
+                style={{
+                  fontSize: '13px',
+                  letterSpacing: '0.14em',
+                  textTransform: 'uppercase',
+                  color: 'var(--bronze-dark)',
+                  margin: '0 0 18px 0',
+                  fontWeight: 500
+                }}
+              >
+                Mobile Automotive Atelier
+              </p>
+
+              <h1
+                className="lx-enter lx-d2"
+                style={{
+                  fontFamily: 'var(--font-display)',
+                  fontSize: 'clamp(52px, 7.2vw, 96px)',
+                  fontWeight: 400,
+                  lineHeight: 0.98,
+                  letterSpacing: '-0.025em',
+                  color: 'var(--ivory)',
+                  margin: '0 0 24px 0'
+                }}
+              >
+                We come to your driveway.
+                <br />
+                <span style={{ fontStyle: 'italic', color: 'rgba(245, 243, 238, 0.82)' }}>
+                  You keep your morning.
                 </span>
+              </h1>
+            </div>
+
+            <div className="lx-enter lx-d3" style={{ maxWidth: '380px', paddingBottom: '10px' }}>
+              <p
+                style={{
+                  fontSize: '15px',
+                  lineHeight: 1.65,
+                  color: 'rgba(245, 243, 238, 0.78)',
+                  margin: '0 0 24px 0'
+                }}
+              >
+                Private, self-contained detailing vans equipped with filtered water, silent power, and paint-safe studio chemistry — dispatched directly to your car.
+              </p>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                 <button
-                  onClick={() => navigate(getDashboardPath())}
-                  className="landing-btn-signup"
-                  style={{ padding: '8px 18px', fontSize: '13px' }}
-                >
-                  Dashboard
-                </button>
-                <button
-                  onClick={logout}
+                  onClick={() => handleBookNow()}
+                  className="lx-btn lx-glass-btn lx-glass-gold"
                   style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#94a3b8',
-                    cursor: 'pointer',
-                    fontSize: '12px'
+                    borderRadius: '999px',
+                    minHeight: '50px',
+                    padding: '0 28px',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px'
                   }}
                 >
-                  Logout
+                  <span>Book a detailing</span>
+                  <ArrowRight size={16} strokeWidth={1.9} className="lx-arrow" />
+                </button>
+
+                <button
+                  onClick={() => setShowFilm(true)}
+                  className="lx-btn lx-glass-btn lx-glass-crystal"
+                  style={{
+                    borderRadius: '999px',
+                    minHeight: '50px',
+                    padding: '0 24px',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <Play size={13} fill="var(--ivory)" color="var(--ivory)" className="lx-play-icon" />
+                  <span>Watch film</span>
                 </button>
               </div>
-            ) : (
-              <>
-                <Link to="/login" className="landing-btn-login">
-                  Login
-                </Link>
-                <Link to="/register" className="landing-btn-signup">
-                  Sign Up
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
-
-      {/* ─────────────────────────────────────────────────────────────
-          2. HERO SECTION (Seamless Right-Side Car Backdrop)
-      ───────────────────────────────────────────────────────────── */}
-      <section id="home" className="landing-hero">
-        <div className="landing-hero-glow" />
-
-
-        <div className="landing-hero-container">
-          {/* Left Column: Headlines & Call to Actions (Protected) */}
-          <div className="landing-hero-text-col">
-            <h1 className="landing-hero-title">
-              <span className="text-white">Your Car</span>
-              <span className="text-accent">Our Care</span>
-            </h1>
-
-            <p className="landing-hero-subtitle">
-              Professional car wash service at your location.
-              <br />
-              Fast, easy, and reliable.
-            </p>
-
-            {/* 3 Value Feature Badges */}
-            <div className="landing-badges-row">
-              <div className="landing-badge-card">
-                <div className="landing-badge-icon">
-                  <Calendar size={18} />
-                </div>
-                <div className="landing-badge-text">
-                  <b>Book Online</b>
-                  <small>in Minutes</small>
-                </div>
-              </div>
-
-              <div className="landing-badge-card">
-                <div className="landing-badge-icon">
-                  <UserCheck size={18} />
-                </div>
-                <div className="landing-badge-text">
-                  <b>Expert</b>
-                  <small>Technicians</small>
-                </div>
-              </div>
-
-              <div className="landing-badge-card">
-                <div className="landing-badge-icon">
-                  <ShieldCheck size={18} />
-                </div>
-                <div className="landing-badge-text">
-                  <b>Eco-Friendly</b>
-                  <small>Products</small>
-                </div>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="landing-cta-row">
-              <button onClick={() => handleBookNow()} className="landing-btn-book">
-                <span>Book Now</span>
-                <ArrowRight size={18} />
-              </button>
-
-              <button onClick={() => setShowVideoModal(true)} className="landing-btn-video">
-                <div className="landing-play-circle">
-                  <Play size={12} fill="#ffffff" color="#ffffff" style={{ marginLeft: '1px' }} />
-                </div>
-                <span>Watch Video</span>
-              </button>
             </div>
           </div>
 
-          {/* Right Column: Dedicated Car Wash Visual Area (Never Overlaps Text) */}
-          <div className="landing-hero-car-col">
-            <div className="landing-car-frame">
-              <img
-                src={activeBg.src}
-                alt="Real Luxury Car washed with water droplets and foam"
-                className="landing-car-img"
-              />
-              <div className="landing-car-gradient-overlay" />
-
-              {/* Signature handwritten cursive tagline floating over the washed car */}
-              <div className="landing-cursive-tagline">
-                <span className="line1">Clean Cars</span>
-                <span className="line2">Happier Days</span>
-              </div>
-            </div>
-
-            {/* Live background switcher */}
-            <div className="landing-switcher-wrap">
-              <div className="landing-bg-switcher">
-                {CAR_BACKGROUNDS.map((bg) => (
-                  <button
-                    key={bg.id}
-                    onClick={() => setActiveBg(bg)}
-                    className={`landing-switcher-btn ${activeBg.id === bg.id ? 'active' : ''}`}
-                  >
-                    <span>{bg.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
+          {/* Quiet Bottom Hairline Index */}
+          <div
+            className="lx-enter lx-d4"
+            style={{
+              marginTop: '48px',
+              paddingTop: '20px',
+              borderTop: '1px solid rgba(245, 243, 238, 0.14)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '16px',
+              fontSize: '12px',
+              color: 'rgba(245, 243, 238, 0.6)'
+            }}
+          >
+            <span>Self-contained water &amp; power</span>
+            <span>Before &amp; after photo inspection</span>
+            <span>Live GPS arrival tracking</span>
+            <span>No waiting rooms, ever</span>
           </div>
         </div>
       </section>
 
-      {/* ─────────────────────────────────────────────────────────────
-          3. SERVICES & PACKAGES
-      ───────────────────────────────────────────────────────────── */}
+      {/* =================================================================
+          2. EDITORIAL CRAFT SHOWCASE (Asymmetrical 60/40 Magazine Split)
+         ================================================================= */}
       <section
-        id="services"
+        id="craft"
         style={{
-          padding: '80px 24px',
-          background: '#141415',
-          borderTop: '1px solid rgba(255, 255, 255, 0.08)'
+          background: 'var(--alabaster)',
+          padding: '112px 0',
+          borderBottom: '1px solid var(--hairline-light)'
         }}
       >
-        <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
-          <div style={{ maxWidth: '640px', margin: '0 0 48px' }}>
-            <span style={{ display: 'block', fontSize: '12px', fontWeight: 500, color: '#d49b4b', marginBottom: '8px' }}>
-              Service tiers
-            </span>
-            <h2
-              style={{
-                fontFamily: 'Manrope, sans-serif',
-                fontSize: '32px',
-                fontWeight: 500,
-                letterSpacing: '-0.02em',
-                color: '#f4f4f5',
-                margin: '0 0 12px'
-              }}
-            >
-              Wash packages &amp; detailing
-            </h2>
-            <p style={{ color: '#a1a1a6', fontSize: '15px', lineHeight: 1.6, margin: 0 }}>
-              From routine exterior washes to steam interior extraction and ceramic paint protection.
-            </p>
-          </div>
-
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-              gap: '20px'
-            }}
-          >
-            {PACKAGES.map((pkg) => (
-              <div
-                key={pkg.id}
+        <div
+          style={{
+            maxWidth: '1320px',
+            margin: '0 auto',
+            padding: '0 32px',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+            gap: '64px',
+            alignItems: 'center'
+          }}
+        >
+          <Reveal>
+            <div style={{ maxWidth: '500px' }}>
+              <span
                 style={{
-                  position: 'relative',
-                  borderRadius: '14px',
-                  padding: '24px',
-                  background: pkg.isPopular ? '#1c1c1f' : '#19191b',
-                  border: pkg.isPopular
-                    ? '1px solid rgba(212, 155, 75, 0.45)'
-                    : '1px solid rgba(255, 255, 255, 0.08)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between'
+                  display: 'block',
+                  fontSize: '12px',
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                  color: 'var(--bronze)',
+                  fontWeight: 600,
+                  marginBottom: '16px'
+                }}
+              >
+                Built for people who care about paint
+              </span>
+
+              <h2
+                style={{
+                  fontFamily: 'var(--font-display)',
+                  fontSize: 'clamp(36px, 4.4vw, 56px)',
+                  fontWeight: 400,
+                  lineHeight: 1.05,
+                  letterSpacing: '-0.02em',
+                  color: 'var(--ink-primary)',
+                  margin: '0 0 24px 0'
+                }}
+              >
+                Not a rushed street wash.
+                <br />
+                <span style={{ fontStyle: 'italic', color: 'var(--ink-secondary)' }}>
+                  A private studio on wheels.
+                </span>
+              </h2>
+
+              <p
+                style={{
+                  fontSize: '16px',
+                  lineHeight: 1.7,
+                  color: 'var(--ink-secondary)',
+                  margin: '0 0 32px 0'
+                }}
+              >
+                Every EGHSELHA technician works from a standardized checklist — two-bucket pH-neutral snow foam, fresh microfiber per panel, deionized rinse water, and six documented inspection photos before and after every session.
+              </p>
+
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '24px',
+                  paddingTop: '24px',
+                  borderTop: '1px solid var(--hairline-light)'
                 }}
               >
                 <div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      marginBottom: '16px'
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: '12px',
-                        fontWeight: 500,
-                        color: pkg.isPopular ? '#e5b56c' : '#a1a1a6',
-                        background: pkg.isPopular ? 'rgba(212, 155, 75, 0.14)' : '#232325',
-                        padding: '4px 10px',
-                        borderRadius: '6px'
-                      }}
-                    >
-                      {pkg.badge}
-                    </span>
-                    <span
-                      style={{
-                        fontSize: '12px',
-                        color: '#85858b',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        fontVariantNumeric: 'tabular-nums'
-                      }}
-                    >
-                      <Clock size={13} strokeWidth={1.6} />
-                      {pkg.duration}
-                    </span>
+                  <div className="mono-num" style={{ fontSize: '26px', fontWeight: 500, color: 'var(--ink-primary)' }}>
+                    30–140m
                   </div>
-
-                  <h3
-                    style={{
-                      fontFamily: 'Manrope, sans-serif',
-                      fontSize: '20px',
-                      fontWeight: 600,
-                      color: '#f4f4f5',
-                      margin: '0 0 8px'
-                    }}
-                  >
-                    {pkg.name}
-                  </h3>
-                  <p
-                    style={{
-                      fontSize: '13px',
-                      color: '#a1a1a6',
-                      lineHeight: 1.55,
-                      margin: '0 0 20px',
-                      minHeight: '40px'
-                    }}
-                  >
-                    {pkg.desc}
-                  </p>
-
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', marginBottom: '20px' }}>
-                    <span
-                      style={{
-                        fontFamily: 'Manrope, sans-serif',
-                        fontSize: '32px',
-                        fontWeight: 500,
-                        color: '#f4f4f5',
-                        fontVariantNumeric: 'tabular-nums'
-                      }}
-                    >
-                      {pkg.price}
-                    </span>
-                    <span style={{ fontSize: '13px', color: '#85858b', fontWeight: 500 }}>EGP</span>
-                  </div>
-
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '10px',
-                      paddingTop: '16px',
-                      borderTop: '1px solid rgba(255, 255, 255, 0.08)'
-                    }}
-                  >
-                    {pkg.highlights.map((h, i) => (
-                      <div
-                        key={i}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                          fontSize: '13px',
-                          color: '#d4d4d8'
-                        }}
-                      >
-                        <Check size={14} strokeWidth={1.8} color="#d49b4b" style={{ flexShrink: 0 }} />
-                        <span>{h}</span>
-                      </div>
-                    ))}
+                  <div style={{ fontSize: '13px', color: 'var(--ink-muted)', marginTop: '4px' }}>
+                    Tailored session duration
                   </div>
                 </div>
-
-                <div style={{ marginTop: '24px' }}>
-                  <button
-                    onClick={() => handleBookNow(pkg.id)}
-                    style={{
-                      width: '100%',
-                      padding: '10px 16px',
-                      minHeight: '40px',
-                      borderRadius: '8px',
-                      fontWeight: 600,
-                      fontSize: '13px',
-                      border: pkg.isPopular ? '1px solid #f4f4f5' : '1px solid rgba(255, 255, 255, 0.14)',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '8px',
-                      background: pkg.isPopular ? '#f4f4f5' : '#232325',
-                      color: pkg.isPopular ? '#141415' : '#ededed',
-                      transition: 'background-color 150ms cubic-bezier(0.22, 1, 0.36, 1)'
-                    }}
-                  >
-                    <span>Book {pkg.name}</span>
-                    <ArrowRight size={14} strokeWidth={1.6} />
-                  </button>
+                <div>
+                  <div className="mono-num" style={{ fontSize: '26px', fontWeight: 500, color: 'var(--ink-primary)' }}>
+                    100%
+                  </div>
+                  <div style={{ fontSize: '13px', color: 'var(--ink-muted)', marginTop: '4px' }}>
+                    Self-contained mobile vans
+                  </div>
                 </div>
               </div>
-            ))}
+            </div>
+          </Reveal>
+
+          <Reveal delay={100}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1.15fr 0.85fr', gap: '16px', alignItems: 'end' }}>
+              <div
+                className="lx-photo-wrap"
+                style={{
+                  aspectRatio: '4 / 5',
+                  borderRadius: '12px',
+                  background: 'var(--charcoal)'
+                }}
+              >
+                <img
+                  src="/car-wash-spray.jpg"
+                  alt="High-pressure detailing rinse"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                />
+              </div>
+              <div
+                className="lx-photo-wrap"
+                style={{
+                  aspectRatio: '3 / 4',
+                  borderRadius: '12px',
+                  background: 'var(--charcoal)'
+                }}
+              >
+                <img
+                  src="/wet-luxury-car.jpg"
+                  alt="Hydrophobic ceramic gloss finish"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                />
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* =================================================================
+          3. INTERACTIVE ATELIER SERVICE MENU (Not 4 SaaS Pricing Boxes!)
+         ================================================================= */}
+      <section
+        id="services"
+        style={{
+          background: 'var(--alabaster)',
+          padding: '112px 0'
+        }}
+      >
+        <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '0 32px' }}>
+          <Reveal>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-end',
+                flexWrap: 'wrap',
+                gap: '24px',
+                marginBottom: '56px'
+              }}
+            >
+              <div>
+                <span
+                  style={{
+                    display: 'block',
+                    fontSize: '12px',
+                    letterSpacing: '0.12em',
+                    textTransform: 'uppercase',
+                    color: 'var(--bronze)',
+                    fontWeight: 600,
+                    marginBottom: '12px'
+                  }}
+                >
+                  The treatment menu
+                </span>
+                <h2
+                  style={{
+                    fontFamily: 'var(--font-display)',
+                    fontSize: 'clamp(36px, 4.4vw, 56px)',
+                    fontWeight: 400,
+                    lineHeight: 1.04,
+                    letterSpacing: '-0.02em',
+                    margin: 0
+                  }}
+                >
+                  Select your level of care
+                </h2>
+              </div>
+              <p style={{ fontSize: '15px', color: 'var(--ink-secondary)', maxWidth: '380px', margin: 0, lineHeight: 1.6 }}>
+                Select any treatment below to inspect every included step and reserve immediately.
+              </p>
+            </div>
+          </Reveal>
+
+          {/* Editorial Split: Left Hairline Ledger + Right Live Detail Panel */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+              gap: '48px',
+              alignItems: 'start'
+            }}
+          >
+            {/* Left: Interactive Architectural Menu Rows */}
+            <div style={{ borderTop: '1px solid var(--hairline-light-strong)' }}>
+              {PACKAGES.map((pkg) => {
+                const isSelected = pkg.id === activePkg.id
+                return (
+                  <button
+                    key={pkg.id}
+                    type="button"
+                    onClick={() => setSelectedPkgId(pkg.id)}
+                    onMouseEnter={() => setSelectedPkgId(pkg.id)}
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      background: isSelected ? 'var(--surface-white)' : 'transparent',
+                      border: 'none',
+                      borderBottom: '1px solid var(--hairline-light-strong)',
+                      padding: '26px 20px',
+                      cursor: 'pointer',
+                      display: 'grid',
+                      gridTemplateColumns: '44px 1fr auto',
+                      alignItems: 'center',
+                      gap: '16px',
+                      transition: 'background-color 220ms var(--ease-luxury), padding-left 220ms var(--ease-luxury)',
+                      paddingLeft: isSelected ? '24px' : '12px'
+                    }}
+                  >
+                    <span
+                      className="mono-num"
+                      style={{
+                        fontSize: '13px',
+                        color: isSelected ? 'var(--bronze)' : 'var(--ink-muted)',
+                        fontWeight: 500
+                      }}
+                    >
+                      {pkg.index}
+                    </span>
+
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                        <span
+                          style={{
+                            fontFamily: 'var(--font-display)',
+                            fontSize: '28px',
+                            lineHeight: 1.1,
+                            color: 'var(--ink-primary)'
+                          }}
+                        >
+                          {pkg.name}
+                        </span>
+                        {pkg.featured && (
+                          <span
+                            style={{
+                              fontSize: '11px',
+                              fontWeight: 500,
+                              color: 'var(--bronze)',
+                              background: 'var(--bronze-soft)',
+                              padding: '3px 8px',
+                              borderRadius: '4px'
+                            }}
+                          >
+                            Most requested
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ fontSize: '13px', color: 'var(--ink-muted)', marginTop: '4px' }}>
+                        {pkg.subtitle} · {pkg.duration}
+                      </div>
+                    </div>
+
+                    <div style={{ textAlign: 'right' }}>
+                      <span
+                        className="mono-num"
+                        style={{
+                          fontSize: '18px',
+                          fontWeight: 500,
+                          color: 'var(--ink-primary)',
+                          display: 'block'
+                        }}
+                      >
+                        EGP {pkg.price}
+                      </span>
+                      <span style={{ fontSize: '11px', color: isSelected ? 'var(--bronze)' : 'var(--ink-muted)' }}>
+                        {isSelected ? 'Selected' : 'Inspect'}
+                      </span>
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Right: Live Selected Treatment Editorial Dossier */}
+            <div
+              style={{
+                background: 'var(--surface-white)',
+                border: '1px solid var(--hairline-light)',
+                borderRadius: '16px',
+                overflow: 'hidden'
+              }}
+            >
+              <div className="lx-photo-wrap" style={{ width: '100%', aspectRatio: '16 / 10', background: 'var(--charcoal)' }}>
+                <img
+                  key={activePkg.photo}
+                  src={activePkg.photo}
+                  alt={activePkg.name}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                />
+              </div>
+
+              <div style={{ padding: '28px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '12px', marginBottom: '12px' }}>
+                  <h3
+                    style={{
+                      fontFamily: 'var(--font-display)',
+                      fontSize: '32px',
+                      fontWeight: 400,
+                      margin: 0,
+                      color: 'var(--ink-primary)'
+                    }}
+                  >
+                    {activePkg.name}
+                  </h3>
+                  <span className="mono-num" style={{ fontSize: '18px', fontWeight: 500, color: 'var(--bronze)' }}>
+                    EGP {activePkg.price}
+                  </span>
+                </div>
+
+                <p style={{ fontSize: '14px', lineHeight: 1.65, color: 'var(--ink-secondary)', margin: '0 0 22px 0' }}>
+                  {activePkg.desc}
+                </p>
+
+                <div
+                  style={{
+                    display: 'grid',
+                    gap: '10px',
+                    paddingTop: '18px',
+                    paddingBottom: '24px',
+                    borderTop: '1px solid var(--hairline-light)'
+                  }}
+                >
+                  {activePkg.highlights.map((item) => (
+                    <div key={item} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: 'var(--ink-primary)' }}>
+                      <Check size={15} strokeWidth={1.8} color="var(--bronze)" style={{ flexShrink: 0 }} />
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => handleBookNow(activePkg.id)}
+                  className="lx-btn lx-glass-btn lx-glass-obsidian"
+                  style={{
+                    width: '100%',
+                    minHeight: '50px',
+                    borderRadius: '999px',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <span>Reserve {activePkg.name}</span>
+                  <ArrowRight size={15} strokeWidth={1.9} className="lx-arrow" />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ─────────────────────────────────────────────────────────────
-          4. BOOKING PROCESS
-      ───────────────────────────────────────────────────────────── */}
+      {/* =================================================================
+          4. ARCHITECTURAL PROCESS STRIP (Open Hairline Grid — No Boxes)
+         ================================================================= */}
       <section
         id="how-it-works"
         style={{
-          padding: '80px 24px',
-          background: '#141415',
-          borderTop: '1px solid rgba(255, 255, 255, 0.08)'
+          background: 'var(--alabaster-raised)',
+          padding: '104px 0',
+          borderTop: '1px solid var(--hairline-light)'
         }}
       >
-        <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
-          <div style={{ maxWidth: '640px', margin: '0 0 48px' }}>
-            <span style={{ display: 'block', fontSize: '12px', fontWeight: 500, color: '#d49b4b', marginBottom: '8px' }}>
-              How it works
+        <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '0 32px' }}>
+          <Reveal>
+            <span
+              style={{
+                display: 'block',
+                fontSize: '12px',
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                color: 'var(--bronze)',
+                fontWeight: 600,
+                marginBottom: '12px'
+              }}
+            >
+              The experience
             </span>
             <h2
               style={{
-                fontFamily: 'Manrope, sans-serif',
-                fontSize: '32px',
-                fontWeight: 500,
+                fontFamily: 'var(--font-display)',
+                fontSize: 'clamp(36px, 4.4vw, 54px)',
+                fontWeight: 400,
+                lineHeight: 1.05,
                 letterSpacing: '-0.02em',
-                color: '#f4f4f5',
-                margin: '0 0 12px'
+                margin: '0 0 56px 0',
+                maxWidth: '580px'
               }}
             >
-              Booking process
+              Effortless from reservation to final inspection
             </h2>
-            <p style={{ color: '#a1a1a6', fontSize: '15px', lineHeight: 1.6, margin: 0 }}>
-              Certified technicians arrive at your home or office with self-contained water and power.
-            </p>
-          </div>
+          </Reveal>
 
           <div
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-              gap: '20px'
+              gap: '32px'
             }}
           >
-            {STEPS.map((s, idx) => (
-              <div
-                key={s.step}
-                style={{
-                  background: '#19191b',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
-                  borderRadius: '14px',
-                  padding: '24px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between'
-                }}
-              >
-                <div>
-                  <div style={{ marginBottom: '16px' }}>
-                    <span
-                      style={{
-                        fontFamily: 'Manrope, sans-serif',
-                        fontSize: '24px',
-                        fontWeight: 500,
-                        color: '#d49b4b',
-                        fontVariantNumeric: 'tabular-nums'
-                      }}
-                    >
-                      {s.step}
-                    </span>
-                  </div>
-                  <h3
+            {CRAFT_PILLARS.map((item, idx) => (
+              <Reveal key={item.num} delay={idx * 70}>
+                <div style={{ paddingTop: '24px', borderTop: '1px solid var(--hairline-light-strong)' }}>
+                  <span
+                    className="mono-num"
                     style={{
-                      fontFamily: 'Manrope, sans-serif',
-                      fontSize: '16px',
-                      fontWeight: 600,
-                      color: '#f4f4f5',
-                      margin: '0 0 8px'
+                      display: 'block',
+                      fontSize: '13px',
+                      color: 'var(--bronze)',
+                      marginBottom: '18px'
                     }}
                   >
-                    {s.title}
+                    {item.num}
+                  </span>
+                  <h3
+                    style={{
+                      fontFamily: 'var(--font-heading)',
+                      fontSize: '18px',
+                      fontWeight: 600,
+                      color: 'var(--ink-primary)',
+                      margin: '0 0 10px 0'
+                    }}
+                  >
+                    {item.title}
                   </h3>
-                  <p style={{ fontSize: '13px', color: '#a1a1a6', lineHeight: 1.6, margin: 0 }}>
-                    {s.desc}
+                  <p style={{ fontSize: '14px', lineHeight: 1.65, color: 'var(--ink-secondary)', margin: 0 }}>
+                    {item.body}
                   </p>
                 </div>
-
-                <div
-                  style={{
-                    marginTop: '20px',
-                    paddingTop: '14px',
-                    borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-                    fontSize: '12px',
-                    fontWeight: 500,
-                    color: '#85858b',
-                    fontVariantNumeric: 'tabular-nums'
-                  }}
-                >
-                  Step {idx + 1} of 4
-                </div>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ─────────────────────────────────────────────────────────────
-          5. FOOTER
-      ───────────────────────────────────────────────────────────── */}
+      {/* =================================================================
+          5. FULL-BLEED AMBIENT VIDEO CLOSING BAND
+         ================================================================= */}
+      <section
+        style={{
+          position: 'relative',
+          background: '#0a0a0c',
+          color: 'var(--ivory)',
+          padding: '120px 32px',
+          overflow: 'hidden'
+        }}
+      >
+        <video
+          src="/eghselha-demo.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            opacity: 0.34,
+            pointerEvents: 'none'
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(180deg, rgba(10,10,12,0.72) 0%, rgba(10,10,12,0.58) 50%, rgba(10,10,12,0.88) 100%)',
+            pointerEvents: 'none'
+          }}
+        />
+
+        <div style={{ position: 'relative', zIndex: 2, maxWidth: '820px', margin: '0 auto', textAlign: 'center' }}>
+          <Reveal>
+            <h2
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: 'clamp(40px, 5.4vw, 68px)',
+                fontWeight: 400,
+                lineHeight: 1.04,
+                letterSpacing: '-0.02em',
+                margin: '0 0 20px 0',
+                color: 'var(--ivory)'
+              }}
+            >
+              Your car deserves a quiet hour.
+            </h2>
+            <p
+              style={{
+                fontSize: '16px',
+                lineHeight: 1.65,
+                color: 'rgba(245, 243, 238, 0.76)',
+                margin: '0 auto 36px',
+                maxWidth: '480px'
+              }}
+            >
+              Book your next detailing session directly from your phone — at home, at the office, or wherever you park.
+            </p>
+            <button
+              onClick={() => handleBookNow()}
+              className="lx-btn lx-glass-btn lx-glass-ivory"
+              style={{
+                borderRadius: '999px',
+                minHeight: '52px',
+                padding: '0 32px',
+                fontSize: '14px',
+                fontWeight: 600,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              <span>Schedule a visit</span>
+              <ArrowRight size={16} strokeWidth={1.9} className="lx-arrow" />
+            </button>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* =================================================================
+          6. EDITORIAL FOOTER
+         ================================================================= */}
       <footer
         style={{
-          borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-          background: '#0f0f10',
-          padding: '36px 24px',
-          color: '#737378',
+          background: '#0a0a0c',
+          borderTop: '1px solid var(--hairline-dark)',
+          padding: '36px 32px',
+          color: 'var(--ivory-muted)',
           fontSize: '13px'
         }}
       >
         <div
           style={{
-            maxWidth: '1280px',
+            maxWidth: '1320px',
             margin: '0 auto',
             display: 'flex',
             alignItems: 'center',
@@ -634,58 +939,45 @@ export default function LandingHome() {
             gap: '20px'
           }}
         >
-          <EghselhaLogo size={34} showText={true} />
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-            <a href="#home" style={{ color: '#94a3b8', textDecoration: 'none' }}>
-              Home
-            </a>
-            <a href="#services" style={{ color: '#94a3b8', textDecoration: 'none' }}>
-              Services
-            </a>
-            <a href="#how-it-works" style={{ color: '#94a3b8', textDecoration: 'none' }}>
-              How It Works
-            </a>
-            <Link to="/login" style={{ color: '#94a3b8', textDecoration: 'none' }}>
-              Login
-            </Link>
-            <Link to="/register" style={{ color: '#94a3b8', textDecoration: 'none' }}>
-              Sign Up
-            </Link>
+          <EghselhaLogo size={30} showText={true} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '28px', flexWrap: 'wrap' }}>
+            <a href="#craft" style={{ color: 'var(--ivory-secondary)', textDecoration: 'none' }}>The craft</a>
+            <a href="#services" style={{ color: 'var(--ivory-secondary)', textDecoration: 'none' }}>Services</a>
+            <a href="#how-it-works" style={{ color: 'var(--ivory-secondary)', textDecoration: 'none' }}>How it works</a>
+            <Link to="/login" style={{ color: 'var(--ivory-secondary)', textDecoration: 'none' }}>Sign in</Link>
+            <Link to="/register" style={{ color: 'var(--ivory-secondary)', textDecoration: 'none' }}>Create account</Link>
           </div>
-
-          <div>
-            <span>© 2026 EGHSELHA. All rights reserved.</span>
-          </div>
+          <span>© 2026 EGHSELHA</span>
         </div>
       </footer>
 
-      {/* ─────────────────────────────────────────────────────────────
-          6. VIDEO DEMO MODAL
-      ───────────────────────────────────────────────────────────── */}
-      {showVideoModal && (
+      {/* =================================================================
+          7. FILM MODAL (Muted)
+         ================================================================= */}
+      {showFilm && (
         <div
+          onClick={() => setShowFilm(false)}
           style={{
             position: 'fixed',
             inset: 0,
             zIndex: 100,
-            background: 'rgba(0, 0, 0, 0.85)',
-            backdropFilter: 'blur(10px)',
+            background: 'rgba(10, 10, 12, 0.88)',
+            backdropFilter: 'blur(12px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '20px'
+            padding: '24px'
           }}
         >
           <div
+            onClick={(e) => e.stopPropagation()}
             style={{
               width: '100%',
-              maxWidth: '720px',
-              background: '#141415',
-              borderRadius: '20px',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              overflow: 'hidden',
-              boxShadow: '0 25px 60px rgba(0, 0, 0, 0.6)'
+              maxWidth: '820px',
+              background: '#141416',
+              borderRadius: '16px',
+              border: '1px solid var(--hairline-dark-strong)',
+              overflow: 'hidden'
             }}
           >
             <div
@@ -693,121 +985,31 @@ export default function LandingHome() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: '16px 20px',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                background: '#0f0f10'
+                padding: '16px 22px',
+                borderBottom: '1px solid var(--hairline-dark)'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Play size={16} fill="#d49b4b" color="#d49b4b" />
-                <b style={{ color: '#ffffff', fontSize: '14px' }}>
-                  EGHSELHA Doorstep Detailing Experience
-                </b>
-              </div>
+              <span style={{ color: 'var(--ivory)', fontSize: '14px', fontWeight: 500 }}>
+                EGHSELHA · Mobile Automotive Atelier
+              </span>
               <button
-                onClick={() => setShowVideoModal(false)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#94a3b8',
-                  cursor: 'pointer',
-                  padding: '4px'
-                }}
+                onClick={() => setShowFilm(false)}
+                aria-label="Close"
+                style={{ background: 'none', border: 'none', color: 'var(--ivory-secondary)', cursor: 'pointer' }}
               >
-                <X size={20} />
+                <X size={18} strokeWidth={1.6} />
               </button>
             </div>
-
-            <div style={{ padding: '24px' }}>
-              <div
-                style={{
-                  position: 'relative',
-                  width: '100%',
-                  aspectRatio: '16/9',
-                  borderRadius: '14px',
-                  overflow: 'hidden',
-                  background: '#000'
-                }}
-              >
-                <img
-                  src="/washed-car-foam.jpg"
-                  alt="Car wash demonstration"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            <div style={{ padding: '20px' }}>
+              <div style={{ aspectRatio: '16 / 9', borderRadius: '10px', overflow: 'hidden', background: '#000' }}>
+                <video
+                  src="/eghselha-demo.mp4"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                 />
-                <div
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    background:
-                      'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 60%, transparent 100%)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'flex-end',
-                    padding: '24px'
-                  }}
-                >
-                  <span
-                    style={{
-                      color: '#d49b4b',
-                      fontWeight: 800,
-                      fontSize: '11px',
-                      letterSpacing: '1px',
-                      textTransform: 'uppercase',
-                      marginBottom: '4px'
-                    }}
-                  >
-                    Mobile Unit in Action
-                  </span>
-                  <h4
-                    style={{
-                      fontFamily: 'Manrope, sans-serif',
-                      fontSize: '18px',
-                      fontWeight: 800,
-                      color: '#ffffff',
-                      margin: 0
-                    }}
-                  >
-                    Snow Foam Bath · High-Pressure Wash · Showroom Finish
-                  </h4>
-                  <p style={{ fontSize: '12px', color: '#cbd5e1', margin: '6px 0 0' }}>
-                    Certified technicians bring mobile clean-water tanks and power generators directly to your door.
-                  </p>
-                </div>
-              </div>
-
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'flex-end',
-                  gap: '12px',
-                  marginTop: '20px'
-                }}
-              >
-                <button
-                  onClick={() => setShowVideoModal(false)}
-                  style={{
-                    padding: '10px 20px',
-                    borderRadius: '10px',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    background: 'transparent',
-                    color: '#ffffff',
-                    fontSize: '13px',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Close
-                </button>
-                <button
-                  onClick={() => {
-                    setShowVideoModal(false)
-                    handleBookNow()
-                  }}
-                  className="landing-btn-signup"
-                  style={{ fontSize: '13px' }}
-                >
-                  Book This Service
-                </button>
               </div>
             </div>
           </div>

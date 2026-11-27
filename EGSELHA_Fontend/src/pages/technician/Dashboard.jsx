@@ -18,6 +18,7 @@ import Status from '../../component/Status'
 import { useTech } from '../../context/TechnicianContext'
 import { jobPath } from '../../data/jobs'
 import { technicianApi } from '../../services/technicianApi'
+import { getOfferRemainingSeconds, clearOfferDeadline, formatOfferCountdown } from '../../utils/offerTimer'
 
 export default function Dashboard() {
   const navigate = useNavigate()
@@ -26,9 +27,10 @@ export default function Dashboard() {
   const [loadingDash, setLoadingDash] = useState(true)
   const [timeRange, setTimeRange] = useState('this_week')
 
-  // 45-Second Job Offer Dispatch state
+  // Persistent wall-clock 30-minute Job Offer countdown (survives route switches & tab close)
   const activeOffer = offers && offers.length > 0 ? offers[0] : null
-  const [secondsLeft, setSecondsLeft] = useState(45)
+  const [nowMs, setNowMs] = useState(() => Date.now())
+  const secondsLeft = activeOffer ? getOfferRemainingSeconds(activeOffer, nowMs) : 0
 
   useEffect(() => {
     let mounted = true
@@ -62,31 +64,25 @@ export default function Dashboard() {
     technicianApi.getDashboard().then(setDashboard).catch(() => {})
   }, [jobs.length, offers.length])
 
+  // Real wall-clock 1s ticker (never resets on route change or tab close)
   useEffect(() => {
-    if (activeOffer) {
-      setSecondsLeft(activeOffer.remainingSeconds || 45)
-    }
-  }, [activeOffer?.id])
-
-  // 45-second timer countdown
-  useEffect(() => {
-    if (!activeOffer || secondsLeft <= 0) return
+    if (!activeOffer) return
+    setNowMs(Date.now())
     const timer = setInterval(() => {
-      setSecondsLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer)
-          handlePassOffer(true)
-          return 0
-        }
-        return prev - 1
-      })
+      const current = Date.now()
+      setNowMs(current)
+      if (getOfferRemainingSeconds(activeOffer, current) <= 0) {
+        clearInterval(timer)
+        handlePassOffer(true)
+      }
     }, 1000)
     return () => clearInterval(timer)
-  }, [activeOffer?.id, secondsLeft])
+  }, [activeOffer?.id])
 
   const handleAcceptOffer = async () => {
     if (!activeOffer) return
     try {
+      clearOfferDeadline(activeOffer.id)
       const res = await acceptOffer(activeOffer.id)
       const targetBooking = res?.bookingNumber || activeOffer.bookingNumber
       notify(`Job Offer ${targetBooking} accepted! Navigating to job details...`)
@@ -100,8 +96,9 @@ export default function Dashboard() {
   const handlePassOffer = async (isAutoExpired = false) => {
     if (!activeOffer) return
     try {
+      clearOfferDeadline(activeOffer.id)
       await passOffer(activeOffer.id)
-      notify(isAutoExpired ? 'Job offer expired (45s limit reached).' : 'Job offer declined.')
+      notify(isAutoExpired ? 'Job offer expired (30 min limit reached).' : 'Job offer declined.')
     } catch (err) {
       console.error(err)
     }
@@ -112,153 +109,181 @@ export default function Dashboard() {
   }
  
   const todayJobs = dashboard?.todayJobs ?? []
-  
-  // Weekly performance dataset with realistic fallback for demo if DB has no completed jobs yet
-  const defaultWeeklyThisWeek = [
-    { day: 'Wed', completedJobs: 4 },
-    { day: 'Thu', completedJobs: 6 },
-    { day: 'Fri', completedJobs: 5 },
-    { day: 'Sat', completedJobs: 8 },
-    { day: 'Sun', completedJobs: 7 },
-    { day: 'Mon', completedJobs: 9 },
-    { day: 'Tue', completedJobs: 6 }
-  ]
-  const defaultWeeklyLastWeek = [
-    { day: 'Wed', completedJobs: 3 },
-    { day: 'Thu', completedJobs: 5 },
-    { day: 'Fri', completedJobs: 4 },
-    { day: 'Sat', completedJobs: 7 },
-    { day: 'Sun', completedJobs: 6 },
-    { day: 'Mon', completedJobs: 8 },
-    { day: 'Tue', completedJobs: 5 }
-  ]
-  const defaultWeeklyMonth = [
-    { day: 'W1', completedJobs: 28 },
-    { day: 'W2', completedJobs: 35 },
-    { day: 'W3', completedJobs: 42 },
-    { day: 'W4', completedJobs: 39 }
-  ]
 
-  const rawWeekly = dashboard?.weeklyPerformance ?? []
-  const hasRealWeeklyJobs = rawWeekly.some((w) => (w.completedJobs || 0) > 0)
-  
-  const currentWeekly = timeRange === 'this_week'
-    ? (hasRealWeeklyJobs ? rawWeekly : defaultWeeklyThisWeek)
-    : timeRange === 'last_week'
-    ? defaultWeeklyLastWeek
-    : defaultWeeklyMonth
+  // Build 100% real performance metrics from actual backend jobs & dashboard API
+  const completedJobsList = (jobs || []).filter(
+    (j) => String(j.status || '').toLowerCase() === 'completed'
+  )
 
+  const parseJobDate = (j) => {
+    const raw = j.scheduledAt || j.completedAt || j.date
+    if (!raw) return null
+    const d = new Date(raw)
+    return Number.isNaN(d.getTime()) ? null : d
+  }
+
+  const buildDailySeries = (daysOffsetEnd) => {
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+    const result = []
+    const now = new Date()
+    for (let i = 6; i >= 0; i--) {
+      const target = new Date(now.getFullYear(), now.getMonth(), now.getDate() - daysOffsetEnd - i)
+      const count = completedJobsList.filter((j) => {
+        const d = parseJobDate(j)
+        return (
+          d &&
+          d.getFullYear() === target.getFullYear() &&
+          d.getMonth() === target.getMonth() &&
+          d.getDate() === target.getDate()
+        )
+      }).length
+      result.push({ day: dayNames[target.getDay()], completedJobs: count })
+    }
+    return result
+  }
+
+  const buildMonthlySeries = () => {
+    const now = new Date()
+    return [3, 2, 1, 0].map((weekIdx, idx) => {
+      const end = new Date(now.getFullYear(), now.getMonth(), now.getDate() - weekIdx * 7, 23, 59, 59)
+      const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (weekIdx + 1) * 7 + 1, 0, 0, 0)
+      const count = completedJobsList.filter((j) => {
+        const d = parseJobDate(j)
+        return d && d >= start && d <= end
+      }).length
+      return { day: `Week ${idx + 1}`, completedJobs: count }
+    })
+  }
+
+  const apiWeekly = Array.isArray(dashboard?.weeklyPerformance) && dashboard.weeklyPerformance.length > 0
+    ? dashboard.weeklyPerformance
+    : null
+
+  const currentWeekly =
+    timeRange === 'this_week'
+      ? (apiWeekly ?? buildDailySeries(0))
+      : timeRange === 'last_week'
+        ? buildDailySeries(7)
+        : buildMonthlySeries()
+
+  const totalInRange = currentWeekly.reduce((sum, w) => sum + (w.completedJobs || 0), 0)
   const maxCompleted = Math.max(...currentWeekly.map((w) => w.completedJobs || 0), 0)
   const maxJobs = Math.max(Math.ceil((maxCompleted || 4) / 4) * 4, 4)
-  const yTicks = [
-    maxJobs,
-    Math.round(maxJobs * 0.75),
-    Math.round(maxJobs * 0.5),
-    Math.round(maxJobs * 0.25),
-    0
-  ]
 
   return (
     <>
       <PageTitle
-        eyebrow="TUESDAY, NOVEMBER 03, 2026"
-        title={`Good morning, ${profile?.name ?? ' Technician'}`}
-        desc="Here's what's happening with your work today."
+        eyebrow={new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: '2-digit', year: 'numeric' }).toUpperCase()}
+        title={`Good morning, ${profile?.name ?? 'Technician'}`}
+        desc="Here is your live dispatch overview and today's assigned detailing schedule."
         action={
           <button
             className="btn primary"
             onClick={() => navigate('/technician/jobs')}
           >
-            <BriefcaseBusiness size={16} /> View all jobs
+            <BriefcaseBusiness size={15} /> View all jobs
           </button>
         }
       />
 
-      {/* 45-Second Dispatched Job Offer Alert */}
+      {/* 45-Second Dispatched Job Offer Alert (High-Contrast Obsidian & Champagne Gold) */}
       {activeOffer && (
-        <div style={{
-          margin: '0 0 24px 0',
-          padding: '20px',
-          borderRadius: '14px',
-          background: '#141415',
-          border: '2px solid #b45309',
-          boxShadow: '0 10px 25px -5px rgba(180, 83, 9, 0.2)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '14px'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div style={{
-                background: '#141415',
-                color: '#fff',
-                width: '38px',
-                height: '38px',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                animation: 'pulse 1.5s infinite'
-              }}>
+        <div
+          className="lx-enter"
+          style={{
+            margin: '0 0 24px 0',
+            padding: '22px 24px',
+            borderRadius: '18px',
+            background: 'var(--obsidian)',
+            color: 'var(--ivory)',
+            border: '1px solid rgba(198, 146, 73, 0.42)',
+            boxShadow: '0 16px 38px rgba(14, 14, 16, 0.22)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px'
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div
+                style={{
+                  background: 'rgba(198, 146, 73, 0.16)',
+                  border: '1px solid rgba(198, 146, 73, 0.36)',
+                  color: 'var(--bronze-dark)',
+                  width: '44px',
+                  height: '44px',
+                  borderRadius: '12px',
+                  display: 'grid',
+                  placeItems: 'center',
+                  flexShrink: 0
+                }}
+              >
                 <BellRing size={20} />
               </div>
               <div>
-                <b style={{ color: '#141415', fontSize: '1.1rem' }}>Fast-Track Dispatch: New Job Offer ({activeOffer.bookingNumber})</b>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: '#141415' }}>
+                <b style={{ color: 'var(--ivory)', fontSize: '16px', fontWeight: 600, display: 'block' }}>
+                  Fast-Track Dispatch · {activeOffer.bookingNumber}
+                </b>
+                <p style={{ margin: '3px 0 0', fontSize: '13px', color: 'var(--ivory-secondary)' }}>
                   {activeOffer.serviceName} · {activeOffer.vehicleModel} · {activeOffer.customerAddress} ({activeOffer.distanceText})
                 </p>
                 {activeOffer.addOnNames?.length > 0 && (
-                  <p style={{ margin: '4px 0 0', fontSize: '0.78rem', color: '#92400e', fontWeight: 600 }}>
+                  <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'var(--bronze-dark)', fontWeight: 500 }}>
                     Add-Ons: {activeOffer.addOnNames.join(' · ')} (+EGP {activeOffer.addOnsSubtotal})
                   </p>
                 )}
               </div>
             </div>
 
-            <div style={{
-              background: secondsLeft <= 10 ? '#ef4444' : '#141415',
-              color: '#fff',
-              padding: '6px 14px',
-              borderRadius: '20px',
-              fontWeight: 700,
-              fontSize: '0.9rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}>
-              <Clock3 size={16} /> {secondsLeft}s left
+            <div
+              className="mono-num"
+              style={{
+                background: secondsLeft <= 120 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(198, 146, 73, 0.16)',
+                border: `1px solid ${secondsLeft <= 120 ? 'rgba(239, 68, 68, 0.5)' : 'rgba(198, 146, 73, 0.4)'}`,
+                color: secondsLeft <= 120 ? '#fca5a5' : '#f3d299',
+                padding: '6px 14px',
+                borderRadius: '999px',
+                fontWeight: 600,
+                fontSize: '13px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              <Clock3 size={15} /> {formatOfferCountdown(secondsLeft)} left
             </div>
           </div>
 
-          {/* Offer details & CTA */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e4e4e7', paddingTop: '12px', flexWrap: 'wrap', gap: '10px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '18px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--hairline-dark)', paddingTop: '14px', flexWrap: 'wrap', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
               <div>
-                <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Booking Total:</span>
-                <span style={{ marginLeft: '6px', fontSize: '1.25rem', fontWeight: 600, color: '#0f172a' }}>
+                <span style={{ fontSize: '12px', color: 'var(--ivory-secondary)' }}>Booking Total:</span>
+                <span className="mono-num" style={{ marginLeft: '6px', fontSize: '18px', fontWeight: 600, color: 'var(--ivory)' }}>
                   EGP {activeOffer.totalPrice ?? activeOffer.payoutAmount}
                 </span>
               </div>
-              <div style={{ fontSize: '0.82rem', color: '#475569' }}>
-                Deposit Paid: <b style={{ color: '#16a34a' }}>EGP {activeOffer.depositAmount ?? 200}</b> · Remaining: <b>EGP {activeOffer.remainingBalance ?? 0}</b>
+              <div style={{ fontSize: '12.5px', color: 'var(--ivory-secondary)' }}>
+                Deposit Paid: <b style={{ color: '#86efac' }}>EGP {activeOffer.depositAmount ?? 200}</b> · Remaining: <b style={{ color: 'var(--ivory)' }}>EGP {activeOffer.remainingBalance ?? 0}</b>
               </div>
-              <div style={{ fontSize: '0.82rem', color: '#15803d', fontWeight: 700 }}>
-                Your Tech Share (70%): EGP {activeOffer.payoutAmount}
+              <div style={{ fontSize: '12.5px', color: '#f3d299', fontWeight: 600 }}>
+                Your Tech Share (70%): <span className="mono-num">EGP {activeOffer.payoutAmount}</span>
               </div>
             </div>
 
             <div style={{ display: 'flex', gap: '10px' }}>
               <button
-                className="btn outline"
+                className="lx-btn lx-glass-btn lx-glass-crystal"
                 onClick={() => handlePassOffer(false)}
+                style={{ minHeight: '40px', padding: '0 18px', borderRadius: '999px', fontSize: '13px', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                <X size={16} /> Pass
+                <X size={15} /> Pass
               </button>
               <button
-                className="btn success"
+                className="lx-btn lx-glass-btn lx-glass-gold"
                 onClick={handleAcceptOffer}
+                style={{ minHeight: '40px', padding: '0 22px', borderRadius: '999px', fontSize: '13px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                <Check size={16} /> Accept Job ({secondsLeft}s)
+                <Check size={15} /> Accept Job
               </button>
             </div>
           </div>
@@ -391,81 +416,71 @@ export default function Dashboard() {
             </select>
           </div>
 
-          <div className="chart">
-            <div className="chart-y">
-              {yTicks.map((tick, i) => (
-                <span key={i}>{tick}</span>
-              ))}
-            </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', fontSize: '12.5px', color: 'var(--ink-secondary)' }}>
+            <span>
+              Total completed in range:{' '}
+              <strong className="mono-num" style={{ color: 'var(--ink-primary)' }}>{totalInRange}</strong>
+            </span>
+            <span style={{ fontSize: '11.5px', color: 'var(--ink-muted)' }}>Live database figures</span>
+          </div>
 
-            <div className="chart-area">
-              <div className="grid-lines">
-                <i />
-                <i />
-                <i />
-                <i />
-                <i />
-              </div>
-
-              <svg viewBox="0 0 600 170" preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="fill" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0" stopColor="#141415" stopOpacity=".22" />
-                    <stop offset="1" stopColor="#141415" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-
-                {currentWeekly.length > 1 && (() => {
-                  const pts = currentWeekly.map((w, i) => {
-                    const x = (i / (currentWeekly.length - 1)) * 560 + 20
-                    const y = 24 + (1 - (w.completedJobs || 0) / maxJobs) * 125
-                    return [x, y]
-                  })
-                  const lineD = `M${pts.map(([x, y]) => `${x} ${y}`).join(' L')}`
-                  const areaD = `${lineD} L580,165 L20,165Z`
-                  return (
-                    <>
-                      <path d={areaD} fill="url(#fill)" />
-                      <path
-                        d={lineD}
-                        fill="none"
-                        stroke="#141415"
-                        strokeWidth="3"
-                        vectorEffect="non-scaling-stroke"
-                      />
-                      {pts.map(([x, y], idx) => (
-                        <g key={idx}>
-                          <circle
-                            cx={x}
-                            cy={y}
-                            r="4.5"
-                            fill="#ffffff"
-                            stroke="#141415"
-                            strokeWidth="2.5"
-                          />
-                          <text
-                            x={x}
-                            y={y - 8}
-                            textAnchor="middle"
-                            fill="#141415"
-                            fontSize="11"
-                            fontWeight="800"
-                          >
-                            {currentWeekly[idx]?.completedJobs}
-                          </text>
-                        </g>
-                      ))}
-                    </>
-                  )
-                })()}
-              </svg>
-
-              <div className="chart-x">
-                {currentWeekly.map((w, idx) => (
-                  <span key={`${w.day}-${idx}`}>{w.day}</span>
-                ))}
-              </div>
-            </div>
+          <div
+            style={{
+              height: '190px',
+              display: 'grid',
+              gridTemplateColumns: `repeat(${currentWeekly.length}, minmax(0, 1fr))`,
+              gap: '14px',
+              alignItems: 'end',
+              padding: '18px 12px 10px',
+              background: 'var(--alabaster)',
+              borderRadius: '14px',
+              border: '1px solid var(--hairline-light)'
+            }}
+          >
+            {currentWeekly.map((w, idx) => {
+              const count = w.completedJobs || 0
+              const pct = count === 0 ? 4 : Math.max(12, Math.round((count / maxJobs) * 100))
+              return (
+                <div
+                  key={`${w.day}-${idx}`}
+                  style={{
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'flex-end',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <span
+                    className="mono-num"
+                    style={{
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      color: count > 0 ? 'var(--ink-primary)' : 'var(--ink-muted)'
+                    }}
+                  >
+                    {count}
+                  </span>
+                  <div
+                    style={{
+                      width: '100%',
+                      maxWidth: '46px',
+                      height: `${pct}%`,
+                      borderRadius: '8px 8px 4px 4px',
+                      background:
+                        count > 0
+                          ? 'linear-gradient(180deg, #cf9d54 0%, #a67c37 100%)'
+                          : 'rgba(24, 24, 27, 0.08)',
+                      transition: 'height 360ms cubic-bezier(0.22, 1, 0.36, 1)'
+                    }}
+                  />
+                  <span style={{ fontSize: '11.5px', fontWeight: 500, color: 'var(--ink-secondary)' }}>
+                    {w.day}
+                  </span>
+                </div>
+              )
+            })}
           </div>
         </section>
       </div>

@@ -1,5 +1,6 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import OrderCarBadge from '../../component/OrderCarBadge'
 import {
   CalendarCheck,
   CreditCard,
@@ -38,6 +39,18 @@ export default function CustomerBookings() {
   const { user } = useAuth()
 
   const [activeTab, setActiveTab] = useState(initialFilter) // 'all', 'active', 'completed', 'disputed'
+  const tabRefs = useRef({})
+  const [tabPill, setTabPill] = useState({ left: 4, width: 0, ready: false })
+
+  useEffect(() => {
+    const syncTabPill = () => {
+      const el = tabRefs.current[activeTab]
+      if (el) setTabPill({ left: el.offsetLeft, width: el.offsetWidth, ready: true })
+    }
+    syncTabPill()
+    window.addEventListener('resize', syncTabPill)
+    return () => window.removeEventListener('resize', syncTabPill)
+  }, [activeTab, bookings.length])
 
   // Modal states
   const [payDepositModal, setPayDepositModal] = useState(null)
@@ -229,7 +242,7 @@ export default function CustomerBookings() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
       <PageTitle
-        eyebrow="3. CUSTOMER / BOOKINGS MANAGEMENT"
+        eyebrow="RESERVATIONS"
         title="My Bookings & Order History"
         desc="Track active jobs, pay deposits, approve on-site inspection upsells, submit reviews, and view itemized invoices."
         action={
@@ -239,31 +252,69 @@ export default function CustomerBookings() {
         }
       />
 
-      {/* Tabs */}
-      <div style={{ display: 'flex', gap: '10px', borderBottom: '1px solid #e2e8f0', paddingBottom: '12px' }}>
-        {[
-          { id: 'all', label: `All Bookings (${bookings.length})` },
-          { id: 'active', label: 'Active & In-Progress' },
-          { id: 'completed', label: 'Completed History' }
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            style={{
-              background: activeTab === tab.id ? '#141415' : 'transparent',
-              color: activeTab === tab.id ? '#fff' : '#64748b',
-              border: 'none',
-              borderRadius: '8px',
-              padding: '8px 16px',
-              fontSize: '12px',
-              fontWeight: 700,
-              cursor: 'pointer',
-              transition: 'background-color 150ms cubic-bezier(0.22, 1, 0.36, 1), border-color 150ms cubic-bezier(0.22, 1, 0.36, 1), color 150ms cubic-bezier(0.22, 1, 0.36, 1)'
-            }}
-          >
-            {tab.label}
-          </button>
-        ))}
+      {/* Smooth Sliding Pill Filter Tabs */}
+      <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid var(--hairline-light)', paddingBottom: '16px' }}>
+        <div
+          style={{
+            position: 'relative',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px',
+            background: 'var(--alabaster-raised)',
+            padding: '4px',
+            borderRadius: '999px',
+            border: '1px solid var(--hairline-light)'
+          }}
+        >
+          {tabPill.ready && (
+            <div
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                top: '4px',
+                bottom: '4px',
+                left: 0,
+                width: `${tabPill.width}px`,
+                transform: `translateX(${tabPill.left}px)`,
+                borderRadius: '999px',
+                background: '#ffffff',
+                border: '1px solid rgba(24, 24, 27, 0.12)',
+                boxShadow: '0 2px 8px rgba(24, 24, 27, 0.08)',
+                transition: 'transform 320ms cubic-bezier(0.22, 1, 0.36, 1), width 320ms cubic-bezier(0.22, 1, 0.36, 1)',
+                pointerEvents: 'none',
+                zIndex: 0
+              }}
+            />
+          )}
+          {[
+            { id: 'all', label: `All Bookings (${bookings.length})` },
+            { id: 'active', label: 'Active & In-Progress' },
+            { id: 'completed', label: 'Completed History' }
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              ref={(el) => { tabRefs.current[tab.id] = el }}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              style={{
+                position: 'relative',
+                zIndex: 1,
+                background: 'transparent',
+                color: activeTab === tab.id ? 'var(--ink-primary)' : 'var(--ink-secondary)',
+                border: 'none',
+                outline: 'none',
+                borderRadius: '999px',
+                padding: '8px 18px',
+                fontSize: '13px',
+                fontWeight: activeTab === tab.id ? 600 : 500,
+                cursor: 'pointer',
+                transition: 'color 220ms var(--ease-luxury)'
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Bookings List */}
@@ -296,23 +347,20 @@ export default function CustomerBookings() {
             return (
               <div
                 key={b.id}
-                className="panel"
+                className="panel lx-card"
                 style={{
                   borderRadius: '16px',
                   padding: '22px',
-                  border: '1px solid #edf2f7',
+                  border: '1px solid var(--hairline-light)',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '16px',
-                  boxShadow: '0 2px 10px rgba(0,0,0,0.02)'
+                  gap: '16px'
                 }}
               >
                 {/* Header row */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: '#f4f4f5', color: '#141415', display: 'grid', placeItems: 'center' }}>
-                      <Car size={22} />
-                    </div>
+                    <OrderCarBadge size={44} />
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                         <b style={{ fontSize: '15px', color: '#171717' }}>

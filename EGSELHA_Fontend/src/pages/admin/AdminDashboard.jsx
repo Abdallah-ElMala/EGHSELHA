@@ -176,14 +176,14 @@ export default function AdminDashboard() {
                 const pct = Math.round((pkg.revenue / maxPkgRevenue) * 100);
                 return (
                   <div key={pkg.packageName}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '5px' }}>
-                      <b style={{ color: '#171717' }}>
-                        {pkg.packageName} <span style={{ color: '#64748b', fontWeight: 500 }}>({pkg.bookingsCount} jobs)</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '6px' }}>
+                      <b style={{ color: 'var(--ink-primary)' }}>
+                        {pkg.packageName} <span style={{ color: 'var(--ink-muted)', fontWeight: 500 }}>({pkg.bookingsCount} jobs)</span>
                       </b>
-                      <b style={{ color: '#141415' }}>EGP {pkg.revenue.toLocaleString()}</b>
+                      <b className="mono-num" style={{ color: 'var(--ink-primary)' }}>EGP {pkg.revenue.toLocaleString()}</b>
                     </div>
-                    <div style={{ height: '8px', background: '#f1f5f9', borderRadius: '99px', overflow: 'hidden' }}>
-                      <div style={{ width: `${pct}%`, height: '100%', background: '#141415', borderRadius: '99px' }} />
+                    <div style={{ height: '8px', background: 'var(--alabaster-raised)', borderRadius: '99px', overflow: 'hidden' }}>
+                      <div style={{ width: `${pct}%`, height: '100%', background: 'linear-gradient(90deg, #a67c37 0%, #cf9d54 100%)', borderRadius: '99px', transition: 'width 420ms cubic-bezier(0.22, 1, 0.36, 1)' }} />
                     </div>
                   </div>
                 );
@@ -205,18 +205,19 @@ export default function AdminDashboard() {
             {statusBreakdown.map((item) => (
               <div
                 key={item.status}
+                className="lx-card"
                 style={{
-                  padding: '12px 14px',
+                  padding: '13px 15px',
                   borderRadius: '12px',
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
+                  background: 'var(--alabaster)',
+                  border: '1px solid var(--hairline-light)',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
                 }}
               >
-                <span style={{ fontSize: '11px', fontWeight: 700, color: '#475569' }}>{item.status}</span>
-                <b style={{ fontSize: '16px', color: '#0f172a' }}>{item.Count ?? item.count}</b>
+                <span style={{ fontSize: '11.5px', fontWeight: 600, color: 'var(--ink-secondary)' }}>{item.status}</span>
+                <b className="mono-num" style={{ fontSize: '17px', color: 'var(--ink-primary)' }}>{item.Count ?? item.count}</b>
               </div>
             ))}
           </div>

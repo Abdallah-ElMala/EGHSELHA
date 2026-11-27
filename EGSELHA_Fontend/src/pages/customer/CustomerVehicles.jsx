@@ -169,7 +169,7 @@ export default function CustomerVehicles() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
       <PageTitle
-        eyebrow="2. CUSTOMER / GARAGE & ADDRESSES"
+        eyebrow="MY GARAGE"
         title="Vehicle Garage & Locations"
         desc="Register and manage vehicles under your customer profile. Vehicle size directly dictates wash tier multipliers (Sedan 1.0×, SUV 1.25×, Truck 1.50×)."
       />
@@ -560,7 +560,7 @@ export default function CustomerVehicles() {
                           padding: '10px 8px',
                           textAlign: 'center',
                           cursor: 'pointer',
-                          background: sizeType === s.id ? '#f0f7ff' : '#fff'
+                          background: sizeType === s.id ? 'var(--bronze-soft)' : '#fff'
                         }}
                       >
                         <b style={{ display: 'block', fontSize: '12px', color: sizeType === s.id ? '#141415' : '#1e293b' }}>

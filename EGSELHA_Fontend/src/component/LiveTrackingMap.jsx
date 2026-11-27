@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { MapPin, Navigation, ExternalLink } from 'lucide-react'
@@ -62,6 +62,7 @@ const TECH_PIN_ICON = L.divIcon({
 export default function LiveTrackingMap({ booking }) {
   const mapContainerRef = useRef(null)
   const mapInstanceRef = useRef(null)
+  const [routeStats, setRouteStats] = useState(null)
 
   const status = String(booking?.status || '').toUpperCase()
   const isAtCar = ['ARRIVED', 'WASHING', 'COMPLETED'].includes(status)
@@ -110,11 +111,15 @@ export default function LiveTrackingMap({ booking }) {
     const custMarker = L.marker([custLat, custLng], { icon: CUSTOMER_PIN_ICON }).addTo(map)
     custMarker.bindPopup(`<b>Your Vehicle</b><br/>${booking?.address || 'Sheikh Zayed / 6th of October'}`)
 
+    let cancelled = false
+    let activeRouteLayer = null
+
     if (!isAtCar) {
       const techMarker = L.marker([techLat, techLng], { icon: TECH_PIN_ICON }).addTo(map)
       techMarker.bindPopup(`<b>${booking?.technicianName || 'Technician'}</b><br/>Status: ${booking?.status || 'On The Way'}`)
 
-      const routeLine = L.polyline(
+      // Immediate fallback line until real road geometry arrives from OSRM
+      activeRouteLayer = L.polyline(
         [
           [techLat, techLng],
           [custLat, custLng]
@@ -123,11 +128,54 @@ export default function LiveTrackingMap({ booking }) {
           color: '#141415',
           weight: 3,
           dashArray: '8 6',
-          opacity: 0.85
+          opacity: 0.5
         }
       ).addTo(map)
 
-      map.fitBounds(routeLine.getBounds(), { padding: [48, 48], maxZoom: 15 })
+      map.fitBounds(activeRouteLayer.getBounds(), { padding: [48, 48], maxZoom: 15 })
+
+      // Fetch real driving road route along actual streets via OSRM
+      fetch(
+        `https://router.project-osrm.org/route/v1/driving/${techLng},${techLat};${custLng},${custLat}?overview=full&geometries=geojson`
+      )
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (cancelled || !data?.routes?.[0]?.geometry?.coordinates?.length) return
+          const route = data.routes[0]
+          const latLngs = route.geometry.coordinates.map(([lng, lat]) => [lat, lng])
+
+          if (activeRouteLayer) {
+            map.removeLayer(activeRouteLayer)
+          }
+
+          // Crisp road-following polyline (outer bronze casing + inner obsidian road line)
+          const casing = L.polyline(latLngs, {
+            color: '#c69249',
+            weight: 7,
+            opacity: 0.45,
+            lineCap: 'round',
+            lineJoin: 'round'
+          }).addTo(map)
+
+          const core = L.polyline(latLngs, {
+            color: '#141415',
+            weight: 4,
+            opacity: 0.95,
+            lineCap: 'round',
+            lineJoin: 'round'
+          }).addTo(map)
+
+          activeRouteLayer = L.layerGroup([casing, core]).addTo(map)
+          map.fitBounds(core.getBounds(), { padding: [44, 44], maxZoom: 15 })
+
+          setRouteStats({
+            km: route.distance / 1000,
+            mins: Math.max(2, Math.round(route.duration / 60))
+          })
+        })
+        .catch(() => {
+          // Keep fallback line if offline
+        })
     } else {
       map.setView([custLat, custLng], 16)
     }
@@ -136,10 +184,14 @@ export default function LiveTrackingMap({ booking }) {
     setTimeout(() => map.invalidateSize(), 150)
 
     return () => {
+      cancelled = true
       map.remove()
       mapInstanceRef.current = null
     }
   }, [custLat, custLng, techLat, techLng, isAtCar, booking?.address, booking?.technicianName, booking?.status])
+
+  const displayKm = routeStats?.km ?? distKm
+  const displayMins = routeStats?.mins ?? etaMins
 
   const googleMapsUrl = isAtCar
     ? `https://www.google.com/maps?q=${custLat},${custLng}`
@@ -147,15 +199,17 @@ export default function LiveTrackingMap({ booking }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px' }}>
-      {/* Real Interactive Leaflet Map */}
+      {/* Real Interactive Leaflet Map (Strictly Isolated Stacking Context so it NEVER covers the Topbar!) */}
       <div
         style={{
-          height: '280px',
+          height: '260px',
           borderRadius: '14px',
           overflow: 'hidden',
-          border: '1px solid #cbd5e1',
+          border: '1px solid var(--hairline-light-strong)',
           position: 'relative',
-          background: '#e2e8f0'
+          isolation: 'isolate',
+          zIndex: 1,
+          background: '#e8e6e0'
         }}
       >
         <div ref={mapContainerRef} style={{ width: '100%', height: '100%' }} />
@@ -170,24 +224,24 @@ export default function LiveTrackingMap({ booking }) {
           gap: '10px',
           flexWrap: 'wrap',
           padding: '10px 14px',
-          borderRadius: '10px',
-          background: '#f4f4f5',
-          border: '1px solid #e4e4e7'
+          borderRadius: '12px',
+          background: 'var(--alabaster)',
+          border: '1px solid var(--hairline-light)'
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
           {isAtCar ? (
-            <MapPin size={16} color="#b45309" style={{ flexShrink: 0 }} />
+            <MapPin size={16} color="var(--bronze)" style={{ flexShrink: 0 }} />
           ) : (
-            <Navigation size={16} color="#141415" style={{ flexShrink: 0 }} />
+            <Navigation size={16} color="var(--ink-primary)" style={{ flexShrink: 0 }} />
           )}
           <div style={{ minWidth: 0 }}>
-            <b style={{ fontSize: '12px', color: '#0f172a', display: 'block' }}>
+            <b style={{ fontSize: '12.5px', color: 'var(--ink-primary)', display: 'block' }}>
               {isAtCar
                 ? `Technician is at your location (${booking?.address || 'Pinned Spot'})`
-                : `En route · ~${distKm.toFixed(1)} km away (~${etaMins} min ETA)`}
+                : `En route · ${displayKm.toFixed(1)} km by road (~${displayMins} min ETA)`}
             </b>
-            <small style={{ fontSize: '10px', color: '#92400e' }}>
+            <small className="mono-num" style={{ fontSize: '10.5px', color: 'var(--bronze)' }}>
               GPS: {custLat.toFixed(4)}, {custLng.toFixed(4)}
             </small>
           </div>

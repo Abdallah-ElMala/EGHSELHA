@@ -37,9 +37,11 @@ namespace WebCarWash.API.Controllers
 
         private Guid GetEffectiveTechnicianId(Guid? requestedTechId = null)
         {
-            if (User.IsInRole("Admin") && requestedTechId.HasValue && requestedTechId.Value != Guid.Empty)
+            if (User.IsInRole("Admin") || User.IsInRole("ADMIN"))
             {
-                return requestedTechId.Value;
+                return requestedTechId.HasValue && requestedTechId.Value != Guid.Empty
+                    ? requestedTechId.Value
+                    : DefaultDemoTechId;
             }
 
             var claim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("sub");

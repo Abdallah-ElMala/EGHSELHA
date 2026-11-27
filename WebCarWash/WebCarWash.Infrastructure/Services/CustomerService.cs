@@ -50,6 +50,8 @@ namespace WebCarWash.Infrastructure.Services
         public async Task<CustomerProfileDto?> GetProfileAsync(Guid customerId)
         {
             var customer = await _unitOfWork.Customers.Query()
+                .AsNoTrackingWithIdentityResolution()
+                .AsSplitQuery()
                 .Include(c => c.Vehicles)
                 .Include(c => c.Bookings)
                 .FirstOrDefaultAsync(c => c.Id == customerId);
@@ -113,6 +115,11 @@ namespace WebCarWash.Infrastructure.Services
             if (customer == null) return null;
 
             customer.WalletBalance += amount;
+            int earnedStars = amount >= 2000f ? 180
+                : amount >= 1000f ? 80
+                : amount >= 500f ? 35
+                : Math.Max(5, (int)Math.Round(amount * 0.05f));
+            customer.LoyaltyPoints += earnedStars;
             _unitOfWork.Customers.Update(customer);
             await _unitOfWork.CompleteAsync();
             return await GetProfileAsync(customerId);
@@ -277,6 +284,8 @@ namespace WebCarWash.Infrastructure.Services
         public async Task<IEnumerable<CustomerBookingDto>> GetBookingsAsync(Guid customerId)
         {
             var bookings = await _unitOfWork.Bookings.Query()
+                .AsNoTrackingWithIdentityResolution()
+                .AsSplitQuery()
                 .Include(b => b.ServicePackage)
                 .Include(b => b.Vehicle)
                 .Include(b => b.Technician)
@@ -434,6 +443,8 @@ namespace WebCarWash.Infrastructure.Services
                     }
 
                     payment = customer.PayDeposit(booking, dto.PaymentMethod);
+                    customer.LoyaltyPoints += dto.PaymentMethod == PaymentMethod.WALLET ? 25 : 10;
+                    _unitOfWork.Customers.Update(customer);
                     await _unitOfWork.Payments.AddAsync(payment);
                 }
                 else

@@ -81,7 +81,7 @@ namespace WebCarWash.Infrastructure.Services
 
             var tech = new Technician
             {
-                Id = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbb0001"),
+                Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
                 FullName = "مصطفى علي (فني محترف)",
                 Email = "mostafa.ali@email.com",
                 Phone = "01001234567",

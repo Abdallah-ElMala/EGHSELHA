@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import BrandLogo from '../../component/BrandLogo';
+import EghselhaLogo from '../../component/EghselhaLogo';
 import FieldError from '../../component/FieldError';
 import {
   extractApiErrors,
@@ -10,7 +10,6 @@ import {
   EGYPTIAN_PHONE_REGEX
 } from '../../utils/validation';
 import {
-  UserPlus,
   User,
   Wrench,
   Mail,
@@ -22,26 +21,27 @@ import {
   AlertCircle
 } from 'lucide-react';
 
-const darkInputStyle = (hasError) => ({
+const lightInputStyle = (hasError) => ({
   width: '100%',
-  padding: '10px 14px',
-  fontSize: '13px',
-  borderRadius: '8px',
-  border: hasError ? '1px solid #e5484d' : '1px solid rgba(255, 255, 255, 0.12)',
-  background: '#232325',
+  padding: '11px 14px',
+  fontSize: '14px',
+  borderRadius: '10px',
+  border: hasError ? '1px solid var(--semantic-negative)' : '1px solid var(--hairline-light-strong)',
+  background: '#ffffff',
   outline: 'none',
-  color: '#f4f4f5',
+  color: 'var(--ink-primary)',
   boxSizing: 'border-box',
-  transition: 'border-color 150ms cubic-bezier(0.22, 1, 0.36, 1)'
+  fontFamily: 'var(--font-sans)',
+  transition: 'border-color 180ms var(--ease-luxury), box-shadow 180ms var(--ease-luxury)'
 });
 
-const labelStyle = {
+const fieldLabelStyle = {
   display: 'flex',
   alignItems: 'center',
   gap: '6px',
   fontSize: '12px',
   fontWeight: 500,
-  color: '#a1a1a6',
+  color: 'var(--ink-secondary)',
   marginBottom: '6px'
 };
 
@@ -69,6 +69,20 @@ export default function Register() {
         delete next[field];
         return next;
       });
+    }
+  };
+
+  const handleFocus = (e, hasError) => {
+    if (!hasError) {
+      e.target.style.borderColor = 'var(--bronze)';
+      e.target.style.boxShadow = '0 0 0 3px rgba(166, 124, 55, 0.12)';
+    }
+  };
+
+  const handleBlur = (e, hasError) => {
+    if (!hasError) {
+      e.target.style.borderColor = 'var(--hairline-light-strong)';
+      e.target.style.boxShadow = 'none';
     }
   };
 
@@ -139,141 +153,195 @@ export default function Register() {
 
   return (
     <div
+      dir="ltr"
       style={{
         minHeight: '100vh',
-        background: '#0f0f10',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '24px 16px',
-        fontFamily: "'DM Sans', 'Manrope', -apple-system, sans-serif"
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
+        background: 'var(--alabaster)',
+        color: 'var(--ink-primary)'
       }}
-      dir="ltr"
     >
+      {/* LEFT HALF: Full-Bleed Cinematic Editorial Panel */}
       <div
         style={{
-          width: '100%',
-          maxWidth: '1040px',
-          background: '#19191b',
-          borderRadius: '16px',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          overflow: 'hidden',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
-          minHeight: '640px'
+          position: 'relative',
+          minHeight: '360px',
+          background: '#0a0a0c',
+          color: 'var(--ivory)',
+          padding: '40px 44px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          overflow: 'hidden'
         }}
       >
-        {/* Left Side: Obsidian Brand Showcase */}
         <div
           style={{
-            background: '#141415',
-            color: '#f4f4f5',
-            padding: '44px 40px',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            borderRight: '1px solid rgba(255, 255, 255, 0.08)'
+            position: 'absolute',
+            inset: 0,
+            backgroundImage: 'url("/car-wash-spray.jpg")',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            zIndex: 0
           }}
-        >
-          <div>
-            <Link to="/" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '12px', marginBottom: '40px' }}>
-              <BrandLogo size={40} />
-              <div>
-                <b style={{ display: 'block', fontSize: '17px', fontWeight: 600, letterSpacing: '0.06em', fontFamily: 'Manrope, sans-serif', color: '#f4f4f5' }}>
-                  EGHSELHA
-                </b>
-                <small style={{ display: 'block', fontSize: '11px', color: '#85858b', marginTop: '2px' }}>
-                  Mobile auto detailing
-                </small>
-              </div>
-            </Link>
+        />
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background:
+              'linear-gradient(180deg, rgba(10,10,12,0.72) 0%, rgba(10,10,12,0.38) 44%, rgba(10,10,12,0.92) 100%)',
+            zIndex: 1
+          }}
+        />
 
-            <h1
-              style={{
-                font: '500 32px/1.18 Manrope, sans-serif',
-                color: '#f4f4f5',
-                margin: '0 0 16px 0',
-                letterSpacing: '-0.02em'
-              }}
-            >
-              Doorstep car detailing, scheduled around your day
-            </h1>
+        <div style={{ position: 'relative', zIndex: 2 }}>
+          <Link to="/" style={{ textDecoration: 'none', display: 'inline-block' }}>
+            <EghselhaLogo size={34} showText={true} />
+          </Link>
+        </div>
 
-            <p style={{ fontSize: '14px', lineHeight: 1.65, color: '#a1a1a6', margin: 0, maxWidth: '400px' }}>
-              Create a customer account to book on-demand washes with live GPS tracking, or register as a certified mobile technician.
-            </p>
-          </div>
+        <div style={{ position: 'relative', zIndex: 2, maxWidth: '480px', marginTop: '48px' }}>
+          <p
+            className="lx-enter lx-d1"
+            style={{
+              fontSize: '12px',
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              color: 'var(--bronze-dark)',
+              margin: '0 0 14px 0',
+              fontWeight: 500
+            }}
+          >
+            Join EGHSELHA
+          </p>
+          <h1
+            className="lx-enter lx-d2"
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(38px, 4.2vw, 56px)',
+              fontWeight: 400,
+              lineHeight: 1.03,
+              letterSpacing: '-0.02em',
+              color: 'var(--ivory)',
+              margin: '0 0 18px 0'
+            }}
+          >
+            Doorstep car care,
+            <br />
+            <span style={{ fontStyle: 'italic', color: 'rgba(245, 243, 238, 0.8)' }}>
+              built around your day.
+            </span>
+          </h1>
+          <p
+            className="lx-enter lx-d3"
+            style={{
+              fontSize: '14px',
+              lineHeight: 1.65,
+              color: 'rgba(245, 243, 238, 0.72)',
+              margin: '0 0 36px 0',
+              maxWidth: '400px'
+            }}
+          >
+            Create a customer account to book on-demand detailing with live GPS tracking, or register as a certified mobile technician.
+          </p>
 
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              paddingTop: '20px',
-              borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+              paddingTop: '18px',
+              borderTop: '1px solid rgba(245, 243, 238, 0.14)',
               fontSize: '12px',
-              color: '#737378'
+              color: 'rgba(245, 243, 238, 0.56)'
             }}
           >
             <span>© 2026 EGHSELHA</span>
             <span>On-demand mobile detailing</span>
           </div>
         </div>
+      </div>
 
-        {/* Right Side: Dark Obsidian Registration Form */}
-        <div
-          style={{
-            padding: '44px 40px',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            background: '#19191b'
-          }}
-        >
-          <div style={{ marginBottom: '20px' }}>
-            <Link
-              to="/"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                color: '#a1a1a6',
-                fontSize: '12px',
-                fontWeight: 500,
-                textDecoration: 'none',
-                marginBottom: '16px'
-              }}
-            >
-              <ArrowLeft size={14} strokeWidth={1.6} />
-              <span>Back to home</span>
-            </Link>
-            <h2
-              style={{
-                font: '500 24px/1.2 Manrope, sans-serif',
-                color: '#f4f4f5',
-                margin: '0 0 6px 0',
-                letterSpacing: '-0.02em'
-              }}
-            >
-              Create account
-            </h2>
-            <p style={{ fontSize: '13px', color: '#85858b', margin: 0 }}>
-              Choose your role and enter your details
-            </p>
-          </div>
-
-          {/* Account Type Tabs */}
-          <div
+      {/* RIGHT HALF: Warm Alabaster Editorial Registration Canvas */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '44px 32px',
+          background: 'var(--alabaster)'
+        }}
+      >
+        <div className="lx-enter lx-d1" style={{ width: '100%', maxWidth: '430px' }}>
+          <Link
+            to="/"
+            className="lx-nav-link"
             style={{
-              display: 'flex',
-              background: '#141415',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              borderRadius: '10px',
-              padding: '4px',
-              marginBottom: '20px',
-              gap: '4px'
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              color: 'var(--ink-secondary)',
+              fontSize: '13px',
+              fontWeight: 500,
+              marginBottom: '24px'
             }}
           >
+            <ArrowLeft size={14} strokeWidth={1.7} />
+            <span>Back to home</span>
+          </Link>
+
+          <h2
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: '42px',
+              fontWeight: 400,
+              lineHeight: 1.05,
+              letterSpacing: '-0.02em',
+              color: 'var(--ink-primary)',
+              margin: '0 0 8px 0'
+            }}
+          >
+            Create account
+          </h2>
+          <p style={{ fontSize: '14px', color: 'var(--ink-secondary)', margin: '0 0 24px 0' }}>
+            Choose your role and enter your details to get started.
+          </p>
+
+          {/* Architectural Sliding Segmented Role Switcher */}
+          <div
+            style={{
+              position: 'relative',
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              background: 'var(--alabaster-raised)',
+              border: '1px solid var(--hairline-light)',
+              borderRadius: '999px',
+              padding: '4px',
+              marginBottom: '22px'
+            }}
+          >
+            {/* Smooth Sliding Active Pill Indicator */}
+            <div
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                top: '4px',
+                bottom: '4px',
+                left: '4px',
+                width: 'calc(50% - 4px)',
+                borderRadius: '999px',
+                background: '#ffffff',
+                border: '1px solid rgba(24, 24, 27, 0.1)',
+                boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 2px 10px rgba(24, 24, 27, 0.08)',
+                transform: activeTab === 'technician' ? 'translateX(100%)' : 'translateX(0%)',
+                transition: 'transform 340ms cubic-bezier(0.22, 1, 0.36, 1)',
+                pointerEvents: 'none',
+                zIndex: 0
+              }}
+            />
+
             <button
               type="button"
               onClick={() => {
@@ -281,23 +349,30 @@ export default function Register() {
                 setErrors({});
               }}
               style={{
-                flex: 1,
-                padding: '9px 12px',
+                position: 'relative',
+                zIndex: 1,
+                padding: '10px 14px',
                 fontSize: '13px',
-                fontWeight: 500,
-                borderRadius: '7px',
-                border: activeTab === 'customer' ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid transparent',
+                fontWeight: 600,
+                borderRadius: '999px',
+                border: 'none',
+                outline: 'none',
+                background: 'transparent',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px',
-                transition: 'background-color 150ms cubic-bezier(0.22, 1, 0.36, 1), color 150ms cubic-bezier(0.22, 1, 0.36, 1)',
-                background: activeTab === 'customer' ? '#232325' : 'transparent',
-                color: activeTab === 'customer' ? '#f4f4f5' : '#85858b'
+                transition: 'color 240ms var(--ease-luxury)',
+                color: activeTab === 'customer' ? 'var(--ink-primary)' : 'var(--ink-secondary)'
               }}
             >
-              <User size={15} strokeWidth={1.6} color={activeTab === 'customer' ? '#d49b4b' : 'currentColor'} />
+              <User
+                size={15}
+                strokeWidth={1.7}
+                color={activeTab === 'customer' ? 'var(--bronze)' : 'currentColor'}
+                style={{ transition: 'color 240ms var(--ease-luxury)' }}
+              />
               <span>Customer</span>
             </button>
             <button
@@ -307,23 +382,30 @@ export default function Register() {
                 setErrors({});
               }}
               style={{
-                flex: 1,
-                padding: '9px 12px',
+                position: 'relative',
+                zIndex: 1,
+                padding: '10px 14px',
                 fontSize: '13px',
-                fontWeight: 500,
-                borderRadius: '7px',
-                border: activeTab === 'technician' ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid transparent',
+                fontWeight: 600,
+                borderRadius: '999px',
+                border: 'none',
+                outline: 'none',
+                background: 'transparent',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px',
-                transition: 'background-color 150ms cubic-bezier(0.22, 1, 0.36, 1), color 150ms cubic-bezier(0.22, 1, 0.36, 1)',
-                background: activeTab === 'technician' ? '#232325' : 'transparent',
-                color: activeTab === 'technician' ? '#f4f4f5' : '#85858b'
+                transition: 'color 240ms var(--ease-luxury)',
+                color: activeTab === 'technician' ? 'var(--ink-primary)' : 'var(--ink-secondary)'
               }}
             >
-              <Wrench size={15} strokeWidth={1.6} color={activeTab === 'technician' ? '#d49b4b' : 'currentColor'} />
+              <Wrench
+                size={15}
+                strokeWidth={1.7}
+                color={activeTab === 'technician' ? 'var(--bronze)' : 'currentColor'}
+                style={{ transition: 'color 240ms var(--ease-luxury)' }}
+              />
               <span>Technician</span>
             </button>
           </div>
@@ -332,15 +414,15 @@ export default function Register() {
             <div
               style={{
                 padding: '12px 14px',
-                borderRadius: '8px',
+                borderRadius: '10px',
                 marginBottom: '16px',
-                fontSize: '12px',
+                fontSize: '13px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '10px',
-                background: 'rgba(229, 72, 77, 0.12)',
-                border: '1px solid rgba(229, 72, 77, 0.3)',
-                color: '#fca5a5'
+                background: 'var(--semantic-negative-bg)',
+                border: '1px solid rgba(185, 28, 28, 0.24)',
+                color: 'var(--semantic-negative)'
               }}
             >
               <AlertCircle size={16} style={{ flexShrink: 0 }} />
@@ -348,58 +430,64 @@ export default function Register() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '14px' }}>
+          <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '15px' }}>
             <div>
-              <label style={labelStyle}>
-                <User size={14} strokeWidth={1.6} color="#85858b" />
+              <label style={fieldLabelStyle}>
+                <User size={14} strokeWidth={1.6} color="var(--ink-muted)" />
                 Full name
               </label>
               <input
                 type="text"
                 value={form.fullName}
                 onChange={(e) => handleInputChange('fullName', e.target.value)}
+                onFocus={(e) => handleFocus(e, errors.fullName)}
+                onBlur={(e) => handleBlur(e, errors.fullName)}
                 placeholder="Ahmed Ali"
-                style={darkInputStyle(errors.fullName)}
+                style={lightInputStyle(errors.fullName)}
               />
               <FieldError error={errors.fullName} />
             </div>
 
             <div>
-              <label style={labelStyle}>
-                <Mail size={14} strokeWidth={1.6} color="#85858b" />
+              <label style={fieldLabelStyle}>
+                <Mail size={14} strokeWidth={1.6} color="var(--ink-muted)" />
                 Email address
               </label>
               <input
                 type="email"
                 value={form.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
+                onFocus={(e) => handleFocus(e, errors.email)}
+                onBlur={(e) => handleBlur(e, errors.email)}
                 placeholder="name@example.com"
                 dir="ltr"
-                style={darkInputStyle(errors.email)}
+                style={lightInputStyle(errors.email)}
               />
               <FieldError error={errors.email} />
             </div>
 
             <div>
-              <label style={labelStyle}>
-                <Phone size={14} strokeWidth={1.6} color="#85858b" />
+              <label style={fieldLabelStyle}>
+                <Phone size={14} strokeWidth={1.6} color="var(--ink-muted)" />
                 Phone number
               </label>
               <input
                 type="tel"
                 value={form.phone}
                 onChange={(e) => handleInputChange('phone', e.target.value)}
+                onFocus={(e) => handleFocus(e, errors.phone)}
+                onBlur={(e) => handleBlur(e, errors.phone)}
                 placeholder="01012345678"
                 dir="ltr"
-                style={darkInputStyle(errors.phone)}
+                style={lightInputStyle(errors.phone)}
               />
               <FieldError error={errors.phone} />
             </div>
 
             {activeTab === 'technician' && (
               <div>
-                <label style={labelStyle}>
-                  <IdCard size={14} strokeWidth={1.6} color="#85858b" />
+                <label style={fieldLabelStyle}>
+                  <IdCard size={14} strokeWidth={1.6} color="var(--ink-muted)" />
                   National ID (14 digits)
                 </label>
                 <input
@@ -407,26 +495,30 @@ export default function Register() {
                   maxLength={14}
                   value={form.nationalId}
                   onChange={(e) => handleInputChange('nationalId', e.target.value)}
+                  onFocus={(e) => handleFocus(e, errors.nationalId)}
+                  onBlur={(e) => handleBlur(e, errors.nationalId)}
                   placeholder="29801011234567"
                   dir="ltr"
-                  style={darkInputStyle(errors.nationalId)}
+                  style={lightInputStyle(errors.nationalId)}
                 />
                 <FieldError error={errors.nationalId} />
               </div>
             )}
 
             <div>
-              <label style={labelStyle}>
-                <KeyRound size={14} strokeWidth={1.6} color="#85858b" />
+              <label style={fieldLabelStyle}>
+                <KeyRound size={14} strokeWidth={1.6} color="var(--ink-muted)" />
                 Password
               </label>
               <input
                 type="password"
                 value={form.password}
                 onChange={(e) => handleInputChange('password', e.target.value)}
+                onFocus={(e) => handleFocus(e, errors.password)}
+                onBlur={(e) => handleBlur(e, errors.password)}
                 placeholder="••••••••"
                 dir="ltr"
-                style={darkInputStyle(errors.password)}
+                style={lightInputStyle(errors.password)}
               />
               <FieldError error={errors.password} />
             </div>
@@ -434,32 +526,37 @@ export default function Register() {
             <button
               type="submit"
               disabled={loading}
+              className="lx-btn lx-glass-btn lx-glass-obsidian"
               style={{
                 width: '100%',
-                minHeight: '42px',
-                padding: '10px 16px',
-                fontSize: '13px',
+                minHeight: '48px',
+                borderRadius: '999px',
+                fontSize: '14px',
                 fontWeight: 600,
-                borderRadius: '8px',
-                background: '#f4f4f5',
-                border: '1px solid #f4f4f5',
-                color: '#141415',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                opacity: loading ? 0.6 : 1,
-                marginTop: '6px',
-                display: 'flex',
+                marginTop: '8px',
+                display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px',
-                transition: 'background-color 150ms cubic-bezier(0.22, 1, 0.36, 1)'
+                opacity: loading ? 0.65 : 1,
+                cursor: loading ? 'not-allowed' : 'pointer'
               }}
             >
               {loading ? (
-                <div style={{ width: '16px', height: '16px', border: '2px solid #141415', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                <div
+                  style={{
+                    width: '16px',
+                    height: '16px',
+                    border: '2px solid var(--ivory)',
+                    borderTopColor: 'transparent',
+                    borderRadius: '50%',
+                    animation: 'spin 0.8s linear infinite'
+                  }}
+                />
               ) : (
                 <>
-                  <UserPlus size={15} strokeWidth={1.8} />
                   <span>{activeTab === 'customer' ? 'Create customer account' : 'Create technician account'}</span>
+                  <ArrowRight size={15} strokeWidth={1.9} className="lx-arrow" />
                 </>
               )}
             </button>
@@ -469,26 +566,26 @@ export default function Register() {
             style={{
               marginTop: '24px',
               paddingTop: '18px',
-              borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+              borderTop: '1px solid var(--hairline-light)',
               textAlign: 'center',
-              fontSize: '13px',
-              color: '#85858b'
+              fontSize: '14px',
+              color: 'var(--ink-secondary)'
             }}
           >
             Already have an account?{' '}
             <Link
               to="/login"
+              className="lx-nav-link"
               style={{
-                color: '#d49b4b',
+                color: 'var(--ink-primary)',
                 fontWeight: 600,
-                textDecoration: 'none',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '4px'
               }}
             >
               <span>Sign in</span>
-              <ArrowRight size={14} strokeWidth={1.6} />
+              <ArrowRight size={14} strokeWidth={1.7} />
             </Link>
           </div>
         </div>

@@ -1,0 +1,380 @@
+/* ==========================================================================
+   EGHSELHA MOTION LAYER — Restrained Awwwards-Grade Micro-Interactions
+   Single easing curve: cubic-bezier(0.22, 1, 0.36, 1)
+   ========================================================================== */
+
+@keyframes lxFadeRise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Staggered Hero Entrance */
+.lx-enter {
+  opacity: 0;
+  animation: lxFadeRise 560ms var(--ease-luxury) forwards;
+}
+
+.lx-d1 { animation-delay: 60ms; }
+.lx-d2 { animation-delay: 140ms; }
+.lx-d3 { animation-delay: 220ms; }
+.lx-d4 { animation-delay: 300ms; }
+.lx-d5 { animation-delay: 380ms; }
+
+/* Scroll Reveal (IntersectionObserver) */
+.lx-reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 540ms var(--ease-luxury),
+    transform 540ms var(--ease-luxury);
+  will-change: opacity, transform;
+}
+
+.lx-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Card 2px Lift Micro-Interaction */
+.lx-card {
+  transition:
+    transform 240ms var(--ease-luxury),
+    border-color 220ms var(--ease-luxury),
+    box-shadow 260ms var(--ease-luxury);
+}
+
+.lx-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(24, 24, 27, 0.08);
+}
+
+/* Photo Internal Smooth Zoom (1.03x) */
+.lx-photo-wrap {
+  overflow: hidden;
+}
+
+.lx-photo-wrap img {
+  transition: transform 720ms var(--ease-luxury);
+  will-change: transform;
+}
+
+.lx-photo-wrap:hover img {
+  transform: scale(1.03);
+}
+
+/* Button Step, Arrow Glide & Tactile Press */
+.lx-btn {
+  position: relative;
+  transition:
+    background-color 180ms var(--ease-luxury),
+    border-color 180ms var(--ease-luxury),
+    color 180ms var(--ease-luxury),
+    box-shadow 240ms var(--ease-luxury),
+    transform 160ms var(--ease-luxury);
+}
+
+.lx-btn:active:not(:disabled) {
+  transform: scale(0.97) !important;
+}
+
+.lx-btn .lx-arrow {
+  transition: transform 240ms var(--ease-luxury);
+}
+
+.lx-btn:hover .lx-arrow {
+  transform: translateX(4px);
+}
+
+/* ==========================================================================
+   BEVELED GLASS-RIM BUTTON SYSTEM — Specular Glass Edges + Subtle Scale
+   Light reflection sweep on hover + barely-perceptible scale (1.022)
+   ========================================================================== */
+.lx-glass-btn {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  cursor: pointer;
+  will-change: transform, box-shadow;
+  transition:
+    background 260ms var(--ease-luxury),
+    border-color 260ms var(--ease-luxury),
+    box-shadow 280ms var(--ease-luxury),
+    color 200ms var(--ease-luxury),
+    transform 260ms var(--ease-luxury);
+}
+
+/* Diagonal Light Reflection Sweep on Hover */
+.lx-glass-btn::before {
+  content: '';
+  position: absolute;
+  top: -20%;
+  left: -80%;
+  width: 48%;
+  height: 140%;
+  background: linear-gradient(
+    110deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.12) 38%,
+    rgba(255, 255, 255, 0.44) 50%,
+    rgba(255, 255, 255, 0.12) 62%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-24deg) translateX(0);
+  pointer-events: none;
+  z-index: 1;
+  transition: transform 680ms var(--ease-luxury);
+}
+
+/* Crisp Glass Edge Rim Highlight (Top & Bottom Bevel Only) */
+.lx-glass-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.45),
+    inset 0 -1px 0.5px rgba(255, 255, 255, 0.12);
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 240ms var(--ease-luxury);
+  opacity: 0.85;
+}
+
+.lx-glass-btn > * {
+  position: relative;
+  z-index: 2;
+}
+
+.lx-glass-btn:hover:not(:disabled) {
+  transform: translateY(-1px) scale(1.022);
+}
+
+.lx-glass-btn:hover:not(:disabled)::before {
+  transform: skewX(-24deg) translateX(380%);
+}
+
+.lx-glass-btn:hover:not(:disabled)::after {
+  opacity: 1;
+}
+
+.lx-glass-btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.985) !important;
+  transition-duration: 90ms;
+}
+
+/* Variant 1: Brushed Bronze / Champagne Gold with Glassy Rim (Hero Primary CTA) */
+.lx-glass-gold {
+  background: linear-gradient(180deg, #cf9d54 0%, #b58238 100%);
+  border: 1px solid rgba(250, 228, 184, 0.58);
+  color: #0e0e10;
+  box-shadow:
+    0 0 0 3px rgba(214, 168, 92, 0.18),
+    0 8px 24px rgba(0, 0, 0, 0.34);
+}
+
+.lx-glass-gold:hover:not(:disabled) {
+  background: linear-gradient(180deg, #d8a962 0%, #bf8b40 100%);
+  border-color: rgba(255, 238, 204, 0.86);
+  box-shadow:
+    0 0 0 4px rgba(226, 181, 106, 0.28),
+    0 12px 30px rgba(198, 146, 73, 0.32);
+}
+
+/* Variant 2: Deep Obsidian Charcoal with Glassy Rim (Light Surfaces & Cards) */
+.lx-glass-obsidian {
+  background: linear-gradient(180deg, #242428 0%, #141416 100%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: var(--ivory);
+  box-shadow:
+    0 0 0 3px rgba(24, 24, 27, 0.08),
+    0 8px 22px rgba(24, 24, 27, 0.18);
+}
+
+.lx-glass-obsidian:hover:not(:disabled) {
+  background: linear-gradient(180deg, #2c2c31 0%, #18181b 100%);
+  border-color: rgba(255, 255, 255, 0.32);
+  box-shadow:
+    0 0 0 4px rgba(24, 24, 27, 0.13),
+    0 12px 28px rgba(24, 24, 27, 0.24);
+}
+
+/* Variant 3: Warm Ivory Pearl with Glassy Outer Rim (Dark Video / Editorial CTA) */
+.lx-glass-ivory {
+  background: linear-gradient(180deg, #faf8f4 0%, #ece8df 100%);
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  color: #0e0e10;
+  box-shadow:
+    0 0 0 3px rgba(245, 243, 238, 0.16),
+    0 10px 26px rgba(0, 0, 0, 0.36);
+}
+
+.lx-glass-ivory:hover:not(:disabled) {
+  background: linear-gradient(180deg, #ffffff 0%, #f3f0e8 100%);
+  border-color: #ffffff;
+  box-shadow:
+    0 0 0 4px rgba(245, 243, 238, 0.28),
+    0 14px 32px rgba(0, 0, 0, 0.44);
+}
+
+/* Variant 4: Smoked Frosted Glass with Crystal Rim (Navbar & Secondary on Dark) */
+.lx-glass-crystal {
+  background: rgba(18, 18, 22, 0.46);
+  backdrop-filter: blur(14px) saturate(145%);
+  -webkit-backdrop-filter: blur(14px) saturate(145%);
+  border: 1px solid rgba(245, 243, 238, 0.28);
+  color: var(--ivory);
+  box-shadow:
+    0 0 0 2.5px rgba(255, 255, 255, 0.06),
+    0 8px 22px rgba(0, 0, 0, 0.28);
+}
+
+.lx-glass-crystal:hover:not(:disabled) {
+  background: rgba(28, 28, 34, 0.62);
+  border-color: rgba(245, 243, 238, 0.54);
+  box-shadow:
+    0 0 0 3.5px rgba(255, 255, 255, 0.13),
+    0 12px 28px rgba(0, 0, 0, 0.38);
+}
+
+.lx-glass-btn:hover .lx-play-icon {
+  transform: scale(1.1);
+}
+
+.lx-play-icon {
+  transition: transform 220ms var(--ease-luxury);
+}
+
+/* ==========================================================================
+   SELECTABLE CONFIGURATOR CARDS — Subtle Bronze Rim Glow + Smooth Active State
+   ========================================================================== */
+.lx-select-card {
+  position: relative;
+  border: 1.5px solid var(--hairline-light);
+  background: rgba(255, 255, 255, 0.72);
+  cursor: pointer;
+  transition:
+    border-color 260ms var(--ease-luxury),
+    background-color 260ms var(--ease-luxury),
+    box-shadow 280ms var(--ease-luxury),
+    transform 240ms var(--ease-luxury);
+}
+
+.lx-select-card:hover:not(.is-selected) {
+  border-color: rgba(166, 124, 55, 0.56);
+  background: #ffffff;
+  transform: translateY(-2px);
+  box-shadow:
+    0 0 0 3px rgba(166, 124, 55, 0.11),
+    0 8px 22px rgba(24, 24, 27, 0.06);
+}
+
+.lx-select-card.is-selected {
+  border-color: var(--ink-primary);
+  background: #ffffff;
+  transform: translateY(-1px);
+  box-shadow:
+    0 0 0 3px rgba(166, 124, 55, 0.22),
+    0 10px 26px rgba(24, 24, 27, 0.09);
+}
+
+.lx-select-card:active {
+  transform: scale(0.99);
+}
+
+/* ==========================================================================
+   FLOATING TOPBAR NAV LINK — Subtle Scale + Luminous White Brighten on Hover
+   ========================================================================== */
+.lx-topbar-link {
+  position: relative;
+  z-index: 1;
+  outline: none !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 13.5px;
+  text-decoration: none;
+  color: rgba(245, 243, 238, 0.66);
+  font-weight: 400;
+  transition:
+    color 220ms var(--ease-luxury),
+    transform 240ms var(--ease-luxury),
+    text-shadow 220ms var(--ease-luxury);
+}
+
+.lx-topbar-link:hover {
+  color: #ffffff;
+  transform: scale(1.045);
+  text-shadow: 0 0 14px rgba(255, 255, 255, 0.24);
+}
+
+.lx-topbar-link.is-active {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Smooth Popover Reveal (Notification Dropdown, Quick Menus) */
+@keyframes lxPopoverIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.lx-popover {
+  transform-origin: top right;
+  animation: lxPopoverIn 240ms var(--ease-luxury) forwards;
+}
+
+/* Navbar Underline Draw */
+.lx-nav-link {
+  position: relative;
+  text-decoration: none;
+}
+
+.lx-nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 1.5px;
+  background: var(--bronze-dark);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 240ms var(--ease-luxury);
+}
+
+.lx-nav-link:hover::after,
+.lx-nav-link.active::after {
+  transform: scaleX(1);
+}
+
+/* Respect Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .lx-enter,
+  .lx-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+  .lx-card:hover,
+  .lx-photo-wrap:hover img,
+  .lx-btn:hover .lx-arrow,
+  .lx-glass-btn:hover {
+    transform: none !important;
+    animation: none !important;
+  }
+}

@@ -14,7 +14,7 @@ const RANGE_LABELS = {
 }
 
 export default function Earnings() {
-  const { notify } = useTech()
+  const { notify, profile } = useTech()
   const [earnings, setEarnings] = useState(null)
   const [loading, setLoading] = useState(true)
   const [chartRange, setChartRange] = useState('7d')
@@ -28,10 +28,45 @@ export default function Earnings() {
   const [payoutModalOpen, setPayoutModalOpen] = useState(false)
   const [payoutAmount, setPayoutAmount] = useState(500)
   const [payoutMethod, setPayoutMethod] = useState('Instapay')
-  const [accountDetails, setAccountDetails] = useState('mostafa@instapay')
+  const [accountsByMethod, setAccountsByMethod] = useState({
+    Instapay: 'mostafa@instapay',
+    'Vodafone Cash': profile?.phone || '01012345678',
+    'Bank Transfer': 'EG38 0019 0005 0000 0000 2631 8000 2'
+  })
+  const accountDetails = accountsByMethod[payoutMethod] ?? ''
+  const setAccountDetails = (val) => {
+    setAccountsByMethod((prev) => ({ ...prev, [payoutMethod]: val }))
+  }
   const [submittingPayout, setSubmittingPayout] = useState(false)
   const [payoutErrors, setPayoutErrors] = useState({})
   const [serverPayoutError, setServerPayoutError] = useState('')
+
+  const payoutMethodMeta = {
+    Instapay: {
+      label: 'Instapay Address (IPA) *',
+      placeholder: 'e.g. username@instapay',
+      hint: 'Instant transfer directly to your Instapay address'
+    },
+    'Vodafone Cash': {
+      label: 'Vodafone Cash Wallet Number *',
+      placeholder: 'e.g. 01012345678',
+      hint: '11-digit mobile wallet number (Vodafone / Orange / Etisalat / WE)'
+    },
+    'Bank Transfer': {
+      label: 'Bank IBAN / Account Number *',
+      placeholder: 'e.g. EG38 0019 0005 0000 ...',
+      hint: '29-character Egyptian IBAN or local bank account number'
+    }
+  }[payoutMethod] || {
+    label: 'Destination Details *',
+    placeholder: 'Enter payout destination',
+    hint: ''
+  }
+
+  const availableBal = Number(earnings?.availableBalance ?? 0)
+  const enteredAmount = Number(payoutAmount) || 0
+  const remainingAfterPayout = availableBal - enteredAmount
+  const exceedsBalance = enteredAmount > availableBal
 
   const fetchEarnings = useCallback(async (selectedRange = chartRange) => {
     try {
@@ -427,35 +462,90 @@ export default function Earnings() {
 
       {/* Request Payout Modal */}
       {payoutModalOpen && (
-        <div style={{
-          position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px'
-        }}>
-          <div className="panel" style={{ width: '100%', maxWidth: '460px', padding: '24px', backgroundColor: '#fff', borderRadius: '12px' }}>
-            <h2 style={{ marginTop: 0 }}>Request Payout</h2>
-            <p style={{ color: '#64748b', fontSize: '0.9rem' }}>
-              Withdraw your accumulated car wash earnings. Available balance: <b style={{ color: '#16a34a' }}>EGP {earnings?.availableBalance?.toLocaleString() ?? 0}</b>
-            </p>
+        <div
+          className="modal-overlay"
+          onClick={() => setPayoutModalOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px'
+          }}
+        >
+          <div
+            className="modal-card"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: '100%',
+              maxWidth: '470px',
+              padding: '26px',
+              background: 'var(--alabaster)',
+              borderRadius: '20px'
+            }}
+          >
+            <div style={{ marginBottom: '18px' }}>
+              <span className="eyebrow" style={{ display: 'block', marginBottom: '4px' }}>Technician Payout</span>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '30px', fontWeight: 400, margin: '0 0 6px 0', color: 'var(--ink-primary)' }}>
+                Request Payout
+              </h2>
+              <p style={{ color: 'var(--ink-secondary)', fontSize: '13px', margin: 0 }}>
+                Withdraw your accumulated detailing earnings to your preferred account.
+              </p>
+            </div>
 
             <form onSubmit={handleRequestPayout} noValidate>
               {serverPayoutError && (
-                <div style={{ padding: '10px 14px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#991b1b', fontSize: '12px', marginBottom: '14px' }}>
+                <div style={{ padding: '10px 14px', background: 'var(--semantic-negative-bg)', border: '1px solid rgba(185,28,28,0.25)', borderRadius: '10px', color: 'var(--semantic-negative)', fontSize: '12.5px', marginBottom: '14px' }}>
                   {serverPayoutError}
                 </div>
               )}
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '6px' }}>Withdrawal Amount (EGP) *</label>
+
+              <div style={{ marginBottom: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <label style={{ fontSize: '12.5px', fontWeight: 600, color: 'var(--ink-primary)' }}>
+                    Withdrawal Amount (EGP) *
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPayoutAmount(Math.floor(availableBal))
+                      if (payoutErrors.amount) setPayoutErrors({ ...payoutErrors, amount: '' })
+                    }}
+                    style={{
+                      background: 'var(--bronze-soft)',
+                      border: '1px solid rgba(166, 124, 55, 0.28)',
+                      color: '#7a571e',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      padding: '3px 9px',
+                      borderRadius: '999px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Withdraw Max (EGP {availableBal.toLocaleString()})
+                  </button>
+                </div>
+
                 <input
                   type="number"
                   min="50"
-                  max={earnings?.availableBalance || undefined}
+                  max={availableBal || undefined}
                   step="1"
+                  className="mono-num"
                   style={{
                     width: '100%',
-                    padding: '10px',
-                    borderRadius: '8px',
-                    border: payoutErrors.amount ? '1.5px solid #ef4444' : '1px solid #cbd5e1',
-                    background: payoutErrors.amount ? '#fffbfb' : '#fff'
+                    padding: '11px 14px',
+                    borderRadius: '10px',
+                    fontSize: '15px',
+                    fontWeight: 600,
+                    boxSizing: 'border-box',
+                    border: payoutErrors.amount || exceedsBalance ? '1.5px solid var(--semantic-negative)' : '1px solid var(--hairline-light-strong)',
+                    background: '#ffffff',
+                    color: 'var(--ink-primary)',
+                    outline: 'none'
                   }}
                   value={payoutAmount}
                   onChange={(e) => {
@@ -464,14 +554,78 @@ export default function Earnings() {
                   }}
                 />
                 <FieldError error={payoutErrors.amount} />
+
+                {/* Live Remaining Balance Breakdown */}
+                <div
+                  style={{
+                    marginTop: '10px',
+                    padding: '11px 14px',
+                    borderRadius: '12px',
+                    background: exceedsBalance ? 'var(--semantic-negative-bg)' : '#ffffff',
+                    border: exceedsBalance ? '1px solid rgba(185, 28, 28, 0.25)' : '1px solid var(--hairline-light)',
+                    display: 'grid',
+                    gap: '5px',
+                    fontSize: '12.5px'
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--ink-secondary)' }}>
+                    <span>Available balance</span>
+                    <span className="mono-num" style={{ fontWeight: 600, color: 'var(--ink-primary)' }}>
+                      EGP {availableBal.toLocaleString()}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--ink-secondary)' }}>
+                    <span>Withdrawing now</span>
+                    <span className="mono-num" style={{ fontWeight: 600, color: 'var(--bronze)' }}>
+                      -EGP {enteredAmount.toLocaleString()}
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      paddingTop: '6px',
+                      borderTop: '1px solid var(--hairline-light)',
+                      fontWeight: 600
+                    }}
+                  >
+                    <span style={{ color: exceedsBalance ? 'var(--semantic-negative)' : 'var(--ink-primary)' }}>
+                      {exceedsBalance ? 'Exceeds available balance' : 'Remaining balance after payout'}
+                    </span>
+                    <span
+                      className="mono-num"
+                      style={{
+                        color: exceedsBalance ? 'var(--semantic-negative)' : 'var(--semantic-positive)'
+                      }}
+                    >
+                      {exceedsBalance
+                        ? `-EGP ${Math.abs(remainingAfterPayout).toLocaleString()}`
+                        : `EGP ${remainingAfterPayout.toLocaleString()}`}
+                    </span>
+                  </div>
+                </div>
               </div>
 
               <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '6px' }}>Payout Method *</label>
+                <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: 'var(--ink-primary)', marginBottom: '6px' }}>
+                  Payout Method *
+                </label>
                 <select
-                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                  style={{
+                    width: '100%',
+                    padding: '11px 14px',
+                    borderRadius: '10px',
+                    border: '1px solid var(--hairline-light-strong)',
+                    background: '#ffffff',
+                    color: 'var(--ink-primary)',
+                    fontSize: '13.5px',
+                    outline: 'none'
+                  }}
                   value={payoutMethod}
-                  onChange={(e) => setPayoutMethod(e.target.value)}
+                  onChange={(e) => {
+                    setPayoutMethod(e.target.value)
+                    if (payoutErrors.accountDetails) setPayoutErrors({ ...payoutErrors, accountDetails: '' })
+                  }}
                 >
                   <option value="Instapay">Instapay (Instant transfer)</option>
                   <option value="Vodafone Cash">Vodafone Cash (Mobile wallet)</option>
@@ -479,30 +633,55 @@ export default function Earnings() {
                 </select>
               </div>
 
-              <div style={{ marginBottom: '18px' }}>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '6px' }}>Destination Details *</label>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: 'var(--ink-primary)', marginBottom: '6px' }}>
+                  {payoutMethodMeta.label}
+                </label>
                 <input
+                  className="mono-num"
                   style={{
                     width: '100%',
-                    padding: '10px',
-                    borderRadius: '8px',
-                    border: payoutErrors.accountDetails ? '1.5px solid #ef4444' : '1px solid #cbd5e1',
-                    background: payoutErrors.accountDetails ? '#fffbfb' : '#fff'
+                    padding: '11px 14px',
+                    borderRadius: '10px',
+                    fontSize: '13.5px',
+                    boxSizing: 'border-box',
+                    border: payoutErrors.accountDetails ? '1.5px solid var(--semantic-negative)' : '1px solid var(--hairline-light-strong)',
+                    background: '#ffffff',
+                    color: 'var(--ink-primary)',
+                    outline: 'none'
                   }}
-                  placeholder="e.g. username@instapay or 010xxxxxxxx"
+                  placeholder={payoutMethodMeta.placeholder}
                   value={accountDetails}
                   onChange={(e) => {
                     setAccountDetails(e.target.value)
                     if (payoutErrors.accountDetails) setPayoutErrors({ ...payoutErrors, accountDetails: '' })
                   }}
                 />
+                {payoutMethodMeta.hint && (
+                  <small style={{ display: 'block', marginTop: '5px', fontSize: '11.5px', color: 'var(--ink-muted)' }}>
+                    {payoutMethodMeta.hint}
+                  </small>
+                )}
                 <FieldError error={payoutErrors.accountDetails} />
               </div>
 
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
                 <button type="button" className="btn outline" onClick={() => setPayoutModalOpen(false)}>Cancel</button>
-                <button type="submit" className="btn primary" disabled={submittingPayout}>
-                  {submittingPayout ? 'Processing...' : 'Submit Withdrawal'}
+                <button
+                  type="submit"
+                  className="lx-btn lx-glass-btn lx-glass-obsidian"
+                  disabled={submittingPayout || exceedsBalance || enteredAmount <= 0}
+                  style={{
+                    minHeight: '42px',
+                    padding: '0 22px',
+                    borderRadius: '999px',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    opacity: submittingPayout || exceedsBalance || enteredAmount <= 0 ? 0.5 : 1,
+                    cursor: submittingPayout || exceedsBalance || enteredAmount <= 0 ? 'not-allowed' : 'pointer'
+                  }}
+                >
+                  {submittingPayout ? 'Processing…' : 'Submit Withdrawal'}
                 </button>
               </div>
             </form>

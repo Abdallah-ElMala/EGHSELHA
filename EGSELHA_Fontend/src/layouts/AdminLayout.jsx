@@ -1,13 +1,6 @@
-import { useState } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { NavLink, Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import {
-  LayoutDashboard,
-  CalendarCheck,
-  Wrench,
-  Users,
-  Tags,
-  ShieldAlert,
-  Wallet,
   RefreshCw,
   CheckCircle2,
   X,
@@ -16,182 +9,227 @@ import {
 } from 'lucide-react';
 import { useAdmin } from '../context/AdminContext';
 import { useAuth } from '../context/AuthContext';
-import BrandLogo from '../component/BrandLogo';
+import EghselhaLogo from '../component/EghselhaLogo';
 
 export default function AdminLayout() {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const { dashboard, toastMessage, refreshAll } = useAdmin();
   const { logout } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const navRefs = useRef({});
+  const [navPill, setNavPill] = useState({ left: 0, width: 0, ready: false });
 
   const openDisputesCount = dashboard?.openDisputes ?? 0;
   const pendingPayoutsCount = dashboard?.pendingPayoutsCount ?? 0;
 
   const navItems = [
-    { label: 'Overview', to: '/admin', icon: LayoutDashboard, end: true },
-    { label: 'Bookings', to: '/admin/bookings', icon: CalendarCheck },
-    { label: 'Technicians', to: '/admin/technicians', icon: Wrench },
-    { label: 'Customers', to: '/admin/customers', icon: Users },
-    { label: 'Pricing & zones', to: '/admin/catalog', icon: Tags },
-    { label: 'Disputes & QA', to: '/admin/disputes', icon: ShieldAlert, badge: openDisputesCount },
-    { label: 'Payouts', to: '/admin/payouts', icon: Wallet, badge: pendingPayoutsCount },
+    { label: 'Overview', to: '/admin', end: true },
+    { label: 'Bookings', to: '/admin/bookings' },
+    { label: 'Technicians', to: '/admin/technicians' },
+    { label: 'Customers', to: '/admin/customers' },
+    { label: 'Pricing', to: '/admin/catalog' },
+    { label: 'Disputes', to: '/admin/disputes', badge: openDisputesCount },
+    { label: 'Payouts', to: '/admin/payouts', badge: pendingPayoutsCount },
   ];
+
+  const activeNavKey =
+    navItems.find((item) =>
+      item.end
+        ? pathname === item.to
+        : pathname === item.to || pathname.startsWith(`${item.to}/`)
+    )?.to || '/admin';
+
+  useEffect(() => {
+    const syncPill = () => {
+      const el = navRefs.current[activeNavKey];
+      if (el) {
+        setNavPill({ left: el.offsetLeft, width: el.offsetWidth, ready: true });
+      }
+    };
+    syncPill();
+    window.addEventListener('resize', syncPill);
+    return () => window.removeEventListener('resize', syncPill);
+  }, [activeNavKey, openDisputesCount, pendingPayoutsCount]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    await refreshAll();
+    await refreshAll(true);
     setRefreshing(false);
   };
 
+  const handleSignOut = async () => {
+    await logout();
+    navigate('/login');
+  };
+
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#fafafa' }}>
-      {/* Obsidian Admin Sidebar */}
-      <aside
+    <div
+      style={{
+        minHeight: '100vh',
+        background: 'var(--alabaster)',
+        color: 'var(--ink-primary)',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      {/* FLOATING OBSIDIAN ADMIN TOP NAVIGATION WITH GLIDING PILL */}
+      <header
         style={{
-          background: '#0f0f10',
-          color: '#ededed',
-          display: 'flex',
-          flexDirection: 'column',
-          padding: '20px 16px',
-          borderRight: '1px solid rgba(255, 255, 255, 0.08)',
+          position: 'sticky',
+          top: 0,
+          zIndex: 40,
+          background: 'rgba(14, 14, 16, 0.94)',
+          backdropFilter: 'blur(18px)',
+          WebkitBackdropFilter: 'blur(18px)',
+          borderBottom: '1px solid var(--hairline-dark)',
+          color: 'var(--ivory)',
         }}
-        className={`portal-sidebar admin ${mobileOpen ? 'mobile-open' : ''}`}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '4px 8px 28px 8px' }}>
-          <BrandLogo size={36} />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <b style={{ display: 'block', color: '#f4f4f5', fontSize: '15px', fontWeight: 600, letterSpacing: '0.06em', fontFamily: 'Manrope, sans-serif' }}>
-              EGHSELHA
-            </b>
-            <small style={{ display: 'block', fontSize: '11px', color: '#d49b4b', marginTop: '2px', fontWeight: 500 }}>
-              Operations console
-            </small>
-          </div>
-          {mobileOpen && (
-            <button onClick={() => setMobileOpen(false)} style={{ background: 'none', border: 'none', color: '#a1a1a6', cursor: 'pointer' }} aria-label="Close menu">
-              <X size={18} strokeWidth={1.6} />
-            </button>
-          )}
-        </div>
-
-        <div style={{ fontSize: '11px', color: '#737378', fontWeight: 500, padding: '0 12px 8px' }}>
-          Operations
-        </div>
-
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <NavLink
-                key={item.label}
-                to={item.to}
-                end={item.end}
-                onClick={() => setMobileOpen(false)}
-                style={({ isActive }) => ({
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  padding: '9px 12px',
-                  minHeight: '36px',
-                  borderRadius: '8px',
-                  color: isActive ? '#f4f4f5' : '#a1a1a6',
-                  backgroundColor: isActive ? '#1e1e21' : 'transparent',
-                  border: isActive ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid transparent',
-                  textDecoration: 'none',
-                  fontWeight: isActive ? 500 : 400,
-                  fontSize: '13px',
-                  transition: 'background-color 150ms cubic-bezier(0.22, 1, 0.36, 1), color 150ms cubic-bezier(0.22, 1, 0.36, 1)',
-                })}
-              >
-                {({ isActive }) => (
-                  <>
-                    <Icon size={17} strokeWidth={1.6} color={isActive ? '#d49b4b' : 'currentColor'} />
-                    <span style={{ flex: 1 }}>{item.label}</span>
-                    {item.badge > 0 && (
-                      <span
-                        style={{
-                          fontSize: '11px',
-                          fontWeight: 500,
-                          padding: '1px 7px',
-                          borderRadius: '6px',
-                          background: 'rgba(212, 155, 75, 0.16)',
-                          color: '#e5b56c',
-                          fontVariantNumeric: 'tabular-nums',
-                        }}
-                      >
-                        {item.badge}
-                      </span>
-                    )}
-                  </>
-                )}
-              </NavLink>
-            );
-          })}
-        </nav>
-
-        <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <button
-            className="sidebar-logout-btn"
-            onClick={async () => {
-              await logout();
-              navigate('/login');
-            }}
-          >
-            <LogOut size={16} strokeWidth={1.6} />
-            <span>Sign out</span>
-          </button>
-        </div>
-      </aside>
-
-      {/* Main Content Area */}
-      <div className="portal-main admin">
-        <header
+        <div
           style={{
-            height: '64px',
-            backgroundColor: '#ffffff',
-            borderBottom: '1px solid rgba(23, 23, 23, 0.08)',
+            maxWidth: '1400px',
+            margin: '0 auto',
+            padding: '0 28px',
+            height: '62px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '0 24px',
-            position: 'sticky',
-            top: 0,
-            zIndex: 30,
+            gap: '16px',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {/* Left: Brand Logo + Admin Badge */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
             <button
               className="portal-hamburger"
               onClick={() => setMobileOpen(true)}
               aria-label="Open menu"
+              style={{ color: 'var(--ivory)' }}
             >
-              <Menu size={18} strokeWidth={1.6} />
+              <Menu size={20} strokeWidth={1.6} />
             </button>
-            <div>
-              <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 600, color: '#171717', fontFamily: 'Manrope, sans-serif' }}>
-                Operations & dispatch
-              </h2>
-              <small style={{ fontSize: '12px', color: '#737373' }}>
-                Bookings, technicians, pricing, disputes and payouts
-              </small>
-            </div>
+            <Link to="/admin" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
+              <EghselhaLogo size={30} showText={true} />
+              <span
+                style={{
+                  fontSize: '10px',
+                  fontWeight: 600,
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                  color: 'var(--bronze-dark)',
+                  background: 'rgba(198, 146, 73, 0.14)',
+                  border: '1px solid rgba(198, 146, 73, 0.28)',
+                  padding: '2px 8px',
+                  borderRadius: '999px',
+                }}
+              >
+                Admin
+              </span>
+            </Link>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <button className="btn outline sm" onClick={handleRefresh} disabled={refreshing}>
-              <RefreshCw size={14} strokeWidth={1.6} />
+          {/* Center: Gliding Pill Navigation */}
+          <nav
+            className="landing-nav"
+            style={{
+              position: 'relative',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '2px',
+              padding: '4px',
+              borderRadius: '999px',
+            }}
+          >
+            {navPill.ready && (
+              <div
+                aria-hidden="true"
+                style={{
+                  position: 'absolute',
+                  top: '4px',
+                  bottom: '4px',
+                  left: 0,
+                  width: `${navPill.width}px`,
+                  transform: `translateX(${navPill.left}px)`,
+                  borderRadius: '999px',
+                  background: 'rgba(245, 243, 238, 0.12)',
+                  border: '1px solid rgba(198, 146, 73, 0.42)',
+                  boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 4px 16px rgba(0, 0, 0, 0.28)',
+                  transition: 'transform 360ms cubic-bezier(0.22, 1, 0.36, 1), width 360ms cubic-bezier(0.22, 1, 0.36, 1)',
+                  pointerEvents: 'none',
+                  zIndex: 0,
+                }}
+              />
+            )}
+
+            {navItems.map((item) => {
+              const isActive = activeNavKey === item.to;
+              return (
+                <NavLink
+                  key={item.to}
+                  ref={(el) => { navRefs.current[item.to] = el; }}
+                  to={item.to}
+                  end={item.end}
+                  className={`lx-topbar-link ${isActive ? 'is-active' : ''}`}
+                  style={{ padding: '7px 13px', fontSize: '13px', gap: '6px' }}
+                >
+                  <span>{item.label}</span>
+                  {item.badge > 0 && (
+                    <span
+                      className="mono-num"
+                      style={{
+                        fontSize: '10px',
+                        fontWeight: 700,
+                        background: 'var(--bronze-dark)',
+                        color: '#0e0e10',
+                        padding: '1px 6px',
+                        borderRadius: '999px',
+                        lineHeight: 1.3,
+                      }}
+                    >
+                      {item.badge}
+                    </span>
+                  )}
+                </NavLink>
+              );
+            })}
+          </nav>
+
+          {/* Right: Sync, Admin Avatar, Sign Out */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+            <button
+              type="button"
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="lx-btn lx-glass-btn lx-glass-crystal"
+              style={{
+                minHeight: '34px',
+                padding: '0 14px',
+                borderRadius: '999px',
+                fontSize: '12px',
+                fontWeight: 500,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+              }}
+            >
+              <RefreshCw
+                size={13}
+                strokeWidth={1.7}
+                style={{ animation: refreshing ? 'spin 0.8s linear infinite' : 'none' }}
+              />
               <span>{refreshing ? 'Syncing…' : 'Sync'}</span>
             </button>
+
             <div
               style={{
                 width: '34px',
                 height: '34px',
-                borderRadius: '8px',
-                background: '#141415',
-                color: '#f4f4f5',
-                fontWeight: 600,
-                fontSize: '12px',
+                borderRadius: '999px',
+                background: 'var(--ivory)',
+                color: '#0e0e10',
+                fontWeight: 700,
+                fontSize: '11.5px',
                 display: 'grid',
                 placeItems: 'center',
               }}
@@ -199,17 +237,130 @@ export default function AdminLayout() {
             >
               AD
             </div>
-          </div>
-        </header>
 
-        <main style={{ padding: '24px 32px', flex: 1, maxWidth: '1500px', width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
-          <Outlet />
-        </main>
-      </div>
+            <button
+              type="button"
+              onClick={handleSignOut}
+              title="Sign out"
+              aria-label="Sign out"
+              style={{
+                width: '34px',
+                height: '34px',
+                borderRadius: '999px',
+                background: 'transparent',
+                border: '1px solid rgba(245, 243, 238, 0.14)',
+                color: 'rgba(245, 243, 238, 0.72)',
+                display: 'grid',
+                placeItems: 'center',
+                cursor: 'pointer',
+              }}
+            >
+              <LogOut size={15} strokeWidth={1.7} />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Mobile Drawer */}
+      {mobileOpen && (
+        <div
+          onClick={() => setMobileOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 60,
+            background: 'rgba(10, 10, 12, 0.72)',
+            backdropFilter: 'blur(8px)',
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: '270px',
+              height: '100%',
+              background: 'var(--obsidian)',
+              color: 'var(--ivory)',
+              padding: '24px 20px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '20px',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <EghselhaLogo size={28} showText={true} />
+              <button onClick={() => setMobileOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--ivory-secondary)', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+            <nav style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              {navItems.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  end={item.end}
+                  onClick={() => setMobileOpen(false)}
+                  style={({ isActive }) => ({
+                    padding: '11px 15px',
+                    borderRadius: '10px',
+                    fontSize: '14px',
+                    fontWeight: isActive ? 600 : 400,
+                    color: isActive ? 'var(--ivory)' : 'var(--ivory-secondary)',
+                    background: isActive ? 'rgba(245, 243, 238, 0.08)' : 'transparent',
+                    textDecoration: 'none',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  })}
+                >
+                  <span>{item.label}</span>
+                  {item.badge > 0 && (
+                    <span className="mono-num" style={{ fontSize: '11px', background: 'var(--bronze-dark)', color: '#0e0e10', padding: '1px 7px', borderRadius: '999px', fontWeight: 700 }}>
+                      {item.badge}
+                    </span>
+                  )}
+                </NavLink>
+              ))}
+            </nav>
+            <button
+              type="button"
+              onClick={handleSignOut}
+              style={{
+                marginTop: 'auto',
+                padding: '12px 16px',
+                borderRadius: '10px',
+                background: 'rgba(239, 68, 68, 0.1)',
+                border: '1px solid rgba(239, 68, 68, 0.24)',
+                color: '#fca5a5',
+                fontSize: '14px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              <LogOut size={16} /> Sign out
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* FULL-BREATHING-ROOM CENTERED ADMIN CANVAS */}
+      <main
+        style={{
+          flex: 1,
+          width: '100%',
+          maxWidth: '1320px',
+          margin: '0 auto',
+          padding: '24px 28px 56px',
+          boxSizing: 'border-box',
+        }}
+      >
+        <Outlet />
+      </main>
 
       {toastMessage && (
         <div className="toast">
-          <CheckCircle2 size={16} strokeWidth={1.6} />
+          <CheckCircle2 size={16} strokeWidth={1.6} color="var(--bronze-dark)" />
           <span>{toastMessage}</span>
         </div>
       )}

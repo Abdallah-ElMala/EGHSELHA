@@ -1,0 +1,466 @@
+/* ==========================================================================
+   EGHSELHA LUXURY DESIGN SYSTEM — Warm Alabaster · Charcoal · Brushed Bronze
+   Grounded in Awwwards Quiet Luxury (Forge Automotive / Porsche / Blacklane)
+   ========================================================================== */
+
+:root {
+  /* Typography */
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-heading: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+
+  /* Light Quiet Luxury Ramp (Portals, Booking, Services) */
+  --alabaster: #f6f5f1;
+  --alabaster-raised: #eeece6;
+  --surface-white: #ffffff;
+  --ink-primary: #18181b;
+  --ink-secondary: #52525b;
+  --ink-muted: #71717a;
+  --hairline-light: rgba(24, 24, 27, 0.09);
+  --hairline-light-strong: rgba(24, 24, 27, 0.18);
+
+  /* Dark Atelier Ramp (Hero, Sidebar, Auth) */
+  --obsidian: #0e0e10;
+  --charcoal: #141416;
+  --charcoal-card: #1a1a1d;
+  --charcoal-raised: #232327;
+  --ivory: #f5f3ee;
+  --ivory-secondary: #a1a1aa;
+  --ivory-muted: #787880;
+  --hairline-dark: rgba(245, 243, 238, 0.09);
+  --hairline-dark-strong: rgba(245, 243, 238, 0.2);
+
+  /* Signature Accent — Brushed Bronze / Champagne */
+  --bronze: #a67c37;
+  --bronze-hover: #8d672b;
+  --bronze-dark: #c69249;
+  --bronze-dark-hover: #d7a864;
+  --bronze-soft: #f7f1e3;
+  --bronze-soft-dark: rgba(198, 146, 73, 0.14);
+
+  /* Semantic */
+  --semantic-positive: #15803d;
+  --semantic-positive-bg: #eef7f1;
+  --semantic-negative: #b91c1c;
+  --semantic-negative-bg: #fdf2f2;
+
+  /* Radii (Nested scale) */
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-xl: 16px;
+
+  /* Motion */
+  --ease-luxury: cubic-bezier(0.22, 1, 0.36, 1);
+  --t-fast: 150ms;
+  --t-med: 280ms;
+  --t-slow: 520ms;
+}
+
+/* Global Quiet Luxury Base */
+html {
+  scroll-behavior: smooth;
+  background: var(--alabaster);
+  color: var(--ink-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  background: var(--alabaster);
+  color: var(--ink-primary);
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Portal Warm Alabaster Upgrades */
+.app,
+.customer-app-wrapper {
+  background: var(--alabaster) !important;
+}
+
+.topbar,
+.portal-main > header {
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--hairline-light) !important;
+}
+
+.panel,
+.stat-card {
+  background: var(--surface-white);
+  border: 1px solid var(--hairline-light);
+  border-radius: var(--r-xl);
+  box-shadow: 0 1px 2px rgba(24, 24, 27, 0.04);
+  transition: border-color var(--t-fast) var(--ease-luxury), box-shadow var(--t-med) var(--ease-luxury);
+}
+
+.profile-cover {
+  background: linear-gradient(135deg, #0e0e10 0%, #1c1a17 60%, #2a2217 100%) !important;
+}
+
+.profile-photo {
+  background: var(--obsidian) !important;
+  color: var(--bronze-dark) !important;
+}
+
+.profile-photo i {
+  background: var(--bronze) !important;
+}
+
+.stat-card:hover {
+  border-color: var(--hairline-light-strong);
+}
+
+.eyebrow {
+  color: var(--bronze) !important;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.page-title h1 {
+  font-family: var(--font-display) !important;
+  font-size: 36px !important;
+  font-weight: 400 !important;
+  line-height: 1.08 !important;
+  color: var(--ink-primary) !important;
+  letter-spacing: -0.02em !important;
+}
+
+.page-title p {
+  color: var(--ink-secondary) !important;
+  font-size: 14px !important;
+}
+
+/* Modal & Toast Quiet Luxury Upgrades */
+.modal-overlay {
+  background: rgba(14, 14, 16, 0.72) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+
+.modal-card {
+  background: var(--alabaster) !important;
+  border: 1px solid var(--hairline-light-strong) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.32) !important;
+}
+
+.modal-header {
+  background: var(--alabaster) !important;
+  border-bottom: 1px solid var(--hairline-light) !important;
+}
+
+.modal-header h3 {
+  font-family: var(--font-display) !important;
+  font-size: 26px !important;
+  font-weight: 400 !important;
+  color: var(--ink-primary) !important;
+}
+
+.modal-footer {
+  background: var(--alabaster-raised) !important;
+  border-top: 1px solid var(--hairline-light) !important;
+}
+
+.toast {
+  background: var(--obsidian) !important;
+  color: var(--ivory) !important;
+  border: 1px solid var(--hairline-dark-strong) !important;
+  border-radius: 999px !important;
+  padding: 12px 20px !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.34) !important;
+}
+
+/* Unified Luxury Button Hierarchy (Beveled Glass-Rim Primary + Subtle Scale) */
+.btn {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 13px;
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 999px;
+  letter-spacing: 0;
+  transition:
+    background 220ms var(--ease-luxury),
+    border-color 220ms var(--ease-luxury),
+    color 180ms var(--ease-luxury),
+    transform 240ms var(--ease-luxury),
+    box-shadow 240ms var(--ease-luxury);
+}
+
+.btn.sm {
+  min-height: 34px;
+  padding: 0 14px;
+  font-size: 12px;
+  border-radius: 999px;
+}
+
+.btn.lg {
+  min-height: 48px;
+  padding: 0 26px;
+  font-size: 14px;
+  border-radius: 999px;
+}
+
+.btn.primary {
+  background: linear-gradient(180deg, #242428 0%, #141416 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  color: var(--ivory) !important;
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.34),
+    0 0 0 3px rgba(24, 24, 27, 0.07),
+    0 6px 18px rgba(24, 24, 27, 0.18) !important;
+}
+
+.btn.primary::before {
+  content: '';
+  position: absolute;
+  top: -20%;
+  left: -80%;
+  width: 48%;
+  height: 140%;
+  background: linear-gradient(
+    110deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.12) 38%,
+    rgba(255, 255, 255, 0.38) 50%,
+    rgba(255, 255, 255, 0.12) 62%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-24deg) translateX(0);
+  pointer-events: none;
+  transition: transform 640ms var(--ease-luxury);
+}
+
+.btn.primary:hover:not(:disabled) {
+  background: linear-gradient(180deg, #2c2c31 0%, #18181b 100%) !important;
+  border-color: rgba(255, 255, 255, 0.32) !important;
+  transform: translateY(-1px) scale(1.018);
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.45),
+    0 0 0 4px rgba(24, 24, 27, 0.12),
+    0 10px 24px rgba(24, 24, 27, 0.24) !important;
+}
+
+.btn.primary:hover:not(:disabled)::before {
+  transform: skewX(-24deg) translateX(380%);
+}
+
+.btn.primary:active:not(:disabled) {
+  transform: translateY(0) scale(0.985) !important;
+}
+
+.btn.accent {
+  background: linear-gradient(180deg, #cf9d54 0%, #b58238 100%);
+  border: 1px solid rgba(250, 228, 184, 0.58);
+  color: #0e0e10;
+  box-shadow: 0 0 0 3px rgba(198, 146, 73, 0.16), 0 6px 18px rgba(166, 124, 55, 0.24);
+}
+
+.btn.accent:hover:not(:disabled) {
+  background: linear-gradient(180deg, #d8a962 0%, #bf8b40 100%);
+  transform: translateY(-1px) scale(1.018);
+}
+
+.btn.outline {
+  background: var(--surface-white) !important;
+  border: 1px solid var(--hairline-light-strong) !important;
+  color: var(--ink-primary) !important;
+  box-shadow: 0 1px 2px rgba(24, 24, 27, 0.04);
+}
+
+.btn.outline:hover:not(:disabled) {
+  background: var(--alabaster-raised) !important;
+  border-color: rgba(24, 24, 27, 0.3) !important;
+  color: var(--ink-primary) !important;
+  transform: translateY(-1px) scale(1.015);
+}
+
+.btn.soft,
+.soft-btn {
+  background: var(--alabaster-raised) !important;
+  border: 1px solid var(--hairline-light) !important;
+  color: var(--ink-primary) !important;
+  border-radius: 999px;
+}
+
+.btn.soft:hover:not(:disabled),
+.soft-btn:hover:not(:disabled) {
+  background: #e4e1d8 !important;
+  transform: translateY(-1px) scale(1.015);
+}
+
+.mono-num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ==========================================================================
+   TECHNICIAN & ADMIN PORTAL QUIET LUXURY OVERRIDES (Strip Legacy Blues)
+   ========================================================================== */
+.stat-icon {
+  background: var(--alabaster-raised) !important;
+  color: var(--ink-primary) !important;
+  border: 1px solid var(--hairline-light);
+}
+
+.stat-icon.green {
+  background: var(--semantic-positive-bg) !important;
+  color: var(--semantic-positive) !important;
+}
+
+.stat-icon.yellow {
+  background: var(--bronze-soft) !important;
+  color: var(--bronze) !important;
+}
+
+.stat-icon.purple {
+  background: #f4f2f8 !important;
+  color: #5b4b8a !important;
+}
+
+.stat-info span {
+  font-size: 12px !important;
+  color: var(--ink-muted) !important;
+}
+
+.stat-info strong {
+  font-family: var(--font-mono) !important;
+  font-size: 22px !important;
+  font-weight: 600 !important;
+  color: var(--ink-primary) !important;
+}
+
+.panel-head h2 {
+  font-family: var(--font-display) !important;
+  font-size: 24px !important;
+  font-weight: 400 !important;
+  color: var(--ink-primary) !important;
+}
+
+.panel-head p {
+  font-size: 13px !important;
+  color: var(--ink-secondary) !important;
+}
+
+.text-btn {
+  color: var(--bronze) !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+}
+
+.job-date,
+.car-thumb {
+  background: var(--obsidian) !important;
+  color: var(--bronze-dark) !important;
+  border-radius: 11px !important;
+}
+
+.job-line > b,
+.full-job-info > b,
+.job-price b,
+td b {
+  font-size: 13.5px !important;
+  color: var(--ink-primary) !important;
+}
+
+.job-main > span,
+.job-main > small,
+.full-job-info > span,
+.full-job-info > small {
+  font-size: 12px !important;
+  color: var(--ink-secondary) !important;
+}
+
+.bar {
+  background: linear-gradient(180deg, #cf9d54 0%, #a67c37 100%) !important;
+}
+
+.active-filter {
+  background: var(--obsidian) !important;
+  color: var(--ivory) !important;
+}
+
+.btn.success {
+  background: linear-gradient(180deg, #cf9d54 0%, #b58238 100%) !important;
+  border: 1px solid rgba(250, 228, 184, 0.58) !important;
+  color: #0e0e10 !important;
+  box-shadow: 0 0 0 3px rgba(198, 146, 73, 0.16), 0 6px 18px rgba(166, 124, 55, 0.24) !important;
+}
+
+.btn.success:hover:not(:disabled) {
+  background: linear-gradient(180deg, #d8a962 0%, #bf8b40 100%) !important;
+  transform: translateY(-1px) scale(1.018);
+}
+
+.btn.danger {
+  background: var(--semantic-negative-bg) !important;
+  border: 1px solid rgba(185, 28, 28, 0.26) !important;
+  color: var(--semantic-negative) !important;
+}
+
+.btn.danger:hover:not(:disabled) {
+  background: #fee2e2 !important;
+  transform: translateY(-1px) scale(1.015);
+}
+
+.field input,
+.field textarea,
+.field select,
+.select-input {
+  border-color: var(--hairline-light-strong) !important;
+  background: #ffffff !important;
+  color: var(--ink-primary) !important;
+  font-size: 13px !important;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus,
+.select-input:focus {
+  border-color: var(--bronze) !important;
+  box-shadow: 0 0 0 3px rgba(166, 124, 55, 0.12) !important;
+}
+
+th {
+  font-size: 11px !important;
+  color: var(--ink-muted) !important;
+}
+
+td {
+  font-size: 13px !important;
+  color: var(--ink-secondary) !important;
+}
+
+/* Keep Leaflet maps strictly inside their own container (never overlapping sticky navbars/modals) */
+.leaflet-container {
+  z-index: 1 !important;
+}
+
+/* Full-width clickable search inputs across all portals */
+.filter-search {
+  border-radius: 999px !important;
+  border-color: var(--hairline-light-strong) !important;
+  background: #ffffff !important;
+  padding: 8px 14px !important;
+}
+
+.filter-search input {
+  flex: 1 !important;
+  width: 100% !important;
+  min-width: 180px !important;
+  font-size: 13px !important;
+  color: var(--ink-primary) !important;
+  background: transparent !important;
+}

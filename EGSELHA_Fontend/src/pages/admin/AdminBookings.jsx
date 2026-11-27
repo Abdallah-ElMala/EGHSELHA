@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef, useEffect } from 'react';
 import {
   Search,
   CalendarCheck,
@@ -14,19 +14,20 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import PageTitle from '../../component/PageTitle';
+import OrderCarBadge from '../../component/OrderCarBadge';
 import { useAdmin } from '../../context/AdminContext';
 import { resolveAssetUrl } from '../../services/apiClient';
 
 const STATUS_OPTIONS = [
-  'All',
-  'PENDING',
-  'DEPOSIT_PAID',
-  'DISPATCHED',
-  'ON_THE_WAY',
-  'ARRIVED',
-  'WASHING',
-  'COMPLETED',
-  'CANCELLED',
+  { key: 'All', label: 'All' },
+  { key: 'PENDING', label: 'Pending' },
+  { key: 'DEPOSIT_PAID', label: 'Deposit Paid' },
+  { key: 'DISPATCHED', label: 'Dispatched' },
+  { key: 'ON_THE_WAY', label: 'On The Way' },
+  { key: 'ARRIVED', label: 'Arrived' },
+  { key: 'WASHING', label: 'Washing' },
+  { key: 'COMPLETED', label: 'Completed' },
+  { key: 'CANCELLED', label: 'Cancelled' },
 ];
 
 const CANCELLED_SUBFILTERS = [
@@ -96,14 +97,29 @@ export default function AdminBookings() {
 
   const statusCounts = useMemo(() => {
     const counts = { All: bookings.length };
-    for (const opt of STATUS_OPTIONS) {
-      if (opt !== 'All') counts[opt] = 0;
+    for (const { key } of STATUS_OPTIONS) {
+      if (key !== 'All') counts[key] = 0;
     }
     for (const b of bookings) {
       if (counts[b.status] !== undefined) counts[b.status] += 1;
     }
     return counts;
   }, [bookings]);
+
+  const filterRefs = useRef({});
+  const [filterPill, setFilterPill] = useState({ left: 4, width: 0, ready: false });
+
+  useEffect(() => {
+    const syncPill = () => {
+      const el = filterRefs.current[statusFilter];
+      if (el) {
+        setFilterPill({ left: el.offsetLeft, width: el.offsetWidth, ready: true });
+      }
+    };
+    syncPill();
+    window.addEventListener('resize', syncPill);
+    return () => window.removeEventListener('resize', syncPill);
+  }, [statusFilter, bookings.length]);
 
   const cancelledSubCounts = useMemo(() => {
     const cancelled = bookings.filter((b) => b.status === 'CANCELLED');
@@ -153,26 +169,94 @@ export default function AdminBookings() {
       />
 
       <div className="panel" style={{ padding: '20px' }}>
-        {/* Status Filter Bar */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', marginBottom: statusFilter === 'CANCELLED' ? '12px' : '18px' }}>
-          {STATUS_OPTIONS.map((st) => (
-            <button
-              key={st}
-              className={statusFilter === st ? 'filter active-filter' : 'filter'}
-              onClick={() => {
-                setStatusFilter(st);
-                if (st !== 'CANCELLED') setCancelledFilter('ALL');
+        {/* Smooth Gliding Status Filter Bar */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center', marginBottom: statusFilter === 'CANCELLED' ? '12px' : '18px' }}>
+          <div style={{ overflowX: 'auto', maxWidth: '100%' }}>
+            <div
+              style={{
+                position: 'relative',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '2px',
+                background: 'var(--alabaster-raised)',
+                padding: '4px',
+                borderRadius: '999px',
+                border: '1px solid var(--hairline-light)',
+                userSelect: 'none'
               }}
             >
-              {st} <span style={{ opacity: 0.75, marginLeft: '3px' }}>({statusCounts[st] ?? 0})</span>
-            </button>
-          ))}
-          <div className="filter-search" style={{ marginLeft: 'auto', minWidth: '240px' }}>
+              {filterPill.ready && (
+                <div
+                  aria-hidden="true"
+                  style={{
+                    position: 'absolute',
+                    top: '4px',
+                    bottom: '4px',
+                    left: 0,
+                    width: `${filterPill.width}px`,
+                    transform: `translateX(${filterPill.left}px)`,
+                    borderRadius: '999px',
+                    background: 'var(--obsidian)',
+                    boxShadow: '0 4px 12px rgba(14, 14, 16, 0.22)',
+                    transition: 'transform 340ms cubic-bezier(0.22, 1, 0.36, 1), width 340ms cubic-bezier(0.22, 1, 0.36, 1)',
+                    pointerEvents: 'none',
+                    zIndex: 0
+                  }}
+                />
+              )}
+
+              {STATUS_OPTIONS.map(({ key, label }) => {
+                const isActive = statusFilter === key;
+                return (
+                  <button
+                    key={key}
+                    ref={(el) => { filterRefs.current[key] = el; }}
+                    type="button"
+                    onClick={() => {
+                      setStatusFilter(key);
+                      if (key !== 'CANCELLED') setCancelledFilter('ALL');
+                    }}
+                    style={{
+                      position: 'relative',
+                      zIndex: 1,
+                      border: 'none',
+                      outline: 'none',
+                      background: 'transparent',
+                      padding: '7px 12px',
+                      borderRadius: '999px',
+                      fontSize: '12px',
+                      fontWeight: isActive ? 600 : 500,
+                      color: isActive ? 'var(--ivory)' : 'var(--ink-secondary)',
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap',
+                      transition: 'color 220ms var(--ease-luxury)'
+                    }}
+                  >
+                    <span>{label}</span>
+                    <span
+                      className="mono-num"
+                      style={{
+                        opacity: isActive ? 0.85 : 0.65,
+                        marginLeft: '5px',
+                        fontSize: '11px',
+                        color: isActive ? 'var(--bronze-dark)' : 'inherit'
+                      }}
+                    >
+                      {statusCounts[key] ?? 0}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="filter-search" style={{ marginLeft: 'auto', minWidth: '230px', borderRadius: '999px', padding: '7px 14px', background: '#ffffff' }}>
             <Search size={15} />
             <input
               placeholder="Search #BK, customer, tech..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ fontSize: '12.5px', width: '100%' }}
             />
           </div>
         </div>
@@ -245,9 +329,7 @@ export default function AdminBookings() {
                   {/* Card Top Row */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#f4f4f5', color: '#141415', display: 'grid', placeItems: 'center' }}>
-                        <CarFront size={20} />
-                      </div>
+                      <OrderCarBadge size={42} />
                       <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                           <b style={{ fontSize: '14px', color: '#0f172a' }}>{b.bookingNumber}</b>

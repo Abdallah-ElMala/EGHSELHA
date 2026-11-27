@@ -124,9 +124,14 @@ namespace WebCarWash.Domain.Entities
             if (booking != null && booking.TechnicianId == Id)
             {
                 booking.Status = BookingStatus.COMPLETED;
-                var techEarnings = (float)Math.Round(booking.TotalPrice * 0.7f, MidpointRounding.AwayFromZero);
-                TodayEarnings += techEarnings;
-                TotalBalance += techEarnings;
+                var fullTechShare = (float)Math.Round(booking.TotalPrice * 0.7f, MidpointRounding.AwayFromZero);
+                // If 50% arrival advance was already credited when technician arrived, only credit the remaining 50%
+                var arrivalAdvance = booking.ArrivedAt.HasValue
+                    ? (float)Math.Round(fullTechShare * 0.5f, MidpointRounding.AwayFromZero)
+                    : 0f;
+                var remainingShare = MathF.Max(0f, fullTechShare - arrivalAdvance);
+                TodayEarnings += remainingShare;
+                TotalBalance += remainingShare;
             }
         }
 

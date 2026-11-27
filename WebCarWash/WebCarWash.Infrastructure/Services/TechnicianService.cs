@@ -226,7 +226,33 @@ namespace WebCarWash.Infrastructure.Services
                     booking.Status = mappedStatus;
                     var now = DateTime.UtcNow;
                     if (mappedStatus == BookingStatus.ON_THE_WAY) booking.OnTheWayAt ??= now;
-                    else if (mappedStatus == BookingStatus.ARRIVED) booking.ArrivedAt ??= now;
+                    else if (mappedStatus == BookingStatus.ARRIVED)
+                    {
+                        var isFirstArrival = !booking.ArrivedAt.HasValue;
+                        booking.ArrivedAt ??= now;
+                        if (isFirstArrival)
+                        {
+                            var tech = await _unitOfWork.Technicians.FirstOrDefaultAsync(t => t.Id == technicianId);
+                            if (tech != null)
+                            {
+                                var fullShare = (float)Math.Round(booking.TotalPrice * 0.7f, MidpointRounding.AwayFromZero);
+                                var arrivalAdvance = (float)Math.Round(fullShare * 0.5f, MidpointRounding.AwayFromZero);
+                                tech.TodayEarnings += arrivalAdvance;
+                                tech.TotalBalance += arrivalAdvance;
+                                _unitOfWork.Technicians.Update(tech);
+
+                                await _unitOfWork.Notifications.AddAsync(new Notification
+                                {
+                                    UserId = tech.Id,
+                                    Title = "50% Arrival Advance Credited",
+                                    Description = $"EGP {arrivalAdvance:N0} (half of your 70% share for {booking.BookingNumber}) has been transferred to your balance upon arrival.",
+                                    Type = "Wallet",
+                                    IsRead = false,
+                                    CreatedAt = now
+                                });
+                            }
+                        }
+                    }
                     else if (mappedStatus == BookingStatus.WASHING) booking.WashingStartedAt ??= now;
                     else if (mappedStatus == BookingStatus.CANCELLED)
                     {
@@ -275,6 +301,9 @@ namespace WebCarWash.Infrastructure.Services
             static float CalcTechEarning(Booking b) =>
                 (float)Math.Round(b.TotalPrice * 0.7f, MidpointRounding.AwayFromZero) + (b.Review?.TipAmount ?? 0f);
 
+            static float CalcArrivalAdvance(Booking b) =>
+                (float)Math.Round(Math.Round(b.TotalPrice * 0.7f, MidpointRounding.AwayFromZero) * 0.5f, MidpointRounding.AwayFromZero);
+
             var activeAndCompletedBookings = tech.Bookings
                 .Where(b => b.Status != BookingStatus.CANCELLED)
                 .ToList();
@@ -283,14 +312,22 @@ namespace WebCarWash.Infrastructure.Services
                 .Where(b => b.Status == BookingStatus.COMPLETED)
                 .ToList();
 
-            var totalEarned = completedBookings.Sum(CalcTechEarning);
+            // Bookings where technician has arrived (or is washing) already received 50% of their 70% share
+            var arrivedInProgressBookings = activeAndCompletedBookings
+                .Where(b => b.Status != BookingStatus.COMPLETED && b.ArrivedAt.HasValue)
+                .ToList();
+
+            var totalEarned = completedBookings.Sum(CalcTechEarning) + arrivedInProgressBookings.Sum(CalcArrivalAdvance);
             var completedCount = completedBookings.Count;
 
             var now = DateTime.UtcNow;
             var thisMonthBookings = completedBookings
                 .Where(b => b.ScheduledAt.Year == now.Year && b.ScheduledAt.Month == now.Month)
                 .ToList();
-            var thisMonthEarned = thisMonthBookings.Sum(CalcTechEarning);
+            var thisMonthArrived = arrivedInProgressBookings
+                .Where(b => b.ScheduledAt.Year == now.Year && b.ScheduledAt.Month == now.Month)
+                .ToList();
+            var thisMonthEarned = thisMonthBookings.Sum(CalcTechEarning) + thisMonthArrived.Sum(CalcArrivalAdvance);
 
             // Only count Pending & Processed/Approved payouts; Cancelled/Rejected payouts stay in AvailableBalance
             var totalPayoutsCommitted = tech.Payouts
@@ -383,9 +420,17 @@ namespace WebCarWash.Infrastructure.Services
                     Date = b.ScheduledAt.ToString("MMM dd"),
                     Service = $"{b.ServicePackage?.Name ?? "Car Wash"} ({b.BookingNumber})",
                     Customer = b.Customer?.FullName ?? "Customer",
-                    Amount = CalcTechEarning(b),
+                    Amount = b.Status == BookingStatus.COMPLETED
+                        ? CalcTechEarning(b)
+                        : b.ArrivedAt.HasValue
+                            ? CalcArrivalAdvance(b)
+                            : CalcTechEarning(b),
                     BookingTotal = b.TotalPrice,
-                    Status = b.Status == BookingStatus.COMPLETED ? "Paid" : "Pending"
+                    Status = b.Status == BookingStatus.COMPLETED
+                        ? "Paid"
+                        : b.ArrivedAt.HasValue
+                            ? "50% Advance Paid"
+                            : "Pending"
                 })
                 .ToList();
 
@@ -631,19 +676,40 @@ namespace WebCarWash.Infrastructure.Services
 
             if (booking != null)
             {
+                var isFirstArrival = !booking.ArrivedAt.HasValue;
                 booking.Status = BookingStatus.ARRIVED;
                 booking.ArrivedAt ??= DateTime.UtcNow;
 
-                // Sync technician's live coordinates to the booking's parking spot on arrival
-                if (booking.ParkingLatitude != 0 && booking.ParkingLongitude != 0)
+                var tech = await _unitOfWork.Technicians.FirstOrDefaultAsync(t => t.Id == technicianId);
+                if (tech != null)
                 {
-                    var tech = await _unitOfWork.Technicians.FirstOrDefaultAsync(t => t.Id == technicianId);
-                    if (tech != null)
+                    // Sync technician's live coordinates to the booking's parking spot on arrival
+                    if (booking.ParkingLatitude != 0 && booking.ParkingLongitude != 0)
                     {
                         tech.CurrentLatitude = booking.ParkingLatitude;
                         tech.CurrentLongitude = booking.ParkingLongitude;
-                        _unitOfWork.Technicians.Update(tech);
                     }
+
+                    // Credit 50% of technician's 70% share immediately on arrival
+                    if (isFirstArrival)
+                    {
+                        var fullShare = (float)Math.Round(booking.TotalPrice * 0.7f, MidpointRounding.AwayFromZero);
+                        var arrivalAdvance = (float)Math.Round(fullShare * 0.5f, MidpointRounding.AwayFromZero);
+                        tech.TodayEarnings += arrivalAdvance;
+                        tech.TotalBalance += arrivalAdvance;
+
+                        await _unitOfWork.Notifications.AddAsync(new Notification
+                        {
+                            UserId = tech.Id,
+                            Title = "50% Arrival Advance Credited",
+                            Description = $"EGP {arrivalAdvance:N0} (half of your 70% share for {booking.BookingNumber}) has been transferred to your balance upon arrival.",
+                            Type = "Wallet",
+                            IsRead = false,
+                            CreatedAt = DateTime.UtcNow
+                        });
+                    }
+
+                    _unitOfWork.Technicians.Update(tech);
                 }
 
                 await _unitOfWork.CompleteAsync();
@@ -769,9 +835,13 @@ namespace WebCarWash.Infrastructure.Services
 
             if (tech != null)
             {
-                var totalEarned = tech.Bookings
+                var completedEarned = tech.Bookings
                     .Where(b => b.Status == BookingStatus.COMPLETED)
                     .Sum(b => (float)Math.Round(b.TotalPrice * 0.7f, MidpointRounding.AwayFromZero) + (b.Review?.TipAmount ?? 0f));
+                var arrivalAdvancesEarned = tech.Bookings
+                    .Where(b => b.Status != BookingStatus.CANCELLED && b.Status != BookingStatus.COMPLETED && b.ArrivedAt.HasValue)
+                    .Sum(b => (float)Math.Round(Math.Round(b.TotalPrice * 0.7f, MidpointRounding.AwayFromZero) * 0.5f, MidpointRounding.AwayFromZero));
+                var totalEarned = completedEarned + arrivalAdvancesEarned;
                 var totalCommitted = tech.Payouts
                     .Where(p => IsCommittedPayout(p.Status))
                     .Sum(p => p.Amount);
@@ -812,6 +882,59 @@ namespace WebCarWash.Infrastructure.Services
 
         public async Task<IEnumerable<JobOfferDto>> GetJobOffersAsync(Guid technicianId)
         {
+            var now = DateTime.UtcNow;
+
+            // Ensure this technician receives any unassigned DEPOSIT_PAID bookings they haven't already declined/accepted
+            var techExists = await _unitOfWork.Technicians.Query().AnyAsync(t => t.Id == technicianId);
+            if (techExists)
+            {
+                var openBookings = await _unitOfWork.Bookings.Query()
+                    .Where(b => b.Status == BookingStatus.DEPOSIT_PAID && b.TechnicianId == null)
+                    .ToListAsync();
+
+                if (openBookings.Any())
+                {
+                    var openBookingIds = openBookings.Select(b => b.Id).ToList();
+                    var existingTechOffers = await _unitOfWork.JobOffers.Query()
+                        .Where(o => o.TechnicianId == technicianId && openBookingIds.Contains(o.BookingId))
+                        .ToListAsync();
+
+                    var offersByBooking = existingTechOffers.ToDictionary(o => o.BookingId);
+                    var createdAny = false;
+
+                    foreach (var booking in openBookings)
+                    {
+                        if (!offersByBooking.TryGetValue(booking.Id, out var existing))
+                        {
+                            var payoutAmount = (float)Math.Round(booking.TotalPrice * 0.7f, MidpointRounding.AwayFromZero);
+                            await _unitOfWork.JobOffers.AddAsync(new JobOffer
+                            {
+                                BookingId = booking.Id,
+                                TechnicianId = technicianId,
+                                Status = JobOfferStatus.OFFERED,
+                                PayoutAmount = payoutAmount,
+                                OfferedAt = now,
+                                ExpiresAt = now.AddMinutes(30)
+                            });
+                            createdAny = true;
+                        }
+                        else if (existing.Status == JobOfferStatus.OFFERED && existing.ExpiresAt <= now)
+                        {
+                            // Refresh expired unaccepted offer while the booking is still unassigned & waiting for a technician
+                            existing.OfferedAt = now;
+                            existing.ExpiresAt = now.AddMinutes(30);
+                            _unitOfWork.JobOffers.Update(existing);
+                            createdAny = true;
+                        }
+                    }
+
+                    if (createdAny)
+                    {
+                        await _unitOfWork.CompleteAsync();
+                    }
+                }
+            }
+
             var offers = await _unitOfWork.JobOffers.Query()
                 .AsNoTrackingWithIdentityResolution()
                 .AsSplitQuery()
@@ -844,6 +967,8 @@ namespace WebCarWash.Infrastructure.Services
                     var totalPrice = o.Booking?.TotalPrice ?? 0f;
                     var deposit = o.Booking?.DepositAmount ?? 200f;
                     var payout = o.PayoutAmount > 0 ? o.PayoutAmount : (float)Math.Round(totalPrice * 0.7f, MidpointRounding.AwayFromZero);
+                    var offeredAtUtc = DateTime.SpecifyKind(o.OfferedAt, DateTimeKind.Utc);
+                    var expiresAtUtc = DateTime.SpecifyKind(o.ExpiresAt, DateTimeKind.Utc);
 
                     return new JobOfferDto
                     {
@@ -878,9 +1003,9 @@ namespace WebCarWash.Infrastructure.Services
                         RemainingBalance = MathF.Max(0f, totalPrice - deposit),
                         AddOnNames = o.Booking?.BookingAddOns?.Where(ba => ba.AddOn != null).Select(ba => ba.AddOn.Name).ToList() ?? new List<string>(),
                         PayoutAmount = payout,
-                        OfferedAt = o.OfferedAt,
-                        ExpiresAt = o.ExpiresAt,
-                        RemainingSeconds = Math.Min(45, Math.Max(1, (int)(o.ExpiresAt - DateTime.UtcNow).TotalSeconds)),
+                        OfferedAt = offeredAtUtc,
+                        ExpiresAt = expiresAtUtc,
+                        RemainingSeconds = Math.Max(1, (int)(expiresAtUtc - DateTime.UtcNow).TotalSeconds),
                         Status = o.Status.ToString()
                     };
                 });

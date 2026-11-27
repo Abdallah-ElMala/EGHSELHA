@@ -19,6 +19,7 @@ import PageTitle from '../../component/PageTitle'
 import Status from '../../component/Status'
 import FieldError from '../../component/FieldError'
 import CustomerPublicProfileModal from '../../component/CustomerPublicProfileModal'
+import LiveTrackingMap from '../../component/LiveTrackingMap'
 import { useTech } from '../../context/TechnicianContext'
 import { technicianApi } from '../../services/technicianApi'
 import { resolveAssetUrl } from '../../services/apiClient'
@@ -641,92 +642,27 @@ export default function JobDetails() {
               )}
             </div>
 
-            <div
-              style={{
-                height: '190px',
-                borderRadius: '14px',
-                overflow: 'hidden',
-                position: 'relative',
-                border: '1px solid #f4f4f5',
-                background: '#141415',
-                marginBottom: '14px'
-              }}
-            >
-              {/* Crisp Stylized Map Grid SVG */}
-              <svg
-                viewBox="0 0 400 200"
-                preserveAspectRatio="none"
-                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
-              >
-                <defs>
-                  <pattern id="map-grid" width="28" height="28" patternUnits="userSpaceOnUse">
-                    <path d="M 28 0 L 0 0 0 28" fill="none" stroke="#e4e4e7" strokeWidth="0.8" opacity="0.6" />
-                  </pattern>
-                </defs>
-                <rect width="400" height="200" fill="url(#map-grid)" />
-                <rect x="260" y="20" width="90" height="58" rx="14" fill="#bbf7d0" opacity="0.45" />
-                <rect x="30" y="120" width="85" height="50" rx="12" fill="#bbf7d0" opacity="0.38" />
-                <path d="M -20 140 C 80 120, 140 70, 220 95 S 330 135, 420 80" fill="none" stroke="#ffffff" strokeWidth="14" strokeLinecap="round" />
-                <path d="M 90 -10 C 110 60, 145 110, 210 100 C 260 92, 300 40, 320 -10" fill="none" stroke="#ffffff" strokeWidth="10" strokeLinecap="round" />
-                <path d="M 70 155 Q 145 128 200 100" fill="none" stroke="#141415" strokeWidth="3.5" strokeDasharray="6 6" strokeLinecap="round" />
-                <circle cx="70" cy="155" r="6" fill="#10b981" stroke="#ffffff" strokeWidth="2.5" />
-              </svg>
-
-              {/* Pulsing Radar Destination Pin */}
-              <div style={{
-                position: 'absolute',
-                top: '46%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center'
-              }}>
-                <div style={{
-                  width: '54px',
-                  height: '54px',
-                  borderRadius: '50%',
-                  background: 'rgba(20, 20, 21, 0.18)',
-                  display: 'grid',
-                  placeItems: 'center'
-                }}>
-                  <div style={{
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: '50%',
-                    background: '#141415',
-                    color: '#fff',
-                    display: 'grid',
-                    placeItems: 'center',
-                    boxShadow: '0 6px 16px rgba(20, 20, 21, 0.35)',
-                    border: '2.5px solid #ffffff'
-                  }}>
-                    <MapPin size={18} />
-                  </div>
-                </div>
-                <div style={{
-                  marginTop: '6px',
-                  background: 'rgba(255, 255, 255, 0.95)',
-                  backdropFilter: 'blur(4px)',
-                  padding: '4px 10px',
-                  borderRadius: '999px',
-                  fontSize: '10px',
-                  fontWeight: 700,
-                  color: '#0f172a',
-                  boxShadow: '0 2px 8px rgba(15, 23, 42, 0.12)',
-                  whiteSpace: 'nowrap',
-                  maxWidth: '240px',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis'
-                }}>
-                  {job.address || 'Customer Destination'}
-                </div>
-              </div>
+            <div style={{ marginBottom: '14px' }}>
+              <LiveTrackingMap
+                booking={{
+                  status: job.status,
+                  address: job.address,
+                  parkingLatitude: job.parkingLatitude,
+                  parkingLongitude: job.parkingLongitude,
+                  technicianLatitude: job.technicianLatitude,
+                  technicianLongitude: job.technicianLongitude,
+                  technicianName: 'Your Van'
+                }}
+              />
             </div>
 
             <a
               className="btn primary full"
-              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(job.address || 'Cairo')}`}
+              href={
+                job.parkingLatitude && job.parkingLongitude
+                  ? `https://www.google.com/maps/dir/?api=1&destination=${job.parkingLatitude},${job.parkingLongitude}`
+                  : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(job.address || 'Sheikh Zayed, Giza')}`
+              }
               target="_blank"
               rel="noreferrer"
               style={{ textDecoration: 'none' }}

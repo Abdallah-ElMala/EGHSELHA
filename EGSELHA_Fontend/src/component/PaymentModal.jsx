@@ -5,13 +5,16 @@ import {
   ShieldCheck,
   CheckCircle2,
   Lock,
-  Zap,
   ArrowRight,
   Smartphone,
   Wallet,
   Building2,
+  AlertCircle,
+  Copy,
+  Check,
+  Star,
   Sparkles,
-  AlertCircle
+  Plus
 } from 'lucide-react'
 import {
   PAYMENT_METHODS,
@@ -22,7 +25,27 @@ import {
 } from '../services/paymentGateway'
 import { customerApi } from '../services/customerApi'
 
-const TOPUP_PRESETS = [100, 250, 500, 1000, 2000]
+const TOPUP_PRESETS = [
+  { amount: 100, stars: 5, perk: null },
+  { amount: 250, stars: 15, perk: null },
+  { amount: 500, stars: 35, perk: '3% bonus stars' },
+  { amount: 1000, stars: 80, perk: '5% wash discount' },
+  { amount: 2000, stars: 180, perk: '10% VIP discount' }
+]
+
+const inputStyle = {
+  width: '100%',
+  padding: '10px 13px',
+  borderRadius: '10px',
+  border: '1px solid var(--hairline-light-strong)',
+  background: '#ffffff',
+  color: 'var(--ink-primary)',
+  fontSize: '13px',
+  fontFamily: 'var(--font-sans)',
+  outline: 'none',
+  boxSizing: 'border-box',
+  transition: 'border-color 180ms var(--ease-luxury)'
+}
 
 export default function PaymentModal({
   isOpen,
@@ -33,16 +56,16 @@ export default function PaymentModal({
   onSuccess = () => {},
   notify = () => {}
 }) {
-  const isTopUp = mode === 'topup'
+  const [activeMode, setActiveMode] = useState(mode)
+  const isTopUp = activeMode === 'topup'
   const targetAmount = isTopUp ? null : 200
 
-  // State
   const [selectedMethod, setSelectedMethod] = useState(PAYMENT_METHODS.CREDIT_CARD)
   const [topUpAmount, setTopUpAmount] = useState(500)
   const [customAmount, setCustomAmount] = useState('')
   const [isCustom, setIsCustom] = useState(false)
+  const [copiedKey, setCopiedKey] = useState(null)
 
-  // Credit Card Form State
   const [cardForm, setCardForm] = useState({
     cardNumber: '4123 4567 8901 4012',
     cardHolder: 'AHMED KHALED',
@@ -51,16 +74,24 @@ export default function PaymentModal({
     saveCard: true
   })
 
-  // Mobile Wallet State
   const [walletPhone, setWalletPhone] = useState('01012345678')
-
-  // Instapay State
   const [instapayRef, setInstapayRef] = useState('')
 
-  // Processing & Confirmation State
   const [processing, setProcessing] = useState(false)
   const [errorMsg, setErrorMsg] = useState(null)
   const [receipt, setReceipt] = useState(null)
+
+  // Keep local mode synced when modal re-opens with a different prop
+  React.useEffect(() => {
+    if (isOpen) {
+      setActiveMode(mode)
+      setReceipt(null)
+      setErrorMsg(null)
+      if (mode === 'topup' && selectedMethod === PAYMENT_METHODS.WALLET) {
+        setSelectedMethod(PAYMENT_METHODS.CREDIT_CARD)
+      }
+    }
+  }, [isOpen, mode])
 
   if (!isOpen) return null
 
@@ -70,7 +101,53 @@ export default function PaymentModal({
       : topUpAmount
     : targetAmount
 
+  const gatewayFee =
+    selectedMethod === PAYMENT_METHODS.WALLET
+      ? 0
+      : selectedMethod === PAYMENT_METHODS.CREDIT_CARD
+        ? Math.max(5, Math.round(effectiveAmount * 0.025))
+        : selectedMethod === PAYMENT_METHODS.INSTAPAY
+          ? 5
+          : Math.max(3, Math.round(effectiveAmount * 0.015))
+
+  const gatewayFeeLabel =
+    selectedMethod === PAYMENT_METHODS.WALLET
+      ? 'Free (Wallet perk)'
+      : selectedMethod === PAYMENT_METHODS.CREDIT_CARD
+        ? `EGP ${gatewayFee} (2.5%)`
+        : selectedMethod === PAYMENT_METHODS.INSTAPAY
+          ? `EGP ${gatewayFee}`
+          : `EGP ${gatewayFee} (1.5%)`
+
+  const totalCharged = effectiveAmount + gatewayFee
+
+  const earnedStars = isTopUp
+    ? effectiveAmount >= 2000
+      ? 180
+      : effectiveAmount >= 1000
+        ? 80
+        : effectiveAmount >= 500
+          ? 35
+          : Math.max(5, Math.round(effectiveAmount * 0.05))
+    : selectedMethod === PAYMENT_METHODS.WALLET
+      ? 25
+      : 10
+
+  const unlockedDiscount =
+    isTopUp && effectiveAmount >= 2000
+      ? '10% VIP discount unlocked on next booking'
+      : isTopUp && effectiveAmount >= 1000
+        ? '5% discount unlocked on next booking'
+        : null
+
   const cardBrand = detectCardBrand(cardForm.cardNumber)
+  const cleanBookingNo = String(booking?.bookingNumber || 'BK-NEW').replace(/^#/, '')
+
+  const handleCopy = (key, value) => {
+    navigator.clipboard?.writeText(value).catch(() => {})
+    setCopiedKey(key)
+    setTimeout(() => setCopiedKey(null), 1800)
+  }
 
   const fillTestCard = () => {
     setCardForm({
@@ -88,13 +165,13 @@ export default function PaymentModal({
     setErrorMsg(null)
 
     if (isTopUp && (!effectiveAmount || effectiveAmount <= 0)) {
-      setErrorMsg('Please select or enter a valid amount (greater than 0 EGP).')
+      setErrorMsg('Please select or enter a valid amount greater than 0 EGP.')
       return
     }
 
     if (!isTopUp && selectedMethod === PAYMENT_METHODS.WALLET) {
       if (currentBalance < 200) {
-        setErrorMsg(`Your wallet balance (${currentBalance} EGP) is insufficient for the deposit (200 EGP). Please use card or top up your wallet.`)
+        setErrorMsg(`Insufficient wallet balance (EGP ${currentBalance.toLocaleString()}). Top up your wallet or pick another method.`)
         return
       }
     }
@@ -102,34 +179,34 @@ export default function PaymentModal({
     setProcessing(true)
 
     try {
-      // 1. Process simulated gateway verification & 3D Secure
       const gatewayRes = await processPaymentTransaction({
-        amount: effectiveAmount,
+        amount: totalCharged,
         paymentMethod: selectedMethod,
         cardData: cardForm,
         walletNumber: walletPhone,
         instapayRef
       })
 
-      // 2. Commit transaction to backend database
       if (isTopUp) {
         await customerApi.topUpWallet(effectiveAmount)
         setReceipt({
           ...gatewayRes,
-          title: 'Wallet Topped Up Successfully!',
-          description: `${effectiveAmount.toLocaleString()} EGP has been deposited to your EGHSELHA balance via ${gatewayRes.gateway}.`
+          stars: earnedStars,
+          perk: unlockedDiscount,
+          title: 'Wallet topped up',
+          description: `EGP ${effectiveAmount.toLocaleString()} added to your EGHSELHA Wallet via ${gatewayRes.gateway}.`
         })
-        notify(`Wallet successfully topped up with ${effectiveAmount.toLocaleString()} EGP`)
+        notify(`Wallet topped up with EGP ${effectiveAmount.toLocaleString()} (+${earnedStars} ★)`)
         onSuccess()
       } else {
-        // Pay deposit for booking
         await customerApi.payDeposit(booking.id, selectedMethod)
         setReceipt({
           ...gatewayRes,
-          title: 'Deposit Paid & Booking Confirmed!',
-          description: `Deposit for booking #${booking.bookingNumber} has been paid successfully. The nearest certified technician is being dispatched.`
+          stars: earnedStars,
+          title: 'Deposit confirmed',
+          description: `Booking #${cleanBookingNo} is locked in. Your certified mobile technician is being dispatched.`
         })
-        notify(`Booking #${booking.bookingNumber} confirmed and deposit paid successfully`)
+        notify(`Booking #${cleanBookingNo} confirmed and deposit paid`)
         onSuccess()
       }
     } catch (err) {
@@ -139,6 +216,13 @@ export default function PaymentModal({
     }
   }
 
+  const methodOptions = [
+    { id: PAYMENT_METHODS.CREDIT_CARD, label: 'Card', Icon: CreditCard },
+    { id: PAYMENT_METHODS.INSTAPAY, label: 'Instapay', Icon: Building2 },
+    { id: PAYMENT_METHODS.VODAFONE_CASH, label: 'Mobile Wallet', Icon: Smartphone },
+    ...(!isTopUp ? [{ id: PAYMENT_METHODS.WALLET, label: 'My Wallet', Icon: Wallet }] : [])
+  ]
+
   return (
     <div
       className="modal-overlay"
@@ -146,641 +230,645 @@ export default function PaymentModal({
         position: 'fixed',
         inset: 0,
         zIndex: 1000,
-        backgroundColor: 'rgba(6, 12, 24, 0.75)',
-        backdropFilter: 'blur(8px)',
+        backgroundColor: 'rgba(14, 14, 16, 0.68)',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '20px'
+        padding: '16px'
       }}
       onClick={onClose}
     >
+      {/* CLEAN UNIFIED WARM ALABASTER CHECKOUT SHEET (NO BLACK HEADER SEAM!) */}
       <div
-        className="modal-card"
         onClick={(e) => e.stopPropagation()}
         style={{
           width: '100%',
-          maxWidth: '540px',
-          background: '#ffffff',
-          borderRadius: '24px',
+          maxWidth: receipt ? '460px' : '780px',
+          background: 'var(--alabaster)',
+          color: 'var(--ink-primary)',
+          borderRadius: '22px',
+          border: '1px solid rgba(24, 24, 27, 0.14)',
+          boxShadow: '0 28px 70px rgba(14, 14, 16, 0.34)',
           overflow: 'hidden',
-          boxShadow: '0 25px 60px rgba(15, 15, 16, 0.35)',
-          border: '1px solid #e2e8f0',
-          animation: 'slideUp 0.25s ease'
+          animation: 'slideUp 0.24s cubic-bezier(0.22, 1, 0.36, 1)'
         }}
       >
-        {/* Header */}
+        {/* Minimal Alabaster Top Bar */}
         <div
           style={{
-            padding: '20px 24px',
-            background: '#0f0f10',
-            color: '#fff',
+            padding: '18px 24px 14px',
+            borderBottom: '1px solid var(--hairline-light)',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between'
+            justifyContent: 'space-between',
+            gap: '12px'
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div
+          <div>
+            <span className="eyebrow" style={{ display: 'block', marginBottom: '2px' }}>
+              {isTopUp ? 'EGHSELHA Wallet & Rewards' : `Booking #${cleanBookingNo}`}
+            </span>
+            <h3
               style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '12px',
-                background: 'rgba(180, 83, 9, 0.2)',
-                border: '1px solid rgba(212, 155, 75, 0.3)',
-                color: '#d49b4b',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
+                margin: 0,
+                fontFamily: 'var(--font-display)',
+                fontSize: '28px',
+                fontWeight: 400,
+                lineHeight: 1.05,
+                color: 'var(--ink-primary)'
               }}
             >
-              <CreditCard size={20} />
-            </div>
-            <div>
-              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 600, fontFamily: 'Manrope, sans-serif' }}>
-                {isTopUp ? 'Wallet Top-Up' : 'Pay Booking Deposit'}
-              </h3>
-              <p style={{ margin: '2px 0 0', fontSize: '11px', color: '#d49b4b' }}>
-                {isTopUp
-                  ? 'Secure & encrypted payment · Visa, Mastercard, and Mobile Wallets'
-                  : `Booking #${booking?.bookingNumber || 'BK-NEW'} · Required Deposit: 200 EGP`}
-              </p>
-            </div>
+              {receipt ? receipt.title : isTopUp ? 'Top up your wallet' : 'Confirm booking deposit'}
+            </h3>
           </div>
+
           <button
+            type="button"
             onClick={onClose}
+            aria-label="Close"
             style={{
-              background: 'rgba(255, 255, 255, 0.1)',
-              border: 'none',
-              color: '#cbd5e1',
-              borderRadius: '50%',
-              width: '32px',
-              height: '32px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              width: '34px',
+              height: '34px',
+              borderRadius: '999px',
+              background: '#ffffff',
+              border: '1px solid var(--hairline-light)',
+              color: 'var(--ink-secondary)',
+              display: 'grid',
+              placeItems: 'center',
               cursor: 'pointer'
             }}
           >
-            <X size={16} />
+            <X size={16} strokeWidth={1.7} />
           </button>
         </div>
 
-        {/* Modal Body */}
-        <div style={{ padding: '24px', maxHeight: '78vh', overflowY: 'auto' }}>
+        {/* Body */}
+        <div style={{ padding: '22px 24px 24px' }}>
           {receipt ? (
-            /* Success Receipt View */
-            <div style={{ textAlign: 'center', padding: '16px 8px' }}>
+            <div style={{ textAlign: 'center' }}>
               <div
                 style={{
-                  width: '64px',
-                  height: '64px',
-                  borderRadius: '50%',
-                  background: '#dcfce7',
-                  color: '#16a34a',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto 16px',
-                  border: '4px solid #bbf7d0'
+                  width: '56px',
+                  height: '56px',
+                  borderRadius: '999px',
+                  background: 'var(--semantic-positive-bg)',
+                  color: 'var(--semantic-positive)',
+                  display: 'grid',
+                  placeItems: 'center',
+                  margin: '0 auto 14px',
+                  border: '1px solid rgba(21, 128, 61, 0.2)'
                 }}
               >
-                <CheckCircle2 size={36} />
+                <CheckCircle2 size={28} strokeWidth={1.8} />
               </div>
-              <h3 style={{ fontSize: '20px', fontWeight: 600, color: '#171717', margin: '0 0 6px' }}>
-                {receipt.title}
-              </h3>
-              <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 20px', lineHeight: 1.5 }}>
+
+              <p style={{ fontSize: '14px', color: 'var(--ink-secondary)', margin: '0 0 18px', lineHeight: 1.55 }}>
                 {receipt.description}
               </p>
 
-              {/* Receipt Card */}
               <div
                 style={{
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '16px',
-                  padding: '18px',
+                  background: '#ffffff',
+                  border: '1px solid var(--hairline-light)',
+                  borderRadius: '14px',
+                  padding: '16px',
                   textAlign: 'left',
-                  marginBottom: '24px'
+                  marginBottom: '18px',
+                  display: 'grid',
+                  gap: '10px',
+                  fontSize: '13px'
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                  <span style={{ fontSize: '12px', color: '#64748b' }}>Amount Paid:</span>
-                  <b style={{ fontSize: '15px', color: '#0f172a' }}>
-                    {receipt.amount.toLocaleString()} {receipt.currency}
-                  </b>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                  <span style={{ fontSize: '12px', color: '#64748b' }}>Transaction Ref:</span>
-                  <code style={{ fontSize: '12px', color: '#92400e', background: '#fef7ec', padding: '2px 6px', borderRadius: '4px' }}>
-                    {receipt.transactionId}
-                  </code>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                  <span style={{ fontSize: '12px', color: '#64748b' }}>Payment Gateway:</span>
-                  <span style={{ fontSize: '12px', color: '#16a34a', fontWeight: 700 }}>
-                    {receipt.gateway}
-                  </span>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: 'var(--ink-muted)' }}>Amount paid</span>
+                  <b className="mono-num">EGP {receipt.amount.toLocaleString()}</b>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: '12px', color: '#64748b' }}>Status:</span>
-                  <span style={{ fontSize: '11px', background: '#dcfce7', color: '#15803d', padding: '2px 8px', borderRadius: '9999px', fontWeight: 600 }}>
-                    Success & Bank Verified </span>
+                  <span style={{ color: 'var(--ink-muted)' }}>Reference</span>
+                  <span className="mono-num" style={{ color: 'var(--bronze)', fontWeight: 600 }}>{receipt.transactionId}</span>
                 </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: 'var(--ink-muted)' }}>Rewards earned</span>
+                  <span style={{ color: '#7a571e', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <Star size={13} fill="var(--bronze)" color="var(--bronze)" /> +{receipt.stars} Stars
+                  </span>
+                </div>
+                {receipt.perk && (
+                  <div style={{ paddingTop: '8px', borderTop: '1px solid var(--hairline-light)', fontSize: '12px', color: 'var(--semantic-positive)', fontWeight: 600 }}>
+                    {receipt.perk}
+                  </div>
+                )}
               </div>
 
               <button
+                type="button"
                 onClick={onClose}
-                className="landing-btn-signup"
-                style={{ width: '100%', padding: '12px', fontSize: '14px', borderRadius: '12px' }}
+                className="lx-btn lx-glass-btn lx-glass-obsidian"
+                style={{
+                  width: '100%',
+                  minHeight: '46px',
+                  borderRadius: '999px',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
               >
-                Done & Return to App
+                <span>Done</span>
               </button>
             </div>
           ) : (
-            /* Main Payment Form */
             <form onSubmit={handleProcessPayment}>
-              {/* Top-up Amount Selector (If in Topup mode) */}
-              {isTopUp && (
-                <div style={{ marginBottom: '22px' }}>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '10px' }}>
-                    Select Top-up Amount (EGP):
-                  </label>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px', marginBottom: '10px' }}>
-                    {TOPUP_PRESETS.map((amt) => (
-                      <button
-                        key={amt}
-                        type="button"
-                        onClick={() => {
-                          setTopUpAmount(amt)
-                          setIsCustom(false)
-                        }}
-                        style={{
-                          border: !isCustom && topUpAmount === amt ? '2px solid #92400e' : '1px solid #cbd5e1',
-                          background: !isCustom && topUpAmount === amt ? '#fef7ec' : '#ffffff',
-                          color: !isCustom && topUpAmount === amt ? '#92400e' : '#475569',
-                          fontWeight: 700,
-                          fontSize: '12px',
-                          padding: '10px 4px',
-                          borderRadius: '10px',
-                          cursor: 'pointer',
-                          transition: 'background-color 150ms cubic-bezier(0.22, 1, 0.36, 1), border-color 150ms cubic-bezier(0.22, 1, 0.36, 1), color 150ms cubic-bezier(0.22, 1, 0.36, 1)'
-                        }}
-                      >
-                        +{amt}
-                      </button>
-                    ))}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))',
+                  gap: '22px',
+                  alignItems: 'start'
+                }}
+              >
+                {/* LEFT COLUMN: PAYMENT METHOD + DETAILS */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {/* Method Selector */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)', marginBottom: '8px' }}>
+                      Payment method
+                    </label>
+                    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${methodOptions.length}, 1fr)`, gap: '8px' }}>
+                      {methodOptions.map(({ id, label, Icon }) => {
+                        const active = selectedMethod === id
+                        return (
+                          <button
+                            key={id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedMethod(id)
+                              setErrorMsg(null)
+                            }}
+                            className={`lx-select-card ${active ? 'is-selected' : ''}`}
+                            style={{
+                              padding: '10px 6px',
+                              borderRadius: '12px',
+                              color: active ? 'var(--ink-primary)' : 'var(--ink-secondary)',
+                              fontSize: '11.5px',
+                              fontWeight: active ? 600 : 500,
+                              outline: 'none',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              gap: '5px'
+                            }}
+                          >
+                            <Icon size={17} strokeWidth={1.7} color={active ? 'var(--bronze)' : 'currentColor'} />
+                            <span>{label}</span>
+                          </button>
+                        )
+                      })}
+                    </div>
                   </div>
 
-                  {/* Custom Amount option */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <input
-                      type="number"
-                      placeholder="Or enter custom amount (e.g. 350)"
-                      value={customAmount}
-                      onChange={(e) => {
-                        setCustomAmount(e.target.value)
-                        setIsCustom(true)
-                      }}
+                  {/* METHOD 1: CREDIT / DEBIT CARD (Sleek Compact Layout) */}
+                  {selectedMethod === PAYMENT_METHODS.CREDIT_CARD && (
+                    <div
                       style={{
-                        flex: 1,
-                        padding: '10px 14px',
-                        borderRadius: '10px',
-                        border: isCustom ? '2px solid #92400e' : '1px solid #cbd5e1',
-                        fontSize: '13px',
-                        outline: 'none'
-                      }}
-                    />
-                    <span style={{ fontSize: '13px', fontWeight: 700, color: '#64748b' }}>EGP</span>
-                  </div>
-                </div>
-              )}
-
-              {/* Payment Methods Tabs */}
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '10px' }}>
-                  Payment Method:
-                </label>
-                <div style={{ display: 'grid', gridTemplateColumns: isTopUp ? '1fr 1fr 1fr' : 'repeat(4, 1fr)', gap: '8px' }}>
-                  {/* Option 1: Credit Card */}
-                  <button
-                    type="button"
-                    onClick={() => setSelectedMethod(PAYMENT_METHODS.CREDIT_CARD)}
-                    style={{
-                      border: selectedMethod === PAYMENT_METHODS.CREDIT_CARD ? '2px solid #92400e' : '1px solid #cbd5e1',
-                      background: selectedMethod === PAYMENT_METHODS.CREDIT_CARD ? '#f4f4f5' : '#ffffff',
-                      color: selectedMethod === PAYMENT_METHODS.CREDIT_CARD ? '#92400e' : '#475569',
-                      padding: '10px 6px',
-                      borderRadius: '12px',
-                      fontWeight: 700,
-                      fontSize: '11px',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}
-                  >
-                    <CreditCard size={18} />
-                    <span>Visa / Mastercard</span>
-                  </button>
-
-                  {/* Option 2: Instapay */}
-                  <button
-                    type="button"
-                    onClick={() => setSelectedMethod(PAYMENT_METHODS.INSTAPAY)}
-                    style={{
-                      border: selectedMethod === PAYMENT_METHODS.INSTAPAY ? '2px solid #92400e' : '1px solid #cbd5e1',
-                      background: selectedMethod === PAYMENT_METHODS.INSTAPAY ? '#f4f4f5' : '#ffffff',
-                      color: selectedMethod === PAYMENT_METHODS.INSTAPAY ? '#92400e' : '#475569',
-                      padding: '10px 6px',
-                      borderRadius: '12px',
-                      fontWeight: 700,
-                      fontSize: '11px',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}
-                  >
-                    <Building2 size={18} />
-                    <span>Instapay</span>
-                  </button>
-
-                  {/* Option 3: Mobile Wallet */}
-                  <button
-                    type="button"
-                    onClick={() => setSelectedMethod(PAYMENT_METHODS.VODAFONE_CASH)}
-                    style={{
-                      border: selectedMethod === PAYMENT_METHODS.VODAFONE_CASH ? '2px solid #92400e' : '1px solid #cbd5e1',
-                      background: selectedMethod === PAYMENT_METHODS.VODAFONE_CASH ? '#f4f4f5' : '#ffffff',
-                      color: selectedMethod === PAYMENT_METHODS.VODAFONE_CASH ? '#92400e' : '#475569',
-                      padding: '10px 6px',
-                      borderRadius: '12px',
-                      fontWeight: 700,
-                      fontSize: '11px',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}
-                  >
-                    <Smartphone size={18} />
-                    <span>Vodafone Cash</span>
-                  </button>
-
-                  {/* Option 4: In-app Wallet (For Deposit only) */}
-                  {!isTopUp && (
-                    <button
-                      type="button"
-                      onClick={() => setSelectedMethod(PAYMENT_METHODS.WALLET)}
-                      style={{
-                        border: selectedMethod === PAYMENT_METHODS.WALLET ? '2px solid #92400e' : '1px solid #cbd5e1',
-                        background: selectedMethod === PAYMENT_METHODS.WALLET ? '#f4f4f5' : '#ffffff',
-                        color: selectedMethod === PAYMENT_METHODS.WALLET ? '#92400e' : '#475569',
-                        padding: '10px 6px',
-                        borderRadius: '12px',
-                        fontWeight: 700,
-                        fontSize: '11px',
-                        cursor: 'pointer',
+                        background: '#ffffff',
+                        border: '1px solid var(--hairline-light)',
+                        borderRadius: '14px',
+                        padding: '16px',
                         display: 'flex',
                         flexDirection: 'column',
-                        alignItems: 'center',
-                        gap: '4px'
+                        gap: '11px'
                       }}
                     >
-                      <Wallet size={18} />
-                      <span>Wallet Balance</span>
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* METHOD 1: CREDIT CARD / VISA FORM */}
-              {selectedMethod === PAYMENT_METHODS.CREDIT_CARD && (
-                <div>
-                  {/* Interactive Visual Credit Card */}
-                  <div
-                    style={{
-                      background: '#141415',
-                      borderRadius: '18px',
-                      padding: '20px 24px',
-                      color: '#ffffff',
-                      marginBottom: '18px',
-                      boxShadow: '0 12px 25px rgba(11, 31, 58, 0.3)',
-                      position: 'relative',
-                      overflow: 'hidden'
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        {/* EMV Chip */}
-                        <div
-                          style={{
-                            width: '36px',
-                            height: '26px',
-                            borderRadius: '6px',
-                            background: 'linear-gradient(135deg, #fef08a 0%, #eab308 100%)',
-                            border: '1px solid #ca8a04'
-                          }}
-                        />
-                        {/* Contactless waves */}
-                        <span style={{ fontSize: '16px', opacity: 0.8 }}>) ) )</span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--ink-primary)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                          <CreditCard size={14} color="var(--bronze)" />
+                          {cardBrand === 'mastercard' ? 'Mastercard' : 'Visa / Mastercard'}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={fillTestCard}
+                          className="btn soft sm"
+                          style={{ minHeight: '28px', padding: '0 10px', fontSize: '11px' }}
+                        >
+                          <ShieldCheck size={12} /> Fill test card
+                        </button>
                       </div>
-                      <span style={{ fontSize: '16px', fontWeight: 600, letterSpacing: '1px' }}>
-                        {cardBrand === 'mastercard' ? 'Mastercard' : 'VISA'}
-                      </span>
-                    </div>
 
-                    <div style={{ fontSize: '18px', letterSpacing: '2.5px', fontFamily: 'monospace', fontWeight: 700, marginBottom: '16px' }}>
-                      {cardForm.cardNumber || '•••• •••• •••• ••••'}
-                    </div>
-
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', fontSize: '11px' }}>
-                      <div>
-                        <span style={{ display: 'block', opacity: 0.7, fontSize: '9px' }}>CARD HOLDER</span>
-                        <b style={{ letterSpacing: '0.5px' }}>{cardForm.cardHolder || 'FULL NAME'}</b>
-                      </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <span style={{ display: 'block', opacity: 0.7, fontSize: '9px' }}>EXPIRES</span>
-                        <b>{cardForm.expiry || 'MM/YY'}</b>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Quick Fill Test Card */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                    <span style={{ fontSize: '12px', color: '#64748b' }}>Enter Card Details:</span>
-                    <button
-                      type="button"
-                      onClick={fillTestCard}
-                      style={{
-                        background: '#f1f5f9',
-                        border: '1px solid #cbd5e1',
-                        color: '#92400e',
-                        borderRadius: '6px',
-                        padding: '3px 8px',
-                        fontSize: '11px',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px'
-                      }}
-                    >
-                      <ShieldCheck size={12} strokeWidth={1.6} />
-                      <span>Fill Test Card</span>
-                    </button>
-                  </div>
-
-                  {/* Card Form Inputs */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px' }}>
-                    <div>
                       <input
                         type="text"
-                        placeholder="Card Number (16 digits)"
+                        placeholder="Card number (16 digits)"
                         value={cardForm.cardNumber}
                         maxLength={19}
                         onChange={(e) => setCardForm({ ...cardForm, cardNumber: formatCardNumber(e.target.value) })}
-                        style={{
-                          width: '100%',
-                          padding: '11px 14px',
-                          borderRadius: '10px',
-                          border: '1px solid #cbd5e1',
-                          fontSize: '14px',
-                          fontFamily: 'monospace',
-                          boxSizing: 'border-box'
-                        }}
+                        style={{ ...inputStyle, fontFamily: 'var(--font-mono)', letterSpacing: '0.06em' }}
                         required
                       />
-                    </div>
 
-                    <div>
                       <input
                         type="text"
-                        placeholder="Cardholder Name (as on card)"
+                        placeholder="Cardholder name"
                         value={cardForm.cardHolder}
                         onChange={(e) => setCardForm({ ...cardForm, cardHolder: e.target.value.toUpperCase() })}
-                        style={{
-                          width: '100%',
-                          padding: '11px 14px',
-                          borderRadius: '10px',
-                          border: '1px solid #cbd5e1',
-                          fontSize: '13px',
-                          boxSizing: 'border-box'
-                        }}
+                        style={inputStyle}
                         required
                       />
-                    </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                        <input
+                          type="text"
+                          placeholder="MM/YY"
+                          maxLength={5}
+                          value={cardForm.expiry}
+                          onChange={(e) => setCardForm({ ...cardForm, expiry: formatExpiry(e.target.value) })}
+                          style={{ ...inputStyle, fontFamily: 'var(--font-mono)' }}
+                          required
+                        />
+                        <input
+                          type="password"
+                          placeholder="CVV"
+                          maxLength={4}
+                          value={cardForm.cvv}
+                          onChange={(e) => setCardForm({ ...cardForm, cvv: e.target.value.replace(/\D/g, '') })}
+                          style={{ ...inputStyle, fontFamily: 'var(--font-mono)' }}
+                          required
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* METHOD 2: INSTAPAY (Refined Editorial Transfer Card) */}
+                  {selectedMethod === PAYMENT_METHODS.INSTAPAY && (
+                    <div
+                      style={{
+                        background: '#ffffff',
+                        border: '1px solid var(--hairline-light)',
+                        borderRadius: '14px',
+                        padding: '16px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '12px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <div style={{ width: '30px', height: '30px', borderRadius: '8px', background: 'var(--bronze-soft)', color: 'var(--bronze)', display: 'grid', placeItems: 'center' }}>
+                            <Building2 size={16} />
+                          </div>
+                          <div>
+                            <b style={{ display: 'block', fontSize: '13px', color: 'var(--ink-primary)' }}>Instapay Instant Transfer</b>
+                            <small style={{ fontSize: '11px', color: 'var(--ink-muted)' }}>Zero transfer fees · Instant verification</small>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div
+                        style={{
+                          background: 'var(--alabaster)',
+                          border: '1px solid var(--hairline-light-strong)',
+                          borderRadius: '10px',
+                          padding: '10px 12px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: '8px'
+                        }}
+                      >
+                        <div>
+                          <span style={{ display: 'block', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink-muted)' }}>
+                            Payment Address (IPA)
+                          </span>
+                          <strong className="mono-num" style={{ fontSize: '14px', color: 'var(--ink-primary)' }}>
+                            eghselha@instapay
+                          </strong>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleCopy('ipa', 'eghselha@instapay')}
+                          className="btn outline sm"
+                          style={{ minHeight: '30px', padding: '0 10px', fontSize: '11px' }}
+                        >
+                          {copiedKey === 'ipa' ? <><Check size={12} color="var(--semantic-positive)" /> Copied</> : <><Copy size={12} /> Copy</>}
+                        </button>
+                      </div>
+
                       <input
                         type="text"
-                        placeholder="Expiry Date (MM/YY)"
-                        maxLength={5}
-                        value={cardForm.expiry}
-                        onChange={(e) => setCardForm({ ...cardForm, expiry: formatExpiry(e.target.value) })}
-                        style={{
-                          width: '100%',
-                          padding: '11px 14px',
-                          borderRadius: '10px',
-                          border: '1px solid #cbd5e1',
-                          fontSize: '13px',
-                          boxSizing: 'border-box'
-                        }}
-                        required
+                        placeholder="Instapay reference number (optional)"
+                        value={instapayRef}
+                        onChange={(e) => setInstapayRef(e.target.value)}
+                        style={inputStyle}
                       />
+                    </div>
+                  )}
+
+                  {/* METHOD 3: MOBILE WALLETS (Vodafone Cash / Orange / WE) */}
+                  {selectedMethod === PAYMENT_METHODS.VODAFONE_CASH && (
+                    <div
+                      style={{
+                        background: '#ffffff',
+                        border: '1px solid var(--hairline-light)',
+                        borderRadius: '14px',
+                        padding: '16px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '12px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ width: '30px', height: '30px', borderRadius: '8px', background: 'var(--semantic-negative-bg)', color: 'var(--semantic-negative)', display: 'grid', placeItems: 'center' }}>
+                          <Smartphone size={16} />
+                        </div>
+                        <div>
+                          <b style={{ display: 'block', fontSize: '13px', color: 'var(--ink-primary)' }}>Mobile Wallet Transfer</b>
+                          <small style={{ fontSize: '11px', color: 'var(--ink-muted)' }}>Vodafone Cash · Orange · Etisalat · WE</small>
+                        </div>
+                      </div>
+
+                      <div
+                        style={{
+                          background: 'var(--alabaster)',
+                          border: '1px solid var(--hairline-light-strong)',
+                          borderRadius: '10px',
+                          padding: '10px 12px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: '8px'
+                        }}
+                      >
+                        <div>
+                          <span style={{ display: 'block', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink-muted)' }}>
+                            Official Wallet Number
+                          </span>
+                          <strong className="mono-num" style={{ fontSize: '14px', color: 'var(--ink-primary)' }}>
+                            0101 234 5678
+                          </strong>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleCopy('vfc', '01012345678')}
+                          className="btn outline sm"
+                          style={{ minHeight: '30px', padding: '0 10px', fontSize: '11px' }}
+                        >
+                          {copiedKey === 'vfc' ? <><Check size={12} color="var(--semantic-positive)" /> Copied</> : <><Copy size={12} /> Copy</>}
+                        </button>
+                      </div>
+
                       <input
-                        type="password"
-                        placeholder="CVV (3 digits)"
-                        maxLength={4}
-                        value={cardForm.cvv}
-                        onChange={(e) => setCardForm({ ...cardForm, cvv: e.target.value.replace(/\D/g, '') })}
-                        style={{
-                          width: '100%',
-                          padding: '11px 14px',
-                          borderRadius: '10px',
-                          border: '1px solid #cbd5e1',
-                          fontSize: '13px',
-                          boxSizing: 'border-box'
-                        }}
-                        required
+                        type="tel"
+                        placeholder="Your wallet phone number"
+                        value={walletPhone}
+                        onChange={(e) => setWalletPhone(e.target.value)}
+                        style={{ ...inputStyle, fontFamily: 'var(--font-mono)' }}
                       />
                     </div>
-                  </div>
-                </div>
-              )}
+                  )}
 
-              {/* METHOD 2: INSTAPAY */}
-              {selectedMethod === PAYMENT_METHODS.INSTAPAY && (
-                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '16px', marginBottom: '16px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#92400e', marginBottom: '8px' }}>
-                    <Building2 size={18} />
-                    <b style={{ fontSize: '13px' }}>Instant Transfer via Instapay</b>
-                  </div>
-                  <p style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.5, margin: '0 0 12px' }}>
-                    Transfer the requested amount via Instapay to the following address:
-                  </p>
-                  <div style={{ background: '#fff', border: '1px dashed #92400e', borderRadius: '8px', padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                    <span style={{ fontSize: '12px', color: '#64748b' }}>Instant Payment Address (IPA):</span>
-                    <strong style={{ fontSize: '14px', color: '#92400e' }}>eghselha@instapay</strong>
-                  </div>
-                  <div>
-                    <input
-                      type="text"
-                      placeholder="Instapay Reference Number (optional for instant confirmation)"
-                      value={instapayRef}
-                      onChange={(e) => setInstapayRef(e.target.value)}
+                  {/* METHOD 4: EGHSELHA WALLET (In Deposit Mode) */}
+                  {!isTopUp && selectedMethod === PAYMENT_METHODS.WALLET && (
+                    <div
                       style={{
-                        width: '100%',
-                        padding: '10px 12px',
-                        borderRadius: '8px',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '12px',
-                        boxSizing: 'border-box'
+                        background: '#ffffff',
+                        border: '1px solid var(--hairline-light)',
+                        borderRadius: '14px',
+                        padding: '16px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '12px'
                       }}
-                    />
-                  </div>
-                </div>
-              )}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                          <span style={{ fontSize: '11px', color: 'var(--ink-muted)', display: 'block' }}>Available Wallet Balance</span>
+                          <strong className="mono-num" style={{ fontSize: '22px', color: currentBalance >= 200 ? 'var(--ink-primary)' : 'var(--semantic-negative)' }}>
+                            EGP {currentBalance.toLocaleString()}
+                          </strong>
+                        </div>
+                        <span
+                          style={{
+                            fontSize: '11px',
+                            fontWeight: 600,
+                            padding: '4px 10px',
+                            borderRadius: '999px',
+                            background: 'var(--bronze-soft)',
+                            color: '#7a571e',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                        >
+                          <Star size={11} fill="var(--bronze)" color="var(--bronze)" /> +25 Bonus Stars
+                        </span>
+                      </div>
 
-              {/* METHOD 3: VODAFONE CASH */}
-              {selectedMethod === PAYMENT_METHODS.VODAFONE_CASH && (
-                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '16px', marginBottom: '16px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#b91c1c', marginBottom: '8px' }}>
-                    <Smartphone size={18} />
-                    <b style={{ fontSize: '13px' }}>Mobile Wallets (Vodafone Cash / Orange / WE)</b>
-                  </div>
-                  <p style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.5, margin: '0 0 12px' }}>
-                    Transfer the required amount to EGHSELHA official wallet:
-                  </p>
-                  <div style={{ background: '#fff', border: '1px dashed #ef4444', borderRadius: '8px', padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                    <span style={{ fontSize: '12px', color: '#64748b' }}>Wallet Number:</span>
-                    <strong style={{ fontSize: '15px', color: '#b91c1c', letterSpacing: '1px' }}>0101 234 5678</strong>
-                  </div>
-                  <div>
-                    <input
-                      type="tel"
-                      placeholder="Your mobile wallet number used for transfer"
-                      value={walletPhone}
-                      onChange={(e) => setWalletPhone(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '10px 12px',
-                        borderRadius: '8px',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '12px',
-                        boxSizing: 'border-box'
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* METHOD 4: IN-APP WALLET */}
-              {!isTopUp && selectedMethod === PAYMENT_METHODS.WALLET && (
-                <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '14px', padding: '16px', marginBottom: '16px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <span style={{ fontSize: '12px', color: '#15803d' }}>Available Wallet Balance:</span>
-                      <h4 style={{ fontSize: '18px', fontWeight: 600, color: '#166534', margin: '4px 0 0' }}>
-                        {currentBalance.toLocaleString()} EGP
-                      </h4>
+                      {currentBalance < 200 ? (
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', padding: '10px 12px', background: 'var(--semantic-negative-bg)', borderRadius: '10px' }}>
+                          <span style={{ fontSize: '12px', color: 'var(--semantic-negative)' }}>
+                            Need EGP {(200 - currentBalance).toLocaleString()} more to pay from wallet.
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveMode('topup')
+                              setSelectedMethod(PAYMENT_METHODS.CREDIT_CARD)
+                              setErrorMsg(null)
+                            }}
+                            className="btn primary sm"
+                            style={{ minHeight: '30px', padding: '0 12px', fontSize: '11px', flexShrink: 0 }}
+                          >
+                            <Plus size={12} /> Top up now
+                          </button>
+                        </div>
+                      ) : (
+                        <div style={{ fontSize: '12px', color: 'var(--semantic-positive)', background: 'var(--semantic-positive-bg)', padding: '9px 12px', borderRadius: '9px' }}>
+                          Instant deduction of EGP 200 · Remaining balance: <b>EGP {(currentBalance - 200).toLocaleString()}</b>
+                        </div>
+                      )}
                     </div>
-                    <span style={{ fontSize: '11px', background: '#dcfce7', color: '#15803d', padding: '4px 10px', borderRadius: '20px', fontWeight: 700 }}>
-                      Instant deduction: 200 EGP
-                    </span>
-                  </div>
-                </div>
-              )}
+                  )}
 
-              {/* Error Message Alert */}
-              {errorMsg && (
+                  {errorMsg && (
+                    <div
+                      style={{
+                        background: 'var(--semantic-negative-bg)',
+                        border: '1px solid rgba(185, 28, 28, 0.25)',
+                        borderRadius: '10px',
+                        padding: '10px 12px',
+                        color: 'var(--semantic-negative)',
+                        fontSize: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}
+                    >
+                      <AlertCircle size={15} style={{ flexShrink: 0 }} />
+                      <span>{errorMsg}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* RIGHT COLUMN: AMOUNT / REWARDS SUMMARY + SUBMIT */}
                 <div
                   style={{
-                    background: '#fef2f2',
-                    border: '1px solid #fecaca',
-                    borderRadius: '10px',
-                    padding: '10px 14px',
-                    color: '#b91c1c',
-                    fontSize: '12px',
+                    background: '#ffffff',
+                    border: '1px solid var(--hairline-light)',
+                    borderRadius: '16px',
+                    padding: '18px',
                     display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    marginBottom: '16px'
+                    flexDirection: 'column',
+                    gap: '14px'
                   }}
                 >
-                  <AlertCircle size={16} />
-                  <span>{errorMsg}</span>
-                </div>
-              )}
+                  {isTopUp && (
+                    <div>
+                      <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)', marginBottom: '8px' }}>
+                        Select top-up amount (EGP)
+                      </label>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px', marginBottom: '8px' }}>
+                        {TOPUP_PRESETS.map((item) => {
+                          const active = !isCustom && topUpAmount === item.amount
+                          return (
+                            <button
+                              key={item.amount}
+                              type="button"
+                              onClick={() => {
+                                setTopUpAmount(item.amount)
+                                setIsCustom(false)
+                              }}
+                              className={`lx-select-card ${active ? 'is-selected' : ''}`}
+                              style={{
+                                padding: '8px 2px',
+                                borderRadius: '9px',
+                                fontSize: '12px',
+                                fontWeight: 600,
+                                color: active ? 'var(--bronze)' : 'var(--ink-secondary)',
+                                outline: 'none'
+                              }}
+                            >
+                              +{item.amount}
+                            </button>
+                          )
+                        })}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <input
+                          type="number"
+                          placeholder="Custom amount (e.g. 350)"
+                          value={customAmount}
+                          onChange={(e) => {
+                            setCustomAmount(e.target.value)
+                            setIsCustom(true)
+                          }}
+                          style={{ ...inputStyle, padding: '8px 12px', fontSize: '12.5px' }}
+                        />
+                        <span className="mono-num" style={{ fontSize: '12px', fontWeight: 600, color: 'var(--ink-muted)' }}>EGP</span>
+                      </div>
+                    </div>
+                  )}
 
-              {/* Summary Breakdown */}
-              <div
-                style={{
-                  background: '#f8fafc',
-                  borderRadius: '12px',
-                  padding: '14px 16px',
-                  marginBottom: '18px',
-                  border: '1px solid #e2e8f0'
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#64748b', marginBottom: '6px' }}>
-                  <span>Required Amount:</span>
-                  <span style={{ fontWeight: 600 }}>{effectiveAmount.toLocaleString()} EGP</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#64748b', marginBottom: '6px' }}>
-                  <span>Gateway Fee:</span>
-                  <span style={{ color: '#16a34a', fontWeight: 700 }}>0.00 EGP (Free)</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: '#0f172a', fontWeight: 600, paddingTop: '8px', borderTop: '1px solid #e2e8f0' }}>
-                  <span>Total Charged:</span>
-                  <span style={{ color: '#92400e' }}>{effectiveAmount.toLocaleString()} EGP</span>
-                </div>
-              </div>
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={processing}
-                className="landing-btn-signup"
-                style={{
-                  width: '100%',
-                  padding: '14px',
-                  fontSize: '14px',
-                  borderRadius: '12px',
-                  cursor: processing ? 'not-allowed' : 'pointer',
-                  opacity: processing ? 0.7 : 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px'
-                }}
-              >
-                {processing ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Connecting to bank & verifying 3D Secure...</span>
-                  </>
-                ) : (
-                  <>
-                    <Lock size={15} />
-                    <span>
-                      {isTopUp
-                        ? `Confirm & Pay ${effectiveAmount.toLocaleString()} EGP`
-                        : `Pay Deposit (${effectiveAmount} EGP) & Confirm`}
+                  {/* Loyalty Stars & Discount Reward Callout */}
+                  <div
+                    style={{
+                      background: 'var(--bronze-soft)',
+                      border: '1px solid rgba(166, 124, 55, 0.28)',
+                      borderRadius: '12px',
+                      padding: '12px 14px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '4px'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12.5px' }}>
+                      <span style={{ color: '#7a571e', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                        <Sparkles size={13} color="var(--bronze)" /> Wallet Rewards
+                      </span>
+                      <b className="mono-num" style={{ color: '#7a571e', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                        <Star size={12} fill="var(--bronze)" color="var(--bronze)" /> +{earnedStars} Stars
+                      </b>
+                    </div>
+                    <span style={{ fontSize: '11.5px', color: '#8d672b' }}>
+                      {unlockedDiscount || 'Top up EGP 1,000+ for 5% off or EGP 2,000+ for 10% VIP discount.'}
                     </span>
-                    <ArrowRight size={16} />
-                  </>
-                )}
-              </button>
+                  </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginTop: '12px', color: '#94a3b8', fontSize: '11px' }}>
-                <ShieldCheck size={14} color="#16a34a" />
-                <span>256-bit SSL Encrypted & PCI-DSS Compliant</span>
+                  {/* Summary Totals */}
+                  <div style={{ display: 'grid', gap: '7px', fontSize: '12.5px', paddingTop: '4px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--ink-secondary)' }}>
+                      <span>Amount</span>
+                      <span className="mono-num" style={{ fontWeight: 600, color: 'var(--ink-primary)' }}>
+                        EGP {effectiveAmount.toLocaleString()}
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--ink-secondary)' }}>
+                      <span>Gateway fee</span>
+                      <span
+                        className="mono-num"
+                        style={{
+                          color: gatewayFee === 0 ? 'var(--semantic-positive)' : 'var(--ink-primary)',
+                          fontWeight: 600
+                        }}
+                      >
+                        {gatewayFeeLabel}
+                      </span>
+                    </div>
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'baseline',
+                        paddingTop: '10px',
+                        borderTop: '1px solid var(--hairline-light)'
+                      }}
+                    >
+                      <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ink-primary)' }}>Total charged</span>
+                      <strong className="mono-num" style={{ fontSize: '20px', color: 'var(--ink-primary)' }}>
+                        EGP {totalCharged.toLocaleString()}
+                      </strong>
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={processing}
+                    className="lx-btn lx-glass-btn lx-glass-obsidian"
+                    style={{
+                      width: '100%',
+                      minHeight: '46px',
+                      borderRadius: '999px',
+                      fontSize: '13.5px',
+                      fontWeight: 600,
+                      cursor: processing ? 'not-allowed' : 'pointer',
+                      opacity: processing ? 0.65 : 1,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px'
+                    }}
+                  >
+                    {processing ? (
+                      <span>Verifying payment…</span>
+                    ) : (
+                      <>
+                        <Lock size={14} />
+                        <span>
+                          {isTopUp
+                            ? `Pay EGP ${totalCharged.toLocaleString()} & top up`
+                            : `Pay EGP ${totalCharged.toLocaleString()} deposit`}
+                        </span>
+                        <ArrowRight size={15} className="lx-arrow" />
+                      </>
+                    )}
+                  </button>
+
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', color: 'var(--ink-muted)', fontSize: '11px' }}>
+                    <ShieldCheck size={13} color="var(--semantic-positive)" />
+                    <span>256-bit SSL encrypted · Instant confirmation</span>
+                  </div>
+                </div>
               </div>
             </form>
           )}

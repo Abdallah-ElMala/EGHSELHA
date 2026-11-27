@@ -5,11 +5,12 @@ import { useAdmin } from '../../context/AdminContext';
 import { adminApi } from '../../services/adminApi';
 
 export default function AdminCatalogZones() {
-  const { catalog, notify, refreshAll } = useAdmin();
+  const { catalog, setCatalog, notify, bumpSyncVersion, refreshCatalog } = useAdmin();
   const [packages, setPackages] = useState([]);
   const [addOns, setAddOns] = useState([]);
   const [zones, setZones] = useState([]);
   const [savingId, setSavingId] = useState(null);
+  const [dirtyIds, setDirtyIds] = useState(() => new Set());
 
   // New zone modal / inline form
   const [newZoneName, setNewZoneName] = useState('');
@@ -17,25 +18,69 @@ export default function AdminCatalogZones() {
   const [newZoneSurge, setNewZoneSurge] = useState(1.0);
   const [newZoneMaxTechs, setNewZoneMaxTechs] = useState(10);
 
+  const markDirty = (id) => {
+    setDirtyIds((prev) => {
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+  };
+
+  const clearDirty = (id) => {
+    setDirtyIds((prev) => {
+      if (!prev.has(id)) return prev;
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+  };
+
   useEffect(() => {
-    setPackages(catalog?.packages ?? []);
-    setAddOns(catalog?.addOns ?? []);
-    setZones(catalog?.zones ?? []);
+    // Preserve any items currently being edited by the admin so background polling never overwrites typed values
+    setPackages((prev) => {
+      const incoming = catalog?.packages ?? [];
+      if (prev.length === 0) return incoming;
+      return incoming.map((inc) => (dirtyIds.has(inc.id) ? (prev.find((p) => p.id === inc.id) || inc) : inc));
+    });
+    setAddOns((prev) => {
+      const incoming = catalog?.addOns ?? [];
+      if (prev.length === 0) return incoming;
+      return incoming.map((inc) => (dirtyIds.has(inc.id) ? (prev.find((a) => a.id === inc.id) || inc) : inc));
+    });
+    setZones((prev) => {
+      const incoming = catalog?.zones ?? [];
+      if (prev.length === 0) return incoming;
+      return incoming.map((inc) => (dirtyIds.has(inc.id) ? (prev.find((z) => z.id === inc.id) || inc) : inc));
+    });
   }, [catalog]);
 
   const handleSavePackage = async (pkg) => {
+    const parsedPrice = Number(pkg.basePrice);
+    const parsedDuration = Number(pkg.durationMinutes);
+    if (!Number.isFinite(parsedPrice) || parsedPrice <= 0) {
+      notify('Please enter a valid price greater than 0 EGP.');
+      return;
+    }
     setSavingId(pkg.id);
+    bumpSyncVersion();
     try {
-      await adminApi.updatePackage(pkg.id, {
+      const updated = await adminApi.updatePackage(pkg.id, {
         name: pkg.name,
-        basePrice: Number(pkg.basePrice),
-        durationMinutes: Number(pkg.durationMinutes),
+        basePrice: parsedPrice,
+        durationMinutes: parsedDuration > 0 ? parsedDuration : 30,
         requiresElectricity: Boolean(pkg.requiresElectricity),
         requiresWater: Boolean(pkg.requiresWater),
         requiresPrivateParking: Boolean(pkg.requiresPrivateParking),
       });
-      notify(`Package "${pkg.name}" updated (EGP ${pkg.basePrice}).`);
-      await refreshAll();
+      const finalPkg = updated?.id ? updated : { ...pkg, basePrice: parsedPrice, durationMinutes: parsedDuration };
+      clearDirty(pkg.id);
+      setPackages((prev) => prev.map((p) => (p.id === pkg.id ? finalPkg : p)));
+      setCatalog((prev) => ({
+        ...prev,
+        packages: (prev?.packages ?? []).map((p) => (p.id === pkg.id ? finalPkg : p)),
+      }));
+      notify(`Package "${finalPkg.name}" saved at EGP ${finalPkg.basePrice} — live for all new customer & technician orders.`);
+      await refreshCatalog();
     } catch (err) {
       notify(err.message || 'Failed to update package.');
     } finally {
@@ -44,16 +89,25 @@ export default function AdminCatalogZones() {
   };
 
   const handleSaveAddOn = async (addon) => {
+    const parsedPrice = Number(addon.price);
     setSavingId(addon.id);
+    bumpSyncVersion();
     try {
-      await adminApi.updateAddOn(addon.id, {
+      const updated = await adminApi.updateAddOn(addon.id, {
         name: addon.name,
-        price: Number(addon.price),
+        price: parsedPrice,
         description: addon.description,
         isActive: Boolean(addon.isActive),
       });
-      notify(`Add-on "${addon.name}" updated (EGP ${addon.price}).`);
-      await refreshAll();
+      const finalAddon = updated?.id ? updated : { ...addon, price: parsedPrice };
+      clearDirty(addon.id);
+      setAddOns((prev) => prev.map((a) => (a.id === addon.id ? finalAddon : a)));
+      setCatalog((prev) => ({
+        ...prev,
+        addOns: (prev?.addOns ?? []).map((a) => (a.id === addon.id ? finalAddon : a)),
+      }));
+      notify(`Add-on "${finalAddon.name}" updated (EGP ${finalAddon.price}).`);
+      await refreshCatalog();
     } catch (err) {
       notify(err.message || 'Failed to update add-on.');
     } finally {
@@ -63,17 +117,25 @@ export default function AdminCatalogZones() {
 
   const handleSaveZone = async (z) => {
     setSavingId(z.id);
+    bumpSyncVersion();
     try {
       const statusMap = { ACTIVE: 1, INACTIVE: 2, UNAVAILABLE: 3 };
-      await adminApi.updateZone(z.id, {
+      const updated = await adminApi.updateZone(z.id, {
         zoneName: z.zoneName,
         status: statusMap[z.status] ?? 1,
         baseDistanceSurcharge: Number(z.baseDistanceSurcharge),
         peakSurgeMultiplier: Number(z.peakSurgeMultiplier),
         maxTechnicians: Number(z.maxTechnicians),
       });
-      notify(`Zone "${z.zoneName}" saved.`);
-      await refreshAll();
+      const finalZone = updated?.id ? updated : z;
+      clearDirty(z.id);
+      setZones((prev) => prev.map((x) => (x.id === z.id ? finalZone : x)));
+      setCatalog((prev) => ({
+        ...prev,
+        zones: (prev?.zones ?? []).map((x) => (x.id === z.id ? finalZone : x)),
+      }));
+      notify(`Zone "${finalZone.zoneName}" saved.`);
+      await refreshCatalog();
     } catch (err) {
       notify(err.message || 'Failed to update zone.');
     } finally {
@@ -149,6 +211,7 @@ export default function AdminCatalogZones() {
                     min="50"
                     value={pkg.basePrice}
                     onChange={(e) => {
+                      markDirty(pkg.id);
                       const next = [...packages];
                       next[idx] = { ...pkg, basePrice: e.target.value };
                       setPackages(next);
@@ -163,6 +226,7 @@ export default function AdminCatalogZones() {
                     min="15"
                     value={pkg.durationMinutes}
                     onChange={(e) => {
+                      markDirty(pkg.id);
                       const next = [...packages];
                       next[idx] = { ...pkg, durationMinutes: e.target.value };
                       setPackages(next);

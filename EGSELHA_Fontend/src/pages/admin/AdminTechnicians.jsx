@@ -35,17 +35,49 @@ const STATUS_COLORS = {
 };
 
 export default function AdminTechnicians() {
-  const { technicians, bookings, payouts, notify, refreshAll } = useAdmin();
+  const {
+    technicians,
+    setTechnicians,
+    setDashboard,
+    bookings,
+    payouts,
+    notify,
+    bumpSyncVersion,
+    refreshTechnicians,
+    refreshDashboard
+  } = useAdmin();
   const [busyId, setBusyId] = useState(null);
   const [selectedTech, setSelectedTech] = useState(null);
 
   const handleToggleOnline = async (tech) => {
+    const nextOnline = !tech.isOnline;
+    const prevTechs = technicians;
     setBusyId(tech.id);
+    bumpSyncVersion();
+
+    // Instant optimistic UI update (0ms feedback)
+    setTechnicians((prev) =>
+      prev.map((item) => (item.id === tech.id ? { ...item, isOnline: nextOnline } : item))
+    );
+    setSelectedTech((curr) => (curr && curr.id === tech.id ? { ...curr, isOnline: nextOnline } : curr));
+    setDashboard((curr) =>
+      curr
+        ? {
+            ...curr,
+            onlineTechnicians: Math.max(0, (curr.onlineTechnicians || 0) + (nextOnline ? 1 : -1))
+          }
+        : curr
+    );
+
     try {
-      await adminApi.toggleTechnicianAvailability(tech.id, !tech.isOnline);
-      notify(`${tech.fullName} is now ${!tech.isOnline ? 'Online' : 'Offline'}.`);
-      await refreshAll();
+      await adminApi.toggleTechnicianAvailability(tech.id, nextOnline);
+      notify(`${tech.fullName} is now ${nextOnline ? 'Online' : 'Offline'}.`);
+      // Lightweight background sync of only technicians & dashboard
+      Promise.all([refreshTechnicians(), refreshDashboard()]).catch(() => {});
     } catch (err) {
+      // Rollback on failure
+      setTechnicians(prevTechs);
+      setSelectedTech((curr) => (curr && curr.id === tech.id ? tech : curr));
       notify(err.message || 'Failed to update availability.');
     } finally {
       setBusyId(null);
@@ -53,12 +85,41 @@ export default function AdminTechnicians() {
   };
 
   const handleReviewApp = async (tech, decision) => {
+    const prevTechs = technicians;
+    const isRejected = decision.toLowerCase() === 'rejected';
     setBusyId(tech.id);
+    bumpSyncVersion();
+
+    // Instant optimistic UI update (0ms feedback)
+    setTechnicians((prev) =>
+      prev.map((item) =>
+        item.id === tech.id
+          ? {
+              ...item,
+              applicationStatus: decision,
+              isOnline: isRejected ? false : item.isOnline
+            }
+          : item
+      )
+    );
+    setSelectedTech((curr) =>
+      curr && curr.id === tech.id
+        ? {
+            ...curr,
+            applicationStatus: decision,
+            isOnline: isRejected ? false : curr.isOnline
+          }
+        : curr
+    );
+
     try {
       await adminApi.reviewTechnicianApplication(tech.id, decision);
       notify(`${tech.fullName} application marked as ${decision}.`);
-      await refreshAll();
+      // Lightweight background sync of only technicians & dashboard
+      Promise.all([refreshTechnicians(), refreshDashboard()]).catch(() => {});
     } catch (err) {
+      setTechnicians(prevTechs);
+      setSelectedTech((curr) => (curr && curr.id === tech.id ? tech : curr));
       notify(err.message || 'Failed to update application.');
     } finally {
       setBusyId(null);

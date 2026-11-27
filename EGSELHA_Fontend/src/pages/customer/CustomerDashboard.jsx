@@ -225,7 +225,7 @@ export default function CustomerDashboard() {
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-2px)'
-                  e.currentTarget.style.background = '#006bd5'
+                  e.currentTarget.style.background = '#27272a'
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'translateY(0)'
@@ -454,7 +454,7 @@ export default function CustomerDashboard() {
                           }}
                           onMouseEnter={(e) => {
                             e.currentTarget.style.borderColor = '#141415'
-                            e.currentTarget.style.background = '#f0f7ff'
+                            e.currentTarget.style.background = 'var(--bronze-soft)'
                           }}
                           onMouseLeave={(e) => {
                             e.currentTarget.style.borderColor = '#dce6ef'
@@ -621,7 +621,7 @@ export default function CustomerDashboard() {
             <span
               style={{
                 display: 'inline-block',
-                background: '#eff6ff',
+                background: 'var(--bronze-soft)',
                 color: '#141415',
                 fontSize: '10px',
                 fontWeight: 700,

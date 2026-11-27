@@ -1,25 +1,18 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  Sparkles,
   Car,
   MapPin,
-  Calendar,
   ShieldCheck,
-  CheckCircle2,
+  Check,
   ArrowRight,
   Clock,
   Droplets,
-  Zap,
   Star,
-  Award,
   Phone,
   Plus,
   X,
-  CreditCard,
-  ThumbsUp,
   ChevronRight,
-  ShieldAlert,
   Eye
 } from 'lucide-react'
 import { useCustomer } from '../../context/CustomerContext'
@@ -32,29 +25,29 @@ const PACKAGES = [
   {
     id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbb0003',
     name: 'Basic Wash',
-    badge: 'Quick & Clean',
+    badge: 'Exterior Reset',
     basePrice: 200,
     duration: '30 mins',
-    desc: 'Exterior pressure wash, snow foam bath, tire gloss & streak-free windows.',
+    desc: 'Exterior pressure wash, snow foam bath, satin tire dressing & streak-free windows.',
     highlights: ['Snow Foam Wash', 'High Pressure Rinse', 'Tire Gloss Dressing', 'Exterior Windows']
   },
   {
     id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbb0001',
     name: 'Premium Wash',
-    badge: 'Most Popular ⭐',
+    badge: 'Most Requested',
     isPopular: true,
     basePrice: 350,
     duration: '60 mins',
-    desc: 'Full cabin vacuum, dashboard dressing, snow foam bath & spray wax shine.',
-    highlights: ['Interior Cabin Vacuum', 'Dashboard & Trim Care', 'Hand Foam Wash', 'Spray Wax Sealant', 'Air Freshener']
+    desc: 'Full cabin vacuum, dashboard conditioning, hand snow foam bath & hydrophobic spray wax.',
+    highlights: ['Interior Cabin Vacuum', 'Dashboard & Trim Care', 'Hand Foam Wash', 'Spray Wax Sealant', 'Subtle Air Freshener']
   },
   {
     id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbb0002',
     name: 'Deep Clean',
-    badge: 'Full Detailing',
+    badge: 'Steam & Leather',
     basePrice: 500,
     duration: '90 mins',
-    desc: 'Steam upholstery detailing, carpet extraction & AC antibacterial sanitation.',
+    desc: 'Hot steam upholstery extraction, carpet shampooing, leather feed & AC sanitation.',
     highlights: ['Interior Steam Extraction', 'Carpet & Mat Shampoo', 'Leather Conditioning', 'AC Vent Disinfection', 'Engine Bay Wipe']
   },
   {
@@ -63,8 +56,26 @@ const PACKAGES = [
     badge: 'Ceramic & Polish',
     basePrice: 700,
     duration: '140 mins',
-    desc: 'Clay bar paint decontamination, machine polish & 6-month ceramic protection.',
+    desc: 'Clay bar paint decontamination, machine gloss polish & 6-month ceramic protection.',
     highlights: ['Clay Bar Paint Treatment', 'Machine Gloss Polish', '6-Month Ceramic Coat', 'Complete Interior Restore', 'Headlight Clarity']
+  }
+]
+
+const EXPERIENCE_STEPS = [
+  {
+    num: '01',
+    title: 'Book in 60 seconds',
+    body: 'Choose on-demand Fast Track or schedule a dedicated window at your home driveway or office parking.'
+  },
+  {
+    num: '02',
+    title: 'Self-contained arrival',
+    body: 'Our mobile detailing vans arrive with onboard filtered water tanks, silent power, and studio chemistry.'
+  },
+  {
+    num: '03',
+    title: 'Photographed & guaranteed',
+    body: 'Before-and-after inspection photos verify every panel. Backed by our quality guarantee.'
   }
 ]
 
@@ -95,95 +106,90 @@ export default function CustomerHome() {
       .catch(console.error)
   }, [])
 
-  const customerFirstName = (user?.fullName || profile?.fullName || 'User').split(' ')[0]
+  const customerFirstName = (user?.fullName || profile?.fullName || 'Guest').split(' ')[0]
 
-  // Quick Book Selector state inside Hero
-  const [selectedVehicleId, setSelectedVehicleId] = useState(vehicles[0]?.id || '')
-  const [selectedAddress, setSelectedAddress] = useState(
-    profile?.savedAddresses?.[0] || 'New Cairo, 5th Settlement'
-  )
-
-  // Check for active wash in progress
   const activeWash = bookings.find(
     (b) => b.status === 'ON_THE_WAY' || b.status === 'ARRIVED' || b.status === 'WASHING' || b.status === 'DISPATCHED'
   )
 
-  // Live tracking modal
   const [showLiveTracking, setShowLiveTracking] = useState(false)
   const [showTechProfile, setShowTechProfile] = useState(false)
 
-  const handleHeroQuickBook = () => {
-    navigate('/customer/book')
-  }
-
-  const handleBookPackage = (pkgId) => {
-    navigate(`/customer/book?package=${encodeURIComponent(pkgId)}`)
-  }
+  const handleHeroQuickBook = () => navigate('/customer/book')
+  const handleBookPackage = (pkgId) => navigate(`/customer/book?package=${encodeURIComponent(pkgId)}`)
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-      {/* 1. ACTIVE WASH TRACKER BANNER (Shows only if there's an ongoing job) */}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '36px' }}>
+      {/* 1. ACTIVE WASH TRACKER BANNER */}
       {activeWash && (
         <div
+          className="lx-enter lx-d1"
           style={{
-            background: '#0f0f10',
-            borderRadius: '20px',
-            padding: '20px 28px',
-            color: '#fff',
+            background: 'var(--obsidian)',
+            borderRadius: '18px',
+            padding: '22px 28px',
+            color: 'var(--ivory)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
             flexWrap: 'wrap',
             gap: '16px',
-            boxShadow: '0 8px 25px rgba(15, 15, 16, 0.25)',
-            border: '1px solid rgba(20, 20, 21, 0.3)'
+            border: '1px solid rgba(198, 146, 73, 0.3)',
+            boxShadow: '0 14px 34px rgba(14, 14, 16, 0.16)'
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <div
               style={{
-                width: '48px',
-                height: '48px',
-                borderRadius: '50%',
-                background: 'rgba(20, 20, 21, 0.25)',
-                color: '#d49b4b',
+                width: '46px',
+                height: '46px',
+                borderRadius: '12px',
+                background: 'rgba(198, 146, 73, 0.14)',
+                border: '1px solid rgba(198, 146, 73, 0.32)',
+                color: 'var(--bronze-dark)',
                 display: 'grid',
                 placeItems: 'center',
-                animation: 'pulse 2s infinite',
                 flexShrink: 0
               }}
             >
-              <Car size={26} />
+              <Car size={22} strokeWidth={1.7} />
             </div>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
                 <span
                   style={{
-                    background: '#141415',
-                    color: '#fff',
+                    background: 'rgba(198, 146, 73, 0.18)',
+                    color: 'var(--bronze-dark)',
                     fontSize: '10px',
                     fontWeight: 600,
                     padding: '3px 10px',
-                    borderRadius: '20px',
-                    letterSpacing: '0.5px'
+                    borderRadius: '999px',
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase'
                   }}
                 >
-                  LIVE SERVICE · {activeWash.status}
+                  Live · {activeWash.status}
                 </span>
-                <span style={{ fontSize: '12px', color: '#d49b4b' }}>{activeWash.bookingNumber}</span>
+                <span className="mono-num" style={{ fontSize: '12px', color: 'var(--ivory-secondary)' }}>
+                  {activeWash.bookingNumber}
+                </span>
               </div>
-              <b style={{ fontSize: '15px', color: '#fff', display: 'block' }}>
+              <b style={{ fontSize: '16px', fontWeight: 500, color: 'var(--ivory)', display: 'block' }}>
                 {activeWash.serviceName || activeWash.packageName || 'Premium Wash'} in progress
               </b>
-              <small style={{ fontSize: '11px', color: '#cbd5e1' }}>
+              <small style={{ fontSize: '12px', color: 'var(--ivory-secondary)' }}>
                 Technician:{' '}
                 <b
                   onClick={() => activeWash.technicianName && setShowTechProfile(true)}
-                  style={{ cursor: activeWash.technicianName ? 'pointer' : 'default', textDecoration: activeWash.technicianName ? 'underline' : 'none', color: '#d49b4b' }}
+                  style={{
+                    cursor: activeWash.technicianName ? 'pointer' : 'default',
+                    textDecoration: activeWash.technicianName ? 'underline' : 'none',
+                    color: 'var(--bronze-dark)'
+                  }}
                 >
                   {activeWash.technicianName || 'Assigned Technician'}
                 </b>
-                {' '}· ETA: ~8 mins away
+                {' '}· Live GPS active
               </small>
             </div>
           </div>
@@ -192,183 +198,214 @@ export default function CustomerHome() {
             {activeWash.technicianName && (
               <button
                 onClick={() => setShowTechProfile(true)}
-                className="btn outline"
+                className="lx-btn lx-glass-btn lx-glass-crystal"
                 style={{
-                  background: 'rgba(20, 20, 21, 0.2)',
-                  borderColor: 'rgba(96, 180, 255, 0.45)',
-                  color: '#fff',
-                  fontSize: '11px',
-                  padding: '9px 14px'
+                  borderRadius: '999px',
+                  minHeight: '38px',
+                  padding: '0 16px',
+                  fontSize: '12px',
+                  fontWeight: 500,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
                 }}
               >
-                <Eye size={14} /> Show Tech Profile
+                <Eye size={14} strokeWidth={1.7} />
+                <span>Technician</span>
               </button>
             )}
             <button
               onClick={() => notify(`Calling technician... (${activeWash.technicianPhone || '+20 101 234 5678'})`)}
-              className="btn outline"
+              className="lx-btn lx-glass-btn lx-glass-crystal"
               style={{
-                background: 'rgba(255,255,255,0.1)',
-                borderColor: 'rgba(255,255,255,0.2)',
-                color: '#fff',
-                fontSize: '11px',
-                padding: '9px 14px'
+                borderRadius: '999px',
+                minHeight: '38px',
+                padding: '0 16px',
+                fontSize: '12px',
+                fontWeight: 500,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px'
               }}
             >
-              <Phone size={14} /> Call Tech
+              <Phone size={14} strokeWidth={1.7} />
+              <span>Call</span>
             </button>
             <button
               onClick={() => setShowLiveTracking(true)}
-              className="btn primary"
-              style={{ fontSize: '11px', padding: '9px 18px', background: '#141415' }}
+              className="lx-btn lx-glass-btn lx-glass-gold"
+              style={{
+                borderRadius: '999px',
+                minHeight: '38px',
+                padding: '0 18px',
+                fontSize: '12px',
+                fontWeight: 600,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
             >
-              <MapPin size={14} /> Track Live On Map
+              <MapPin size={14} strokeWidth={1.8} />
+              <span>Track live</span>
             </button>
           </div>
         </div>
       )}
 
-      {/* 2. HERO SECTION: Doorstep Car Wash */}
+      {/* 2. EDITORIAL HERO BANNER */}
       <section
+        className="lx-enter lx-d1"
         style={{
-          borderRadius: '16px',
+          borderRadius: '20px',
           overflow: 'hidden',
-          background: '#0f0f10',
-          border: '1px solid rgba(212, 155, 75, 0.25)',
-          color: '#f4f4f5',
-          padding: '44px 44px 36px 44px',
+          background: '#0a0a0c',
+          border: '1px solid var(--hairline-dark)',
+          color: 'var(--ivory)',
+          padding: '48px 48px 40px',
           position: 'relative',
-          boxShadow: '0 10px 28px rgba(0, 0, 0, 0.14)'
+          boxShadow: '0 16px 40px rgba(14, 14, 16, 0.14)'
         }}
       >
-        {/* Real Luxury Car Detailing Photo */}
         <div
           style={{
             position: 'absolute',
-            right: '0',
-            top: '0',
-            bottom: '0',
-            width: '52%',
+            right: 0,
+            top: 0,
+            bottom: 0,
+            width: '58%',
             minWidth: '340px',
             backgroundImage: 'url("/wet-luxury-car.jpg")',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
-            maskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.92) 48%, black 100%)',
-            WebkitMaskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.92) 48%, black 100%)',
-            opacity: 0.88,
+            maskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.88) 46%, black 100%)',
+            WebkitMaskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.88) 46%, black 100%)',
+            opacity: 0.9,
             pointerEvents: 'none'
           }}
         />
 
         <div style={{ position: 'relative', zIndex: 2, maxWidth: '540px' }}>
+          <span
+            style={{
+              display: 'block',
+              fontSize: '11px',
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              color: 'var(--bronze-dark)',
+              fontWeight: 600,
+              marginBottom: '12px'
+            }}
+          >
+            Welcome back, {customerFirstName}
+          </span>
+
           <h1
             style={{
-              fontSize: '34px',
-              fontWeight: 500,
-              margin: '0 0 12px 0',
-              lineHeight: 1.16,
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(36px, 4vw, 52px)',
+              fontWeight: 400,
+              margin: '0 0 14px 0',
+              lineHeight: 1.04,
               letterSpacing: '-0.02em',
-              color: '#f4f4f5',
-              fontFamily: 'Manrope, sans-serif'
+              color: 'var(--ivory)'
             }}
           >
             Mobile auto detailing,
             <br />
-            <span style={{ color: '#d49b4b' }}>at your doorstep</span>
+            <span style={{ fontStyle: 'italic', color: 'rgba(245, 243, 238, 0.8)' }}>at your doorstep.</span>
           </h1>
 
-          <p style={{ fontSize: '14px', color: '#a1a1a6', lineHeight: 1.6, margin: '0 0 24px 0', maxWidth: '460px' }}>
-            Certified mobile detailers come directly to your home, office, or driveway with self-contained water, power, and detailing equipment.
+          <p style={{ fontSize: '14px', color: 'rgba(245, 243, 238, 0.72)', lineHeight: 1.65, margin: '0 0 28px 0', maxWidth: '440px' }}>
+            Certified mobile detailers arrive directly at your home or office with filtered water, silent power, and paint-safe studio chemistry.
           </p>
 
-          {/* Quick Book Action Buttons */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
             <button
               onClick={handleHeroQuickBook}
+              className="lx-btn lx-glass-btn lx-glass-gold"
               style={{
-                background: '#d49b4b',
-                color: '#141415',
-                border: '1px solid #d49b4b',
-                borderRadius: '8px',
-                padding: '11px 22px',
-                minHeight: '42px',
+                borderRadius: '999px',
+                padding: '0 26px',
+                minHeight: '46px',
                 fontSize: '13px',
                 fontWeight: 600,
-                cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '8px',
-                transition: 'background-color 150ms cubic-bezier(0.22, 1, 0.36, 1), transform 120ms cubic-bezier(0.22, 1, 0.36, 1)'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#e5b56c'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = '#d49b4b'
+                gap: '8px'
               }}
             >
-              <span>Book a wash</span>
-              <ArrowRight size={15} strokeWidth={1.8} />
+              <span>Book a detailing</span>
+              <ArrowRight size={15} strokeWidth={1.9} className="lx-arrow" />
             </button>
 
             <button
               onClick={() => navigate('/customer/bookings')}
+              className="lx-btn lx-glass-btn lx-glass-crystal"
               style={{
-                background: '#19191b',
-                color: '#f4f4f5',
-                border: '1px solid rgba(212, 155, 75, 0.32)',
-                borderRadius: '8px',
-                padding: '11px 20px',
-                minHeight: '42px',
+                borderRadius: '999px',
+                padding: '0 22px',
+                minHeight: '46px',
                 fontSize: '13px',
                 fontWeight: 500,
-                cursor: 'pointer',
-                transition: 'background-color 150ms cubic-bezier(0.22, 1, 0.36, 1), border-color 150ms cubic-bezier(0.22, 1, 0.36, 1)'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#232325'
-                e.currentTarget.style.borderColor = 'rgba(212, 155, 75, 0.55)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = '#19191b'
-                e.currentTarget.style.borderColor = 'rgba(212, 155, 75, 0.32)'
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px'
               }}
             >
-              View my bookings
+              <span>View my bookings</span>
             </button>
           </div>
 
-          {/* Value highlights underneath */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap', marginTop: '28px', paddingTop: '16px', borderTop: '1px solid rgba(212, 155, 75, 0.16)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#a1a1a6' }}>
-              <Droplets size={14} strokeWidth={1.6} color="#d49b4b" /> Self-contained water &amp; power
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '24px',
+              flexWrap: 'wrap',
+              marginTop: '32px',
+              paddingTop: '18px',
+              borderTop: '1px solid rgba(245, 243, 238, 0.14)'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '12px', color: 'rgba(245, 243, 238, 0.66)' }}>
+              <Droplets size={14} strokeWidth={1.6} color="var(--bronze-dark)" /> Self-contained water &amp; power
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#a1a1a6' }}>
-              <ShieldCheck size={14} strokeWidth={1.6} color="#d49b4b" /> Quality guarantee
+            <div style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '12px', color: 'rgba(245, 243, 238, 0.66)' }}>
+              <ShieldCheck size={14} strokeWidth={1.6} color="var(--bronze-dark)" /> Photo-verified finish
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#a1a1a6' }}>
-              <Star size={14} strokeWidth={1.6} fill="#d49b4b" color="#d49b4b" /> Certified technicians
+            <div style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '12px', color: 'rgba(245, 243, 238, 0.66)' }}>
+              <Star size={14} strokeWidth={1.6} fill="var(--bronze-dark)" color="var(--bronze-dark)" /> Certified detailers
             </div>
           </div>
         </div>
       </section>
 
-      {/* 3. MY GARAGE QUICK SELECTOR (Quick car selection) */}
+      {/* 3. MY GARAGE QUICK SELECTOR */}
       <section>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '18px', gap: '12px', flexWrap: 'wrap' }}>
           <div>
-            <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 600, color: '#171717', fontFamily: 'Manrope, sans-serif' }}>
-              My Garage
+            <span className="eyebrow" style={{ display: 'block', marginBottom: '4px' }}>My Garage</span>
+            <h2 style={{ margin: 0, fontSize: '28px', fontWeight: 400, color: 'var(--ink-primary)', fontFamily: 'var(--font-display)' }}>
+              Select a vehicle for one-click booking
             </h2>
-            <small style={{ color: '#64748b', fontSize: '12px' }}>
-              Select a vehicle to book a wash in 1 click
-            </small>
           </div>
           <button
             onClick={() => navigate('/customer/profile')}
-            style={{ background: 'none', border: 'none', color: '#141415', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+            className="lx-nav-link"
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--ink-primary)',
+              fontSize: '13px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: 0
+            }}
           >
-            <span>Manage Vehicles & Addresses</span>
+            <span>Manage vehicles &amp; addresses</span>
             <ChevronRight size={14} />
           </button>
         </div>
@@ -378,25 +415,16 @@ export default function CustomerHome() {
             <div
               key={v.id}
               onClick={() => navigate(`/customer/book?vehicle=${encodeURIComponent(v.id)}`)}
+              className="lx-card"
               style={{
-                background: '#fff',
+                background: '#ffffff',
                 borderRadius: '16px',
                 padding: '18px 20px',
-                border: '1.5px solid #edf2f7',
+                border: '1px solid var(--hairline-light)',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                cursor: 'pointer',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
-                transition: 'background-color 150ms cubic-bezier(0.22, 1, 0.36, 1), border-color 150ms cubic-bezier(0.22, 1, 0.36, 1), color 150ms cubic-bezier(0.22, 1, 0.36, 1)'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = '#141415'
-                e.currentTarget.style.transform = 'translateY(-2px)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = '#edf2f7'
-                e.currentTarget.style.transform = 'translateY(0)'
+                cursor: 'pointer'
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
@@ -405,18 +433,20 @@ export default function CustomerHome() {
                     width: '44px',
                     height: '44px',
                     borderRadius: '12px',
-                    background: '#0f0f10',
-                    color: '#d49b4b',
+                    background: 'var(--obsidian)',
+                    color: 'var(--bronze-dark)',
                     display: 'grid',
                     placeItems: 'center',
                     flexShrink: 0
                   }}
                 >
-                  <Car size={22} />
+                  <Car size={20} strokeWidth={1.7} />
                 </div>
                 <div>
-                  <b style={{ fontSize: '14px', color: '#171717', display: 'block' }}>{v.make} {v.model}</b>
-                  <small style={{ color: '#64748b', fontSize: '11px' }}>
+                  <b style={{ fontSize: '15px', fontWeight: 600, color: 'var(--ink-primary)', display: 'block' }}>
+                    {v.make} {v.model}
+                  </b>
+                  <small className="mono-num" style={{ color: 'var(--ink-muted)', fontSize: '12px' }}>
                     {v.licensePlate} · {v.color}
                   </small>
                 </div>
@@ -424,17 +454,17 @@ export default function CustomerHome() {
 
               <div
                 style={{
-                  background: '#f0f7ff',
-                  color: '#141415',
-                  borderRadius: '50%',
-                  width: '32px',
-                  height: '32px',
+                  background: 'var(--bronze-soft)',
+                  color: 'var(--bronze)',
+                  borderRadius: '999px',
+                  width: '34px',
+                  height: '34px',
                   display: 'grid',
                   placeItems: 'center',
                   flexShrink: 0
                 }}
               >
-                <ArrowRight size={15} />
+                <ArrowRight size={15} strokeWidth={1.8} />
               </div>
             </div>
           ))}
@@ -443,108 +473,127 @@ export default function CustomerHome() {
           <div
             onClick={() => navigate('/customer/profile')}
             style={{
-              background: '#f8fafc',
+              background: 'var(--alabaster-raised)',
               borderRadius: '16px',
               padding: '18px 20px',
-              border: '1.5px dashed #cbd5e1',
+              border: '1px dashed var(--hairline-light-strong)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '10px',
               cursor: 'pointer',
-              color: '#141415',
-              fontWeight: 700,
-              fontSize: '12px',
-              transition: 'background-color 150ms cubic-bezier(0.22, 1, 0.36, 1), border-color 150ms cubic-bezier(0.22, 1, 0.36, 1), color 150ms cubic-bezier(0.22, 1, 0.36, 1)'
+              color: 'var(--ink-secondary)',
+              fontWeight: 600,
+              fontSize: '13px',
+              transition: 'border-color 180ms var(--ease-luxury), color 180ms var(--ease-luxury)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = 'var(--bronze)'
+              e.currentTarget.style.color = 'var(--ink-primary)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = 'var(--hairline-light-strong)'
+              e.currentTarget.style.color = 'var(--ink-secondary)'
             }}
           >
-            <Plus size={16} />
-            <span>Add Another Car to Garage</span>
+            <Plus size={16} strokeWidth={1.8} />
+            <span>Add vehicle to garage</span>
           </div>
         </div>
       </section>
 
-      {/* 4. OUR SERVICE PACKAGES (Visual 4-Tier Grid) */}
+      {/* 4. TREATMENT PACKAGES */}
       <section>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '20px', gap: '12px', flexWrap: 'wrap' }}>
           <div>
-            <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 600, color: '#171717', fontFamily: 'Manrope, sans-serif' }}>
-              Our Detailing Packages
+            <span className="eyebrow" style={{ display: 'block', marginBottom: '4px' }}>Treatment Menu</span>
+            <h2 style={{ margin: 0, fontSize: '30px', fontWeight: 400, color: 'var(--ink-primary)', fontFamily: 'var(--font-display)' }}>
+              Our detailing packages
             </h2>
-            <small style={{ color: '#64748b', fontSize: '12px' }}>
-              Eco-friendly pressure wash with mobile water and electricity
-            </small>
           </div>
           <button
             onClick={() => navigate('/customer/book')}
-            style={{ background: 'none', border: 'none', color: '#141415', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+            className="lx-nav-link"
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--ink-primary)',
+              fontSize: '13px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: 0
+            }}
           >
-            <span>Customise & Add-Ons</span>
+            <span>Customise with add-ons</span>
             <ChevronRight size={14} />
           </button>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '18px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(265px, 1fr))', gap: '18px' }}>
           {packages.map((pkg) => (
             <div
               key={pkg.id}
+              className="lx-card"
               style={{
-                background: '#fff',
+                background: '#ffffff',
                 borderRadius: '18px',
                 padding: '24px',
-                border: pkg.isPopular ? '2px solid #141415' : '1px solid #edf2f7',
+                border: pkg.isPopular ? '1.5px solid var(--bronze)' : '1px solid var(--hairline-light)',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
-                position: 'relative',
-                boxShadow: pkg.isPopular ? '0 8px 24px rgba(20, 20, 21, 0.12)' : '0 2px 10px rgba(0,0,0,0.02)',
-                transition: 'transform 0.2s'
+                position: 'relative'
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)' }}
-              onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)' }}
             >
               {pkg.isPopular && (
                 <div
                   style={{
                     position: 'absolute',
                     top: '-11px',
-                    left: '20px',
-                    background: '#141415',
-                    color: '#fff',
+                    left: '22px',
+                    background: 'var(--obsidian)',
+                    color: 'var(--bronze-dark)',
                     fontSize: '10px',
                     fontWeight: 600,
-                    padding: '3px 12px',
-                    borderRadius: '20px',
-                    letterSpacing: '0.5px'
+                    padding: '4px 12px',
+                    borderRadius: '999px',
+                    letterSpacing: '0.1em',
+                    textTransform: 'uppercase'
                   }}
                 >
-                  MOST POPULAR
+                  Most requested
                 </div>
               )}
 
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <b style={{ fontSize: '16px', color: '#171717' }}>{pkg.name}</b>
-                  <span style={{ fontSize: '11px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '6px' }}>
+                  <b style={{ fontFamily: 'var(--font-display)', fontSize: '26px', fontWeight: 400, color: 'var(--ink-primary)' }}>
+                    {pkg.name}
+                  </b>
+                  <span style={{ fontSize: '12px', color: 'var(--ink-muted)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                     <Clock size={12} /> {pkg.duration}
                   </span>
                 </div>
 
-                <div style={{ margin: '8px 0 14px' }}>
-                  <span style={{ fontSize: '24px', fontWeight: 600, color: '#171717' }}>EGP {pkg.basePrice}</span>
-                  <small style={{ fontSize: '11px', color: '#8493a2', marginLeft: '6px' }}>base rate</small>
+                <div style={{ margin: '6px 0 14px' }}>
+                  <span className="mono-num" style={{ fontSize: '24px', fontWeight: 500, color: 'var(--ink-primary)' }}>
+                    EGP {pkg.basePrice}
+                  </span>
+                  <small style={{ fontSize: '12px', color: 'var(--ink-muted)', marginLeft: '6px' }}>base rate</small>
                 </div>
 
-                <p style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.5, margin: '0 0 16px' }}>{pkg.desc}</p>
+                <p style={{ fontSize: '13px', color: 'var(--ink-secondary)', lineHeight: 1.6, margin: '0 0 18px' }}>
+                  {pkg.desc}
+                </p>
 
-                <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '14px', marginBottom: '20px' }}>
-                  <span style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8', letterSpacing: '0.8px', display: 'block', marginBottom: '8px' }}>
-                    Included Services
-                  </span>
-                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div style={{ borderTop: '1px solid var(--hairline-light)', paddingTop: '14px', marginBottom: '22px' }}>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {pkg.highlights.map((item, idx) => (
-                      <li key={idx} style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '11px', color: '#334155' }}>
-                        <CheckCircle2 size={13} color="#16a34a" />
+                      <li key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--ink-primary)' }}>
+                        <Check size={14} strokeWidth={1.9} color="var(--bronze)" style={{ flexShrink: 0 }} />
                         <span>{item}</span>
                       </li>
                     ))}
@@ -554,169 +603,113 @@ export default function CustomerHome() {
 
               <button
                 onClick={() => handleBookPackage(pkg.id)}
+                className={pkg.isPopular ? 'lx-btn lx-glass-btn lx-glass-obsidian' : 'btn outline full'}
                 style={{
                   width: '100%',
-                  background: pkg.isPopular ? '#141415' : '#f0f7ff',
-                  color: pkg.isPopular ? '#fff' : '#141415',
-                  border: 'none',
-                  borderRadius: '10px',
-                  padding: '11px',
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  display: 'flex',
+                  minHeight: '44px',
+                  borderRadius: '999px',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '6px',
-                  transition: 'background 0.2s'
+                  gap: '7px'
                 }}
               >
-                <span>Book This Package</span>
-                <ArrowRight size={14} />
+                <span>Reserve {pkg.name}</span>
+                <ArrowRight size={14} strokeWidth={1.8} className="lx-arrow" />
               </button>
             </div>
           ))}
         </div>
       </section>
 
-      {/* 5. HOW EGHSELHA WORKS (3 Simple Steps) */}
+      {/* 5. ARCHITECTURAL 3-STEP EXPERIENCE STRIP */}
       <section
         style={{
-          background: '#fff',
-          borderRadius: '22px',
-          padding: '36px',
-          border: '1px solid #edf2f7',
-          boxShadow: '0 2px 12px rgba(0,0,0,0.02)'
+          background: 'var(--alabaster-raised)',
+          borderRadius: '20px',
+          padding: '36px 38px',
+          border: '1px solid var(--hairline-light)'
         }}
       >
-        <div style={{ textAlign: 'center', maxWidth: '520px', margin: '0 auto 32px' }}>
-          <h2 style={{ margin: '0 0 8px 0', fontSize: '22px', fontWeight: 600, color: '#171717', fontFamily: 'Manrope, sans-serif' }}>
-            Car Washing Made Effortless
+        <div style={{ marginBottom: '28px' }}>
+          <span className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>The standard</span>
+          <h2 style={{ margin: 0, fontSize: '30px', fontWeight: 400, color: 'var(--ink-primary)', fontFamily: 'var(--font-display)' }}>
+            Effortless from reservation to final inspection
           </h2>
-          <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>
-            Enjoy your day while certified detailing specialists make your vehicle spotless right where it is parked.
-          </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '28px' }}>
-          <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div
-              style={{
-                width: '60px',
-                height: '60px',
-                borderRadius: '16px',
-                background: '#f4f4f5',
-                color: '#141415',
-                display: 'grid',
-                placeItems: 'center',
-                marginBottom: '16px'
-              }}
-            >
-              <Calendar size={28} />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '28px' }}>
+          {EXPERIENCE_STEPS.map((step) => (
+            <div key={step.num} style={{ paddingTop: '18px', borderTop: '1px solid var(--hairline-light-strong)' }}>
+              <span className="mono-num" style={{ display: 'block', fontSize: '12px', color: 'var(--bronze)', marginBottom: '12px' }}>
+                {step.num}
+              </span>
+              <b style={{ fontSize: '16px', fontWeight: 600, color: 'var(--ink-primary)', display: 'block', marginBottom: '6px', fontFamily: 'var(--font-heading)' }}>
+                {step.title}
+              </b>
+              <p style={{ fontSize: '13px', color: 'var(--ink-secondary)', lineHeight: 1.6, margin: 0 }}>
+                {step.body}
+              </p>
             </div>
-            <b style={{ fontSize: '15px', color: '#171717', display: 'block', marginBottom: '6px' }}>1. Book in 60 Seconds</b>
-            <p style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.5, margin: 0 }}>
-              Choose on-demand Fast Track (under 5 km) or schedule a specific time at your home or office parking.
-            </p>
-          </div>
-
-          <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div
-              style={{
-                width: '60px',
-                height: '60px',
-                borderRadius: '16px',
-                background: '#f4f4f5',
-                color: '#141415',
-                display: 'grid',
-                placeItems: 'center',
-                marginBottom: '16px'
-              }}
-            >
-              <Droplets size={28} />
-            </div>
-            <b style={{ fontSize: '15px', color: '#171717', display: 'block', marginBottom: '6px' }}>2. We Bring Water & Power</b>
-            <p style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.5, margin: 0 }}>
-              Our mobile detailing vans are 100% self-sufficient with onboard water tanks and electricity generators.
-            </p>
-          </div>
-
-          <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div
-              style={{
-                width: '60px',
-                height: '60px',
-                borderRadius: '16px',
-                background: '#f0fdf4',
-                color: '#16a34a',
-                display: 'grid',
-                placeItems: 'center',
-                marginBottom: '16px'
-              }}
-            >
-              <ShieldCheck size={28} />
-            </div>
-            <b style={{ fontSize: '15px', color: '#171717', display: 'block', marginBottom: '6px' }}>3. Guaranteed Quality</b>
-            <p style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.5, margin: 0 }}>
-              8 mandatory Quality Assurance photos verify every angle. 100% money-back or free re-wash guarantee.
-            </p>
-          </div>
+          ))}
         </div>
       </section>
 
-      {/* 6. SUBSCRIPTION & RECURRING SAVINGS PROMO BANNER */}
+      {/* 6. RECURRING SUBSCRIPTIONS EDITORIAL BANNER */}
       <section
         style={{
           borderRadius: '20px',
-          background: '#141415',
-          color: '#fff',
-          padding: '32px 36px',
+          background: 'var(--obsidian)',
+          color: 'var(--ivory)',
+          padding: '36px 40px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           flexWrap: 'wrap',
-          gap: '20px',
-          boxShadow: '0 8px 24px rgba(3, 105, 161, 0.2)'
+          gap: '24px',
+          border: '1px solid var(--hairline-dark)'
         }}
       >
         <div>
           <span
             style={{
-              background: 'rgba(255, 255, 255, 0.15)',
-              color: '#fff',
+              color: 'var(--bronze-dark)',
               fontSize: '11px',
-              fontWeight: 700,
-              padding: '4px 12px',
-              borderRadius: '20px',
-              display: 'inline-block',
-              marginBottom: '10px'
+              fontWeight: 600,
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              display: 'block',
+              marginBottom: '8px'
             }}
           >
-            WEEKLY & MONTHLY WASH PLANS
+            Weekly &amp; Monthly Care Plans
           </span>
-          <h3 style={{ fontSize: '22px', fontWeight: 600, margin: '0 0 6px 0', fontFamily: 'Manrope, sans-serif' }}>
-            Save up to 15% with Recurring Subscriptions
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 400, margin: '0 0 8px 0', color: 'var(--ivory)' }}>
+            Save up to 15% with recurring detailing
           </h3>
-          <p style={{ fontSize: '12px', color: '#fef7ec', margin: 0, maxWidth: '520px', lineHeight: 1.5 }}>
-            Automate your car care. Pick your preferred recurring day, and we'll keep your vehicle sparkling clean every week or month.
+          <p style={{ fontSize: '14px', color: 'var(--ivory-secondary)', margin: 0, maxWidth: '520px', lineHeight: 1.6 }}>
+            Automate your vehicle care. Pick your preferred recurring day and keep your car spotless every week or month.
           </p>
         </div>
 
         <button
           onClick={() => navigate('/customer/book')}
+          className="lx-btn lx-glass-btn lx-glass-ivory"
           style={{
-            background: '#fff',
-            color: '#92400e',
-            border: 'none',
-            borderRadius: '12px',
-            padding: '13px 24px',
+            borderRadius: '999px',
+            minHeight: '46px',
+            padding: '0 26px',
             fontSize: '13px',
             fontWeight: 600,
-            cursor: 'pointer',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px'
           }}
         >
-          View Subscription Plans
+          <span>Explore care plans</span>
+          <ArrowRight size={15} strokeWidth={1.8} className="lx-arrow" />
         </button>
       </section>
 
@@ -726,24 +719,24 @@ export default function CustomerHome() {
           <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '620px' }}>
             <div className="modal-header">
               <div>
-                <h3>Live Detailing Tracker</h3>
+                <h3>Live detailing tracker</h3>
                 <p>Booking {activeWash.bookingNumber} · {activeWash.status}</p>
               </div>
-              <button onClick={() => setShowLiveTracking(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+              <button onClick={() => setShowLiveTracking(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ink-secondary)' }}>
                 <X size={18} />
               </button>
             </div>
             <div className="modal-body">
               <LiveTrackingMap booking={activeWash} />
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px', background: '#f8fafc', borderRadius: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: '#ffffff', border: '1px solid var(--hairline-light)', borderRadius: '14px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: '#fef7ec', color: '#92400e', display: 'grid', placeItems: 'center', fontWeight: 600, fontSize: '13px' }}>
+                  <div style={{ width: '42px', height: '42px', borderRadius: '999px', background: 'var(--bronze-soft)', color: 'var(--bronze)', display: 'grid', placeItems: 'center', fontWeight: 600, fontSize: '13px' }}>
                     {(activeWash.technicianName || 'Tech').split(' ').map((x) => x[0]).join('').slice(0, 2).toUpperCase()}
                   </div>
                   <div>
-                    <b style={{ fontSize: '13px', color: '#171717' }}>{activeWash.technicianName || 'Assigned Technician'}</b>
-                    <small style={{ fontSize: '11px', color: '#64748b', display: 'block' }}>
+                    <b style={{ fontSize: '14px', color: 'var(--ink-primary)' }}>{activeWash.technicianName || 'Assigned Technician'}</b>
+                    <small style={{ fontSize: '12px', color: 'var(--ink-muted)', display: 'block' }}>
                       {activeWash.technicianPhone || 'Technician assigned · On the way'}
                     </small>
                   </div>
@@ -752,18 +745,17 @@ export default function CustomerHome() {
                 {activeWash.technicianPhone ? (
                   <a
                     href={`tel:${activeWash.technicianPhone.replace(/\s+/g, '')}`}
-                    className="btn primary"
-                    style={{ fontSize: '11px', padding: '8px 14px', textDecoration: 'none' }}
+                    className="btn primary sm"
+                    style={{ textDecoration: 'none' }}
                   >
-                    <Phone size={13} /> Call Tech
+                    <Phone size={13} /> Call tech
                   </a>
                 ) : (
                   <button
-                    className="btn outline"
-                    style={{ fontSize: '11px', padding: '8px 14px' }}
+                    className="btn outline sm"
                     onClick={() => notify('Awaiting technician assignment before calling.')}
                   >
-                    <Phone size={13} /> Pending Tech
+                    <Phone size={13} /> Pending tech
                   </button>
                 )}
               </div>
@@ -777,10 +769,10 @@ export default function CustomerHome() {
                     setShowTechProfile(true)
                   }}
                 >
-                  <Eye size={14} /> Show Tech Profile
+                  <Eye size={14} /> Show tech profile
                 </button>
               )}
-              <button className="btn outline sm" onClick={() => setShowLiveTracking(false)}>Close Tracker</button>
+              <button className="btn outline sm" onClick={() => setShowLiveTracking(false)}>Close tracker</button>
             </div>
           </div>
         </div>

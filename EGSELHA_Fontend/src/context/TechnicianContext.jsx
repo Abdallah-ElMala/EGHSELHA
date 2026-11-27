@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { technicianApi } from '../services/technicianApi.js'
+import { useAuth } from './AuthContext.jsx'
 
 const TechnicianContext = createContext(null)
 export const useTech = () => useContext(TechnicianContext)
@@ -17,6 +18,8 @@ const initialProfile = {
 }
 
 export function TechnicianProvider({ children }) {
+  const { user } = useAuth()
+  const activeUserId = user?.id || ''
   const [jobs, setJobs] = useState([])
   const [offers, setOffers] = useState([])
   const [unreadCount, setUnreadCount] = useState(0)
@@ -50,10 +53,13 @@ export function TechnicianProvider({ children }) {
     }
   }
 
-  // Load bookings and profile on startup + auto polling sync
+  // Load bookings and profile on startup + whenever active technician account changes + auto polling sync
   useEffect(() => {
     async function loadInitialData() {
       setLoading(true)
+      setJobs([])
+      setOffers([])
+      setUnreadCount(0)
       await refreshData()
       setLoading(false)
     }
@@ -65,7 +71,7 @@ export function TechnicianProvider({ children }) {
       }
     }, 8000)
     return () => clearInterval(interval)
-  }, [])
+  }, [activeUserId])
 
   // Accept or decline job offer, sync with API and refresh job list
   const acceptOffer = async (offerId) => {

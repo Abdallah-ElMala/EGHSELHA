@@ -1,11 +1,13 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CalendarDays, Search, SlidersHorizontal, BriefcaseBusiness, CarFront, MapPin, Clock3, ChevronRight, BellRing, Check, X, RefreshCw, Eye } from 'lucide-react'
 import PageTitle from '../../component/PageTitle'
 import Status from '../../component/Status'
+import OrderCarBadge from '../../component/OrderCarBadge'
 import CustomerPublicProfileModal from '../../component/CustomerPublicProfileModal'
 import { useTech } from '../../context/TechnicianContext'
 import { jobPath } from '../../data/jobs'
+import { getOfferRemainingSeconds, clearOfferDeadline, formatOfferCountdown } from '../../utils/offerTimer'
 
 const filters = ['All', 'Upcoming', 'On The Way', 'Arrived', 'In Progress', 'Completed']
 
@@ -16,6 +18,26 @@ export default function Jobs() {
   const [searchQuery, setSearchQuery] = useState('')
   const [refreshing, setRefreshing] = useState(false)
   const [profileModalCustomer, setProfileModalCustomer] = useState(null)
+  const [nowMs, setNowMs] = useState(() => Date.now())
+  const filterRefs = useRef({})
+
+  useEffect(() => {
+    if (!offers || offers.length === 0) return
+    setNowMs(Date.now())
+    const timer = setInterval(() => setNowMs(Date.now()), 1000)
+    return () => clearInterval(timer)
+  }, [offers?.length])
+  const [filterPill, setFilterPill] = useState({ left: 4, width: 0, ready: false })
+
+  useEffect(() => {
+    const syncFilterPill = () => {
+      const el = filterRefs.current[filter]
+      if (el) setFilterPill({ left: el.offsetLeft, width: el.offsetWidth, ready: true })
+    }
+    syncFilterPill()
+    window.addEventListener('resize', syncFilterPill)
+    return () => window.removeEventListener('resize', syncFilterPill)
+  }, [filter])
 
   useEffect(() => {
     refreshData()
@@ -29,6 +51,7 @@ export default function Jobs() {
 
   const handleAccept = async (offer) => {
     try {
+      clearOfferDeadline(offer.id)
       const res = await acceptOffer(offer.id)
       const target = res?.bookingNumber || offer.bookingNumber
       notify(`Job ${target} accepted! Opening job details...`)
@@ -41,6 +64,7 @@ export default function Jobs() {
 
   const handlePass = async (offer) => {
     try {
+      clearOfferDeadline(offer.id)
       await passOffer(offer.id)
       notify(`Job offer ${offer.bookingNumber} passed.`)
     } catch (err) {
@@ -83,15 +107,18 @@ export default function Jobs() {
 
       {/* Pending Customer Booking Offers waiting for Technician acceptance */}
       {offers && offers.length > 0 && (
-        <div style={{ marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={{ marginBottom: '22px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {offers.map((offer) => (
             <div
               key={offer.id}
+              className="lx-enter"
               style={{
-                padding: '18px 20px',
-                borderRadius: '14px',
-                background: '#141415',
-                border: '2px solid #b45309',
+                padding: '20px 22px',
+                borderRadius: '16px',
+                background: 'var(--obsidian)',
+                color: 'var(--ivory)',
+                border: '1px solid rgba(198, 146, 73, 0.42)',
+                boxShadow: '0 12px 30px rgba(14, 14, 16, 0.16)',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
@@ -99,23 +126,45 @@ export default function Jobs() {
                 gap: '14px'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#141415', color: '#fff', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'rgba(198, 146, 73, 0.16)', border: '1px solid rgba(198, 146, 73, 0.34)', color: 'var(--bronze-dark)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
                   <BellRing size={19} />
                 </div>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                    <b style={{ color: '#141415', fontSize: '14px' }}>
+                    <b style={{ color: 'var(--ivory)', fontSize: '15px', fontWeight: 600 }}>
                       New Booking Request ({offer.bookingNumber})
                     </b>
-                    <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '20px', background: '#dcfce7', color: '#15803d' }}>
-                      Booking Total: EGP {offer.totalPrice ?? offer.payoutAmount}
+                    <span className="mono-num" style={{ fontSize: '11px', fontWeight: 600, padding: '3px 9px', borderRadius: '999px', background: 'rgba(134, 239, 172, 0.14)', color: '#86efac' }}>
+                      Total: EGP {offer.totalPrice ?? offer.payoutAmount}
                     </span>
-                    <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '20px', background: '#f4f4f5', color: '#141415' }}>
-                      Deposit Paid · Tech Share (70%): EGP {offer.payoutAmount}
+                    <span className="mono-num" style={{ fontSize: '11px', fontWeight: 600, padding: '3px 9px', borderRadius: '999px', background: 'rgba(198, 146, 73, 0.16)', color: '#f3d299' }}>
+                      Your 70% Share: EGP {offer.payoutAmount}
                     </span>
+                    {(() => {
+                      const rem = getOfferRemainingSeconds(offer, nowMs)
+                      return (
+                        <span
+                          className="mono-num"
+                          style={{
+                            fontSize: '11px',
+                            fontWeight: 600,
+                            padding: '3px 10px',
+                            borderRadius: '999px',
+                            background: rem <= 120 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(245, 243, 238, 0.1)',
+                            border: `1px solid ${rem <= 120 ? 'rgba(239, 68, 68, 0.48)' : 'rgba(198, 146, 73, 0.35)'}`,
+                            color: rem <= 120 ? '#fca5a5' : '#f3d299',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px'
+                          }}
+                        >
+                          <Clock3 size={12} /> {formatOfferCountdown(rem)} left
+                        </span>
+                      )
+                    })()}
                   </div>
-                  <p style={{ margin: '3px 0 0', fontSize: '12px', color: '#171717' }}>
+                  <p style={{ margin: '4px 0 0', fontSize: '12.5px', color: 'var(--ivory-secondary)' }}>
                     {offer.serviceName} · {offer.customerName} ({offer.vehicleModel}) · {offer.customerAddress}
                     {offer.addOnNames?.length > 0 && ` · Add-Ons: ${offer.addOnNames.join(', ')}`}
                   </p>
@@ -124,19 +173,25 @@ export default function Jobs() {
 
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                 <button
-                  className="btn soft"
+                  className="lx-btn lx-glass-btn lx-glass-crystal"
                   onClick={() => setProfileModalCustomer(offer)}
+                  style={{ minHeight: '38px', padding: '0 14px', borderRadius: '999px', fontSize: '12px', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 >
-                  <Eye size={15} /> Customer Profile
-                </button>
-                <button className="btn outline" onClick={() => handlePass(offer)}>
-                  <X size={15} /> Pass
+                  <Eye size={14} /> Customer
                 </button>
                 <button
-                  className="btn success"
-                  onClick={() => handleAccept(offer)}
+                  className="lx-btn lx-glass-btn lx-glass-crystal"
+                  onClick={() => handlePass(offer)}
+                  style={{ minHeight: '38px', padding: '0 14px', borderRadius: '999px', fontSize: '12px', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 >
-                  <Check size={15} /> Accept Job
+                  <X size={14} /> Pass
+                </button>
+                <button
+                  className="lx-btn lx-glass-btn lx-glass-gold"
+                  onClick={() => handleAccept(offer)}
+                  style={{ minHeight: '38px', padding: '0 18px', borderRadius: '999px', fontSize: '12.5px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <Check size={14} /> Accept Job
                 </button>
               </div>
             </div>
@@ -145,18 +200,71 @@ export default function Jobs() {
       )}
 
       <div className="panel jobs-list-panel">
-        <div className="filter-row">
-          {filters.map((f) => (
-            <button key={f} className={filter === f ? 'filter active-filter' : 'filter'} onClick={() => setFilter(f)}>
-              {f}
-            </button>
-          ))}
-          <div className="filter-search">
-            <Search size={16} />
+        <div className="filter-row" style={{ gap: '12px', flexWrap: 'wrap' }}>
+          <div
+            style={{
+              position: 'relative',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '2px',
+              background: 'var(--alabaster-raised)',
+              padding: '4px',
+              borderRadius: '999px',
+              border: '1px solid var(--hairline-light)'
+            }}
+          >
+            {filterPill.ready && (
+              <div
+                aria-hidden="true"
+                style={{
+                  position: 'absolute',
+                  top: '4px',
+                  bottom: '4px',
+                  left: 0,
+                  width: `${filterPill.width}px`,
+                  transform: `translateX(${filterPill.left}px)`,
+                  borderRadius: '999px',
+                  background: '#ffffff',
+                  border: '1px solid rgba(24, 24, 27, 0.12)',
+                  boxShadow: '0 2px 8px rgba(24, 24, 27, 0.08)',
+                  transition: 'transform 320ms cubic-bezier(0.22, 1, 0.36, 1), width 320ms cubic-bezier(0.22, 1, 0.36, 1)',
+                  pointerEvents: 'none',
+                  zIndex: 0
+                }}
+              />
+            )}
+            {filters.map((f) => (
+              <button
+                key={f}
+                ref={(el) => { filterRefs.current[f] = el }}
+                type="button"
+                onClick={() => setFilter(f)}
+                style={{
+                  position: 'relative',
+                  zIndex: 1,
+                  border: 'none',
+                  outline: 'none',
+                  background: 'transparent',
+                  padding: '6px 13px',
+                  borderRadius: '999px',
+                  fontSize: '12px',
+                  fontWeight: filter === f ? 600 : 500,
+                  color: filter === f ? 'var(--ink-primary)' : 'var(--ink-secondary)',
+                  cursor: 'pointer',
+                  transition: 'color 200ms var(--ease-luxury)'
+                }}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+          <div className="filter-search" style={{ borderRadius: '999px', padding: '7px 14px', background: '#ffffff' }}>
+            <Search size={15} />
             <input
               placeholder="Search booking or customer"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ fontSize: '12.5px', width: '170px' }}
             />
           </div>
           <button className="icon-btn border"><SlidersHorizontal size={17} /></button>
@@ -171,7 +279,9 @@ export default function Jobs() {
         ) : (
           visibleJobs.map((j) => (
             <div className="full-job-row" key={j.id}>
-              <div className="car-thumb"><CarFront size={27} /></div>
+              <div className="car-thumb" style={{ background: 'transparent', border: 'none', padding: 0 }}>
+                <OrderCarBadge size={48} />
+              </div>
               <div className="full-job-info">
                 <div className="job-line">
                   <b>{j.service}</b>

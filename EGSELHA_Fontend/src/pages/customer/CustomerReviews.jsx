@@ -170,7 +170,7 @@ export default function CustomerReviews() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '26px' }}>
       <PageTitle
-        eyebrow="8. REVIEWS & RATINGS"
+        eyebrow="REVIEWS & FEEDBACK"
         title="Reviews & Service Feedback"
         desc="Rate completed washes across Punctuality, Cleanliness, and Professionalism. Earn +50 Loyalty Points for each review!"
       />

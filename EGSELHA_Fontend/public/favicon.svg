@@ -1,21 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
-  <defs>
-    <linearGradient id="bg" x1="6" y1="6" x2="58" y2="58" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#0ea5e9" />
-      <stop offset="55%" stop-color="#087cf0" />
-      <stop offset="100%" stop-color="#0353a4" />
-    </linearGradient>
-    <linearGradient id="shine" x1="18" y1="12" x2="46" y2="48" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#ffffff" />
-      <stop offset="100%" stop-color="#dbeafe" />
-    </linearGradient>
-  </defs>
-  <rect width="64" height="64" rx="18" fill="url(#bg)" />
-  <circle cx="48" cy="16" r="4" fill="#bae6fd" opacity="0.9" />
-  <path d="M51 23c1.8 2.2 2.5 3.6 2.5 4.8a2.5 2.5 0 1 1-5 0c0-1.2.7-2.6 2.5-4.8Z" fill="#e0f2fe" />
-  <path d="M18 35.5c.8-4.2 3.1-9 6.6-10.7 4-1.9 10.8-1.9 14.8 0 3.5 1.7 5.8 6.5 6.6 10.7l1.2 1.2c1 1 1.5 2.3 1.5 3.7v6.1a2.5 2.5 0 0 1-2.5 2.5h-2.4a2.5 2.5 0 0 1-2.5-2.5V45H22.7v1.5a2.5 2.5 0 0 1-2.5 2.5h-2.4a2.5 2.5 0 0 1-2.5-2.5v-6.1c0-1.4.5-2.7 1.5-3.7l1.2-1.2Z" fill="url(#shine)" />
-  <path d="M23.5 34.5 26 27.6c.4-1.1 1.4-1.8 2.6-1.8h6.8c1.2 0 2.2.7 2.6 1.8l2.5 6.9H23.5Z" fill="#087cf0" opacity="0.85" />
-  <circle cx="23" cy="40" r="2.3" fill="#087cf0" />
-  <circle cx="41" cy="40" r="2.3" fill="#087cf0" />
-  <path d="M16 18l1.3 2.8L20 22l-2.7 1.2L16 26l-1.3-2.8L12 22l2.7-1.2L16 18Z" fill="#ffffff" opacity="0.95" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none">
+  <rect x="12" y="12" width="232" height="232" rx="58" fill="#141416" stroke="#C69249" stroke-opacity="0.38" stroke-width="6"/>
+  <path fill="#F6F5F1" fill-rule="evenodd" d="M124 62 C80 62 52 92 52 132 C52 174 82 202 130 202 C160 202 182 190 194 172 L170 154 C162 166 148 172 130 172 C104 172 88 158 86 138 H196 C198 132 198 126 198 122 C198 84 170 62 124 62 Z M86 114 C90 96 104 86 124 86 C146 86 160 96 164 114 Z"/>
+  <path fill="#C69249" d="M192 40 C194 54 200 60 214 62 C200 64 194 70 192 84 C190 70 184 64 170 62 C184 60 190 54 192 40 Z"/>
+  <path fill="#C69249" d="M98 184 C116 190 142 190 162 180 C166 178 172 184 166 190 C146 202 116 202 94 194 C88 192 92 182 98 184 Z"/>
 </svg>

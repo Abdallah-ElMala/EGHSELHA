@@ -26,6 +26,8 @@ namespace WebCarWash.Infrastructure.Services
         public async Task<AdminDashboardDto> GetDashboardAsync()
         {
             var bookings = await _unitOfWork.Bookings.Query()
+                .AsNoTrackingWithIdentityResolution()
+                .AsSplitQuery()
                 .Include(b => b.Customer)
                 .Include(b => b.Technician)
                 .Include(b => b.Vehicle)
@@ -51,14 +53,16 @@ namespace WebCarWash.Infrastructure.Services
                 BookingStatus.WASHING
             };
 
-            var totalCustomers = await _unitOfWork.Customers.Query().CountAsync();
-            var technicians = await _unitOfWork.Technicians.Query().ToListAsync();
-            var openDisputes = await _unitOfWork.Disputes.Query()
+            var totalCustomers = await _unitOfWork.Customers.Query().AsNoTracking().CountAsync();
+            var totalTechnicians = await _unitOfWork.Technicians.Query().AsNoTracking().CountAsync();
+            var onlineTechnicians = await _unitOfWork.Technicians.Query().AsNoTracking().CountAsync(t => t.IsOnline);
+            var openDisputes = await _unitOfWork.Disputes.Query().AsNoTracking()
                 .CountAsync(d => d.Status == DisputeStatus.OPEN || d.Status == DisputeStatus.UNDER_REVIEW);
-            var pendingPayouts = await _unitOfWork.Payouts.Query()
+            var pendingPayouts = await _unitOfWork.Payouts.Query().AsNoTracking()
                 .Where(p => p.Status == "Pending")
+                .Select(p => p.Amount)
                 .ToListAsync();
-            var pendingApps = await _unitOfWork.TechnicianApplications.Query()
+            var pendingApps = await _unitOfWork.TechnicianApplications.Query().AsNoTracking()
                 .CountAsync(a => a.Status == "Pending Review");
 
             var statusBreakdown = bookings
@@ -78,8 +82,9 @@ namespace WebCarWash.Infrastructure.Services
                 .OrderByDescending(p => p.Revenue)
                 .ToList();
 
-            var recentBookings = _mapper.Map<List<AdminBookingDto>>(bookings.Take(8).ToList());
-            EnrichBookingsTiming(bookings.Take(8).ToList(), recentBookings);
+            var topRecent = bookings.Take(8).ToList();
+            var recentBookings = _mapper.Map<List<AdminBookingDto>>(topRecent);
+            EnrichBookingsTiming(topRecent, recentBookings);
 
             return new AdminDashboardDto
             {
@@ -91,11 +96,11 @@ namespace WebCarWash.Infrastructure.Services
                 CompletedBookings = completed.Count,
                 CancelledBookings = bookings.Count(b => b.Status == BookingStatus.CANCELLED),
                 TotalCustomers = totalCustomers,
-                TotalTechnicians = technicians.Count,
-                OnlineTechnicians = technicians.Count(t => t.IsOnline),
+                TotalTechnicians = totalTechnicians,
+                OnlineTechnicians = onlineTechnicians,
                 OpenDisputes = openDisputes,
                 PendingPayoutsCount = pendingPayouts.Count,
-                PendingPayoutsAmount = pendingPayouts.Sum(p => p.Amount),
+                PendingPayoutsAmount = pendingPayouts.Sum(),
                 PendingApplicationsCount = pendingApps,
                 StatusBreakdown = statusBreakdown,
                 RevenueByPackage = revenueByPackage,
@@ -106,6 +111,8 @@ namespace WebCarWash.Infrastructure.Services
         public async Task<IEnumerable<AdminBookingDto>> GetBookingsAsync(string? status = null, string? search = null)
         {
             var query = _unitOfWork.Bookings.Query()
+                .AsNoTrackingWithIdentityResolution()
+                .AsSplitQuery()
                 .Include(b => b.Customer)
                 .Include(b => b.Technician)
                 .Include(b => b.Vehicle)
@@ -210,6 +217,8 @@ namespace WebCarWash.Infrastructure.Services
         public async Task<IEnumerable<AdminTechnicianDto>> GetTechniciansAsync()
         {
             var techs = await _unitOfWork.Technicians.Query()
+                .AsNoTrackingWithIdentityResolution()
+                .AsSplitQuery()
                 .Include(t => t.Bookings)
                 .Include(t => t.TechnicianApplication)
                 .ToListAsync();
@@ -222,6 +231,7 @@ namespace WebCarWash.Infrastructure.Services
             var tech = await _unitOfWork.Technicians.FirstOrDefaultAsync(t => t.Id == technicianId);
             if (tech == null) return false;
             tech.ToggleAvailability(isOnline);
+            _unitOfWork.Technicians.Update(tech);
             await _unitOfWork.CompleteAsync();
             return true;
         }
@@ -257,6 +267,7 @@ namespace WebCarWash.Infrastructure.Services
                 tech.IsOnline = false;
             }
 
+            _unitOfWork.Technicians.Update(tech);
             await _unitOfWork.CompleteAsync();
             return true;
         }
@@ -264,6 +275,8 @@ namespace WebCarWash.Infrastructure.Services
         public async Task<IEnumerable<AdminCustomerDto>> GetCustomersAsync()
         {
             var customers = await _unitOfWork.Customers.Query()
+                .AsNoTrackingWithIdentityResolution()
+                .AsSplitQuery()
                 .Include(c => c.Vehicles)
                 .Include(c => c.Bookings)
                 .Include(c => c.Disputes)
@@ -275,12 +288,16 @@ namespace WebCarWash.Infrastructure.Services
         public async Task<AdminCatalogDto> GetCatalogAsync()
         {
             var packages = await _unitOfWork.ServicePackages.Query()
+                .AsNoTracking()
                 .OrderBy(p => p.BasePrice)
                 .ToListAsync();
             var addOns = await _unitOfWork.AddOns.Query()
+                .AsNoTracking()
                 .OrderByDescending(a => a.Price)
                 .ToListAsync();
             var zones = await _unitOfWork.ServiceZones.Query()
+                .AsNoTrackingWithIdentityResolution()
+                .AsSplitQuery()
                 .Include(z => z.Bookings)
                 .Include(z => z.Technicians)
                 .ToListAsync();
@@ -305,6 +322,7 @@ namespace WebCarWash.Infrastructure.Services
             pkg.RequiresWater = dto.RequiresWater;
             pkg.RequiresPrivateParking = dto.RequiresPrivateParking;
 
+            _unitOfWork.ServicePackages.Update(pkg);
             await _unitOfWork.CompleteAsync();
             return _mapper.Map<AdminServicePackageDto>(pkg);
         }
@@ -319,6 +337,7 @@ namespace WebCarWash.Infrastructure.Services
             if (dto.Description != null) addon.Description = dto.Description.Trim();
             addon.IsActive = dto.IsActive;
 
+            _unitOfWork.AddOns.Update(addon);
             await _unitOfWork.CompleteAsync();
             return _mapper.Map<AdminAddOnDto>(addon);
         }
@@ -372,6 +391,8 @@ namespace WebCarWash.Infrastructure.Services
         public async Task<IEnumerable<AdminDisputeDto>> GetDisputesAsync()
         {
             var disputes = await _unitOfWork.Disputes.Query()
+                .AsNoTrackingWithIdentityResolution()
+                .AsSplitQuery()
                 .Include(d => d.Customer)
                 .Include(d => d.Booking)
                     .ThenInclude(b => b.Technician)
@@ -458,9 +479,15 @@ namespace WebCarWash.Infrastructure.Services
                         };
                         await _unitOfWork.Bookings.AddAsync(rewashBooking);
 
-                        var tech = await _unitOfWork.Technicians.Query().Where(t => t.IsOnline).FirstOrDefaultAsync()
-                            ?? await _unitOfWork.Technicians.FirstOrDefaultAsync(t => true);
-                        if (tech != null)
+                        var candidateTechs = await _unitOfWork.Technicians.Query()
+                            .Where(t => t.IsOnline)
+                            .ToListAsync();
+                        if (!candidateTechs.Any())
+                        {
+                            candidateTechs = await _unitOfWork.Technicians.Query().ToListAsync();
+                        }
+
+                        foreach (var tech in candidateTechs)
                         {
                             await _unitOfWork.JobOffers.AddAsync(new JobOffer
                             {
@@ -506,6 +533,7 @@ namespace WebCarWash.Infrastructure.Services
         public async Task<IEnumerable<AdminPayoutDto>> GetPayoutsAsync()
         {
             var payouts = await _unitOfWork.Payouts.Query()
+                .AsNoTrackingWithIdentityResolution()
                 .Include(p => p.Technician)
                 .OrderByDescending(p => p.RequestedAt)
                 .ToListAsync();
